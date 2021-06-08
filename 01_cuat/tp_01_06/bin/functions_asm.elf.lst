@@ -1,0 +1,61 @@
+     1                                  SECTION .functions_asm
+     2                                  ;---------------INCLUDES-----------------
+     3                                  %include "inc/functions_asm.h"
+     1                              <1> ;----------------PIC----------------------------
+     2                              <1> %define PORT_A_8042    0x60
+     3                              <1> %define CTRL_PORT_8042 0x64
+     4                              <1> %define KEYB_DIS       0xAD
+     5                              <1> %define KEYB_EN        0xAE
+     6                              <1> %define READ_OUT_8042  0xD0
+     7                              <1> %define WRITE_OUT_8042 0xD1
+     8                              <1> 
+     4                                  ;---------------EXTERN-------------------
+     5                                  EXTERN determinar_tecla_presionada
+     6                                  ;---------------GLOBAL-------------------
+     7                                  GLOBAL handler_teclado
+     8                                  GLOBAL init_pic
+     9                                  
+    10                                  ;--------------INIT DE PICS E INTERRUPCIONES DEL 8042----------------
+    11                                  ;	Funcion: 	Inicializa el pic en cascada y le asigna el rango de tipo de interrupcion de 0x20 a 0x27 
+    12                                  ;				y de 0x28 a 0x2F respectivamente.
+    13                                  ;				PIC: Programable Interrupt Controller
+    14                                  ;------------------------------------------------------------------------------------------------------------
+    15                                  init_pic:
+    16                                  ;// Inicialización PIC N°1
+    17                                    ;//ICW1: Initialization Control Word
+    18 00000000 B011                      mov     al,0x11   ;//Establece IRQs activas x flanco, Modo cascada, e ICW4
+    19 00000002 E620                      out     0x20,al
+    20                                    ;//ICW2:
+    21 00000004 B020                      mov     al,0x20   ;//Establece para el PIC#1 el valor base del Tipo de INT que recibi� en el registro BH = 0x20
+    22 00000006 E621                      out     0x21,al
+    23                                    ;//ICW3:
+    24 00000008 B004                      mov     al,0x04   ;//Establece PIC#1 como Master, e indica que un PIC Slave cuya Interrupci�n ingresa por IRQ2
+    25 0000000A E621                      out     0x21,al
+    26                                    ;//ICW4
+    27 0000000C B001                      mov     al,0x01   ;// Establece al PIC en Modo 8086
+    28 0000000E E621                      out     0x21,al
+    29                                  ;//Antes de inicializar el PIC N�2, deshabilitamos las Interrupciones del PIC1
+    30 00000010 B0FD                      mov     al,0xFD   ;0x11111101
+    31 00000012 E621                      out     0x21,al
+    32                                  ;//Ahora inicializamos el PIC N�2
+    33                                    ;//ICW1
+    34 00000014 B011                      mov     al,0x11   ;//Establece IRQs activas x flanco, Modo cascada, e ICW4
+    35 00000016 E6A0                      out     0xA0,al
+    36                                    ;//ICW2
+    37 00000018 B028                      mov     al,0x28    ;//Establece para el PIC#2 el valor base del Tipo de INT que recibi� en el registro BL = 0x28
+    38 0000001A E6A1                      out     0xA1,al
+    39                                    ;//ICW3
+    40 0000001C B002                      mov     al,0x02   ;//Establece al PIC#2 como Slave, y le indca que ingresa su Interrupci�n al Master por IRQ2
+    41 0000001E E6A1                      out     0xA1,al
+    42                                    ;//ICW4
+    43 00000020 B001                      mov     al,0x01   ;// Establece al PIC en Modo 8086
+    44 00000022 E6A1                      out     0xA1,al
+    45                                  ;Enmascaramos el resto de las Interrupciones (las del PIC#2)
+    46 00000024 B0FF                      mov     al,0xFF
+    47 00000026 E6A1                      out     0xA1,al
+    48                                  ; Habilitamos la interrupcion del timer y teclado.
+    49 00000028 B0FC                      mov     al,0xFC   ;0x11111100
+    50 0000002A E621                      out     0x21,al
+    51 0000002C C3                        ret
+    52                                    
+    53                                  

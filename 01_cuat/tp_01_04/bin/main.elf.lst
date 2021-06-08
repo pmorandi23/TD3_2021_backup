@@ -1,0 +1,18 @@
+     1                                  USE32
+     2                                  
+     3                                  SECTION .kernel32
+     4                                  
+     5                                  GLOBAL kernel32_code_size
+     6                                  GLOBAL kernel32_init
+     7                                  
+     8                                  kernel21_code_size EQU kernel32_end-kernel32_init
+     9                                  
+    10                                  ; Aquí en el kernel se puede paginar, setear Timer, manejar interrupciones.
+    11                                  kernel32_init:
+    12                                  
+    13                                  .guard:
+    14 00000000 F4                          hlt
+    15 00000001 EBFD                        jmp .guard
+    16                                  
+    17                                  kernel32_end:
+    18                                      

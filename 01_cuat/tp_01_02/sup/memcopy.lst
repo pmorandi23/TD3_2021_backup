@@ -1,0 +1,59 @@
+     1                                  ; ROM de 64 KBytes
+     2                                  ; El procesador arranca en FFFF0 y en modo real, con
+     3                                  ; lo cual el mapa de memoria es de 1MB
+     4                                  
+     5                                  ORG 0xF0000	; Esto es: 1MB - 64KB + 1 -> 0xFFFFF-0x1000 = 0xEFFFF. Entonces
+     6                                  		; el origen de nuestra ROM es: 0xEFFFF +  1 (que es la sig posición
+     7                                  		; de memoria): 0xF0000
+     8                                  
+     9                                  USE16
+    10                                  
+    11                                  
+    12                                  ROM_SIZE EQU 0x10000; 64KB
+    13                                  DEST_ADDRESS EQU 0x0000; Offset de destino
+    14                                  code_size EQU end - init_bootstrap		
+    15                                  
+    16                                  ; Rellenamos la ROM con 0x90 (NOP)
+    17 00000000 90<rept>                times (ROM_SIZE-code_size) db 0x90 ; Otra opción: times 4096 resb 1
+    18                                  
+    19                                  init_bootstrap:
+    20                                  
+    21                                  idle:
+    22 0000FFC0 87DB                        xchg bx,bx ;magic breakpoint. Se habilitan desde el bochsrc
+    23 0000FFC2 F4                      	hlt
+    24 0000FFC3 EBFB                    	jmp	idle
+    25                                  
+    26                                  ;* Subrutina: memcopy
+    27                                  ;* Recibe:
+    28                                  ;*  es:di la dirección lógica de destino (a donde quiero copiar)
+    29                                  ;*  ds:si la dirección lógica de origen (lo que quiero copiar)
+    30                                  ;*  cx la cantidad de bytes a copiar
+    31                                  ;* Retorna:
+    32                                  ;*  NULL si hubo error
+    33                                  ;*  puntero a la dirección de inicio de la nueva copia
+    34                                  memcopy:
+    35 0000FFC5 FC                      	cld
+    36 0000FFC6 F2A4                    	repnz movsb
+    37 0000FFC8 C3                      	ret
+    38                                  init:
+    39 0000FFC9 B80090                  	mov	ax,0x9000; Valor para el segemento de codigo destino
+    40 0000FFCC 8EC0                    	mov	es,ax ; Asigno ax a es 
+    41 0000FFCE BF0000                  	mov	di,DEST_ADDRESS ;Le asigno a DI la dirección de destino para el memcopy
+    42 0000FFD1 BB00F0                  	mov bx,0xF000 ;Valor para del segmento de codigo origen
+    43 0000FFD4 8EDB                    	mov ds,bx ; Funciona tambien con el bx
+    44                                  	;push    cs ;Pusheo en el SP el valor del selector de segmento CS
+    45                                  	;pop	ds ;Popeo el valor del SP (CS) al registro DS porque no puedo hacer mov ds,cs
+    46 0000FFD6 BE[C0FF]                	mov	si,init_bootstrap ; Le asigno a SI la dirección de inicio de mi código para el memcopy
+    47 0000FFD9 B94000                  	mov	cx,code_size ; Le asigno a CX el tamaño del código a ser copiado
+    48 0000FFDC E8E6FF                  	call memcopy
+    49 0000FFDF EA00000090              	jmp	0x9000:DEST_ADDRESS
+    50 0000FFE4 90<rept>                align 16
+    51                                  init16:				
+    52 0000FFF0 FA                      	cli
+    53 0000FFF1 EBD6                    	jmp	init
+    54                                  aqui:
+    55 0000FFF3 F4                      	hlt
+    56 0000FFF4 EBFD                    	jmp	aqui
+    57                                  
+    58 0000FFF6 90<rept>                align 16		
+    59                                  end:

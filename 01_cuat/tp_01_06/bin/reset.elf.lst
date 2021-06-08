@@ -1,0 +1,16 @@
+     1                                  USE16
+     2                                  
+     3                                  SECTION .resetVector
+     4                                  
+     5                                  EXTERN start16
+     6                                  GLOBAL reset
+     7                                  
+     8                                  
+     9                                  reset:
+    10 00000000 FA                          cli
+    11 00000001 FC                          cld    
+    12 00000002 E9(0000)                    jmp start16
+    13                                  halted:
+    14 00000005 F4                          hlt 
+    15 00000006 EBFD                        jmp halted
+    16 00000008 90<rept>                    ALIGN 16; Directiva de pre procesador que rellena con operaciones "nop (0x90)" hasta la próxima dirección multiplo de 16bytes 

@@ -1,0 +1,147 @@
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+ram              0x0000000000000000 0x00000000ffff0000 !x
+rom              0x00000000ffff0000 0x0000000000010000 xr
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+                0x0000000000060000                __EH_FRAME = 0x60000
+                0x0000000000009000                __STACK_START_16 = 0x9000
+                0x0000000000009fff                __STACK_END_16 = 0x9fff
+                0x000000002fff8000                __STACK_START_32 = 0x2fff8000
+                0x000000002fff8fff                __STACK_END_32 = 0x2fff8fff
+                0x00000000000003ff                __STACK_SIZE_32 = ((__STACK_END_32 - __STACK_START_32) / 0x4)
+                0x0000000000000000                __SYS_TABLE_IDT = 0x0
+                0x0000000000000100                __SYS_TABLE_GDT_VMA = 0x100
+                0x0000000000010000                __FUNCTIONS_VMA = 0x10000
+                0x0000000000100000                __TECLADO_ISR_VMA = 0x100000
+                0x0000000000202000                __KERNEL_32_VMA = 0x202000
+                0x0000000000210000                __DATA_VMA = 0x210000
+                0x00000000ffff0000                __INIT_16_VMA = 0xffff0000
+                0x00000000fffff800                __INIT_32_VMA = 0xfffff800
+                0x00000000fffffc00                __FUNCTIONS_ROM_VMA = 0xfffffc00
+                0x00000000fffffd00                __SYS_TABLES_VMA = 0xfffffd00
+                0x00000000fffffff0                __RESET_VMA = 0xfffffff0
+                0x00000000ffff0000                __INIT_16_LMA = 0xffff0000
+                0x00000000ffff1000                __DATA_LMA = 0xffff1000
+                0x00000000ffff2000                __FUNCTIONS_LMA = 0xffff2000
+                0x00000000ffff3000                __KERNEL_32_LMA = 0xffff3000
+                0x00000000ffff4000                __TECLADO_ISR_LMA = 0xffff4000
+                0x00000000fffff800                __INIT_32_LMA = 0xfffff800
+                0x00000000fffffc00                __FUNCTIONS_ROM_LMA = 0xfffffc00
+                0x00000000fffffd00                __SYS_TABLES_LMA = 0xfffffd00
+                0x00000000fffffff0                __RESET_LMA = 0xfffffff0
+
+.codigo_kernel32
+                0x0000000000202000        0x3 load address 0x00000000ffff3000
+ *(.kernel32)
+ .kernel32      0x0000000000202000        0x3 ./bin/main.elf
+                0x0000000000202000                kernel32_init
+                0x0000000000000003                __codigo_kernel32_size = SIZEOF (.codigo_kernel32)
+
+.functions      0x0000000000010000       0xd5 load address 0x00000000ffff2000
+ *(.functions_c)
+ .functions_c   0x0000000000010000       0x89 ./bin/functions.elf
+                0x0000000000010000                __fast_memcpy
+                0x000000000001003c                determinar_tecla_presionada
+ *(.functions_asm)
+ .functions_asm
+                0x0000000000010089       0x4c ./bin/functions_asm.elf
+                0x0000000000010089                init_pic
+                0x00000000000100b6                handler_teclado
+                0x00000000000000d5                __functions_size = SIZEOF (.functions)
+
+.data           0x0000000000210000      0x17e load address 0x00000000ffff1000
+ *(.sys_idt_table_32)
+ .sys_idt_table_32
+                0x0000000000210000      0x17e ./bin/sys_idt_table_32.elf
+                0x0000000000210178                _idtr
+ .data          0x000000000021017e        0x0 ./bin/functions_rom.elf
+ .data          0x000000000021017e        0x0 ./bin/functions.elf
+                0x000000000000017e                __data_size = SIZEOF (.data)
+
+.handlers       0x0000000000100000       0x51 load address 0x00000000ffff4000
+ *(.teclado_and_ISR)
+ .teclado_and_ISR
+                0x0000000000100000       0x51 ./bin/handlers_32.elf
+                0x0000000100000000                L_IRQ01_Handler
+                0x0000000100000011                L_ISR00_Handler_DE
+                0x000000010000001a                L_ISR02_Handler_NMI
+                0x000000010000001d                L_ISR03_Handler_BP
+                0x0000000100000020                L_ISR04_Handler_OF
+                0x0000000100000023                L_ISR05_Handler_BR
+                0x0000000100000026                L_ISR06_Handler_UD
+                0x000000010000002c                L_ISR07_Handler_NM
+                0x000000010000002f                L_ISR08_Handler_DF
+                0x0000000100000032                L_ISR10_Handler_TS
+                0x0000000100000035                L_ISR11_Handler_NP
+                0x0000000100000038                L_ISR12_Handler_SS
+                0x000000010000003b                L_ISR13_Handler_GP
+                0x000000010000003f                L_ISR14_Handler_PF
+                0x0000000100000045                L_ISR16_Handler_MF
+                0x0000000100000048                L_ISR17_Handler_AC
+                0x000000010000004b                L_ISR18_Handler_MC
+                0x000000010000004e                L_ISR19_Handler_XM
+                0x0000000000000051                __handlers_32_size = SIZEOF (.handlers)
+
+.codigo_init16  0x00000000ffff0000       0x40
+ *(.ROM_init)
+ .ROM_init      0x00000000ffff0000       0x40 ./bin/init16.elf
+                0x00000000ffff0000                start16
+
+.codigo_init32  0x00000000fffff800       0xb0
+ *(.start32)
+ .start32       0x00000000fffff800       0xb0 ./bin/init32.elf
+                0x00000000fffff800                start32_launcher
+
+.functions_rom  0x00000000fffffc00       0x3c
+ *(.functions_rom)
+ .functions_rom
+                0x00000000fffffc00       0x3c ./bin/functions_rom.elf
+                0x00000000fffffc00                __fast_memcpy_rom
+ *(.note.gnu.property)
+
+.text           0x00000000fffffc3c        0x0
+ .text          0x00000000fffffc3c        0x0 ./bin/functions_rom.elf
+ .text          0x00000000fffffc3c        0x0 ./bin/functions.elf
+
+.sys_tables_32  0x00000000fffffd00       0x26
+ *(.sys_tables*)
+ .sys_tables_progbits
+                0x00000000fffffd00       0x26 ./bin/sys_gdt_table_32.elf
+                0x00000000fffffd20                _gdtr
+                0x0000000000000026                __sys_tables_size = SIZEOF (.sys_tables_32)
+
+.codigo_reset   0x00000000fffffff0       0x10
+ *(.resetVector)
+ .resetVector   0x00000000fffffff0       0x10 ./bin/reset.elf
+                0x00000000fffffff0                reset
+LOAD ./bin/init32.elf
+LOAD ./bin/reset.elf
+LOAD ./bin/init16.elf
+LOAD ./bin/main.elf
+LOAD ./bin/functions_asm.elf
+LOAD ./bin/functions_rom.elf
+LOAD ./bin/handlers_32.elf
+LOAD ./bin/functions.elf
+LOAD ./bin/sys_gdt_table_32.elf
+LOAD ./bin/sys_idt_table_32.elf
+OUTPUT(bin/mibios.bin binary)
+
+.bss            0x0000000100000000        0x0
+ .bss           0x0000000100000000        0x0 ./bin/functions_rom.elf
+ .bss           0x0000000100000000        0x0 ./bin/functions.elf
+
+.comment        0x0000000000000000       0x54
+ .comment       0x0000000000000000       0x2a ./bin/functions_rom.elf
+ .comment       0x000000000000002a       0x2a ./bin/functions.elf
+
+.note.GNU-stack
+                0x0000000000000000        0x0
+ .note.GNU-stack
+                0x0000000000000000        0x0 ./bin/functions_rom.elf
+ .note.GNU-stack
+                0x0000000000000000        0x0 ./bin/functions.elf

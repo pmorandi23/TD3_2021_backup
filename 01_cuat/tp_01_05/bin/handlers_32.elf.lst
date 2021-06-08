@@ -1,0 +1,141 @@
+     1                                  USE32
+     2                                  ;----------------GLOBAL--------------------
+     3                                  EXTERN DS_SEL_32
+     4                                  EXTERN CS_SEL_32
+     5                                  EXTERN __TECLADO_ISR_VMA
+     6                                  EXTERN handler_teclado
+     7                                  ;----------------EXTERN--------------------
+     8                                  GLOBAL L_ISR00_Handler_DE
+     9                                  GLOBAL L_ISR02_Handler_NMI
+    10                                  GLOBAL L_ISR03_Handler_BP
+    11                                  GLOBAL L_ISR04_Handler_OF
+    12                                  GLOBAL L_ISR05_Handler_BR
+    13                                  GLOBAL L_ISR06_Handler_UD
+    14                                  GLOBAL L_ISR07_Handler_NM
+    15                                  GLOBAL L_ISR08_Handler_DF
+    16                                  GLOBAL L_ISR10_Handler_TS
+    17                                  GLOBAL L_ISR11_Handler_NP
+    18                                  GLOBAL L_ISR12_Handler_SS
+    19                                  GLOBAL L_ISR13_Handler_GP
+    20                                  GLOBAL L_ISR14_Handler_PF
+    21                                  GLOBAL L_ISR16_Handler_MF
+    22                                  GLOBAL L_ISR17_Handler_AC
+    23                                  GLOBAL L_ISR18_Handler_MC
+    24                                  GLOBAL L_ISR19_Handler_XM
+    25                                  GLOBAL L_IRQ01_Handler
+    26                                  ;----------------EQU--------------------
+    27                                  VMA_ISR_TECLADO     EQU 0x00100000
+    28                                  ; Parte baja de las direcciones de los Handlers 
+    29                                  L_ISR00_Handler_DE  EQU ISR00_Handler_DE    - VMA_ISR_TECLADO 
+    30                                  L_ISR01_Handler_DB  EQU ISR01_Handler_DB    - VMA_ISR_TECLADO 
+    31                                  L_ISR02_Handler_NMI EQU ISR02_Handler_NMI   - VMA_ISR_TECLADO 
+    32                                  L_ISR03_Handler_BP  EQU ISR03_Handler_BP    - VMA_ISR_TECLADO 
+    33                                  L_ISR04_Handler_OF  EQU ISR04_Handler_OF    - VMA_ISR_TECLADO 
+    34                                  L_ISR05_Handler_BR  EQU ISR05_Handler_BR    - VMA_ISR_TECLADO 
+    35                                  L_ISR06_Handler_UD  EQU ISR06_Handler_UD    - VMA_ISR_TECLADO 
+    36                                  L_ISR07_Handler_NM  EQU ISR07_Handler_NM    - VMA_ISR_TECLADO 
+    37                                  L_ISR08_Handler_DF  EQU ISR08_Handler_DF    - VMA_ISR_TECLADO   
+    38                                  L_ISR10_Handler_TS  EQU ISR10_Handler_TS    - VMA_ISR_TECLADO 
+    39                                  L_ISR11_Handler_NP  EQU ISR11_Handler_NP    - VMA_ISR_TECLADO 
+    40                                  L_ISR12_Handler_SS  EQU ISR12_Handler_SS    - VMA_ISR_TECLADO 
+    41                                  L_ISR13_Handler_GP  EQU ISR13_Handler_GP    - VMA_ISR_TECLADO 
+    42                                  L_ISR14_Handler_PF  EQU ISR14_Handler_PF    - VMA_ISR_TECLADO 
+    43                                  L_ISR16_Handler_MF  EQU ISR16_Handler_MF    - VMA_ISR_TECLADO 
+    44                                  L_ISR17_Handler_AC  EQU ISR17_Handler_AC    - VMA_ISR_TECLADO 
+    45                                  L_ISR18_Handler_MC  EQU ISR18_Handler_MC    - VMA_ISR_TECLADO 
+    46                                  L_ISR19_Handler_XM  EQU ISR19_Handler_XM    - VMA_ISR_TECLADO 
+    47                                  L_IRQ01_Handler     EQU IRQ01_Handler       - VMA_ISR_TECLADO
+    48                                  
+    49                                  ;----------------SECTION-----------------------
+    50                                  SECTION .teclado_and_ISR
+    51                                  ;----------HANDLER IRQ TECLADO-----------------
+    52                                  IRQ01_Handler:
+    53 00000000 6687DB                      xchg    bx, bx                      ; Breakpoint
+    54 00000003 60                          pushad                              ; Guardo todos los registros  para asegurarme que no se rompa el estado actual.
+    55 00000004 B221                        mov     dl,0x21                     ; Guardo la interrupcion en el registro DX
+    56 00000006 E8(00000000)                call    handler_teclado             ; Voy a leer el puerto y analizar tecla presionada.
+    57 0000000B B020                        mov     al, 0x20                    ; ACK de la IRQ para el PIC 
+    58 0000000D E620                        out     0x20, al
+    59 0000000F 61                          popad                               ; Recupero registros
+    60 00000010 CF                          iret                                ; Retorno de la IRQ
+    61                                  
+    62                                  ;-----------HANDLERs DE EXCEPTIONS-------------
+    63                                  ;#DE (Divide Error)
+    64                                  ISR00_Handler_DE:
+    65 00000011 6687DB                      xchg    bx,bx
+    66 00000014 B200                        mov     dl,0x00
+    67 00000016 CF                          iret
+    68                                  
+    69                                  ISR01_Handler_DB:
+    70 00000017 B201                        mov dl,0x01
+    71 00000019 F4                          hlt
+    72                                  
+    73                                  ISR02_Handler_NMI:
+    74 0000001A B202                        mov dl,0x02
+    75 0000001C F4                          hlt
+    76                                  
+    77                                  ISR03_Handler_BP:
+    78 0000001D B203                        mov dl,0x03
+    79 0000001F F4                          hlt
+    80                                  
+    81                                  ISR04_Handler_OF:
+    82 00000020 B204                        mov dl,0x04
+    83 00000022 F4                          hlt
+    84                                  
+    85                                  ISR05_Handler_BR:
+    86 00000023 B205                        mov dl,0x05
+    87 00000025 F4                          hlt
+    88                                  ;#UD (Invalid Opcode Fetch) 
+    89                                  ISR06_Handler_UD:
+    90 00000026 6687DB                      xchg    bx,bx
+    91 00000029 B206                        mov dl,0x06
+    92 0000002B F4                          hlt
+    93                                  
+    94                                  ISR07_Handler_NM:
+    95 0000002C B207                        mov dl,0x07
+    96 0000002E F4                          hlt
+    97                                  
+    98                                  ISR08_Handler_DF:
+    99 0000002F B208                        mov dl,0x08
+   100 00000031 F4                          hlt
+   101                                  
+   102                                  ISR10_Handler_TS:
+   103 00000032 B20A                        mov dl,0x0A
+   104 00000034 F4                          hlt
+   105                                  
+   106                                  ISR11_Handler_NP:
+   107 00000035 B20B                        mov dl,0x0B
+   108 00000037 F4                          hlt
+   109                                  
+   110                                  ISR12_Handler_SS:
+   111 00000038 B20C                        mov dl,0x0C
+   112 0000003A F4                          hlt
+   113                                  
+   114                                  ISR13_Handler_GP:
+   115 0000003B B20D                        mov dl,0x0D
+   116 0000003D F4                          hlt
+   117 0000003E CF                          iret
+   118                                  
+   119                                  ISR14_Handler_PF:
+   120 0000003F B20E                        mov dl,0x0E
+   121 00000041 F4                          hlt
+   122                                  
+   123                                  ISR15_Handler_RES:
+   124 00000042 B20F                        mov dl,0x0F
+   125 00000044 F4                          hlt
+   126                                  
+   127                                  ISR16_Handler_MF:
+   128 00000045 B210                        mov dl,0x10
+   129 00000047 F4                          hlt
+   130                                  
+   131                                  ISR17_Handler_AC:
+   132 00000048 B211                        mov dl,0x11
+   133 0000004A F4                          hlt
+   134                                  
+   135                                  ISR18_Handler_MC:
+   136 0000004B B212                        mov dl,0x12
+   137 0000004D F4                          hlt
+   138                                  
+   139                                  ISR19_Handler_XM:
+   140 0000004E B213                        mov dl,0x13
+   141 00000050 F4                          hlt

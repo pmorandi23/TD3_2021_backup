@@ -1,0 +1,19 @@
+     1                                  ; INICIALIZACIÓN BÁSICA UTILIZANDO EL LINKER
+     2                                  ; El mapa de memoria propuesto
+     3                                   
+     4                                  ; Binario copiado                 0x00007C00
+     5                                  ; Pila                            0x00068000
+     6                                  ; Secuencia inicialización ROM    0xFFFF0000
+     7                                  ; Vector de reset                 0xFFFFFFF0
+     8                                  
+     9                                  BITS 16
+    10                                  GLOBAL reset_entry
+    11                                  EXTERN init16_entry
+    12                                  
+    13                                  SECTION .reset
+    14                                  reset_entry: ;0xFFFFFFF0
+    15 00000000 FA                          cli; 0xFFFFFFF1 (1 byte de tamaño de instrucción)
+    16 00000001 E9(0000)                    jmp init16_entry; 0xFFFFFFF3 (2 bytes de tamaño de instrucción)
+    17 00000004 90<rept>                    ALIGN 16; Directiva de pre procesador que rellena con operaciones "nop (0x90)" hasta la próxima dirección multiplo de 16bytes 
+    18                                  
+    19                                  

@@ -1,0 +1,23 @@
+     1                                  USE32
+     2                                  
+     3                                  SECTION .kernel32
+     4                                  
+     5                                  GLOBAL kernel32_code_size
+     6                                  GLOBAL kernel32_init
+     7                                  EXTERN CS_SEL_32
+     8                                  EXTERN __TECLADO_ISR_VMA
+     9                                  EXTERN pool_teclado
+    10                                  
+    11                                  kernel21_code_size EQU kernel32_end-kernel32_init
+    12                                  
+    13                                  ; Aquí en el kernel se puede paginar, setear Timer, manejar interrupciones.
+    14                                  kernel32_init:
+    15                                  
+    16                                      ;xchg    bx, bx
+    17                                  guard:
+    18 00000000 F4                          hlt         ; Aguardo por interrupciones / excepciones
+    19 00000001 EBFD                        jmp guard
+    20                                  
+    21                                  
+    22                                  kernel32_end:
+    23                                      

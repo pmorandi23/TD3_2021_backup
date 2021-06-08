@@ -1,0 +1,120 @@
+     1                                  USE16
+     2                                  
+     3                                  SECTION .ROM_init
+     4                                  
+     5                                  %include "inc/processor-flags.h" 
+     1                              <1> %define X86_CR0_PE      0x00000001 ;/* Protectede mode enable*/
+     2                              <1> %define X86_CR0_MP      0x00000002 ;/* Monitor coProcessor*/
+     3                              <1> %define X86_CR0_EM      0x00000004 ;/* Emulation*/
+     4                              <1> %define X86_CR0_TS      0x00000008 ;/* Task Switched*/
+     5                              <1> %define X86_CR0_ET      0x00000010 ;/* Extension Type*/
+     6                              <1> %define X86_CR0_NE      0x00000020 ;/* Numeric Error*/
+     7                              <1> %define X86_CR0_WP      0x00010000 ;/* Write Protect*/
+     8                              <1> %define X86_CR0_AM      0x00040000 ;/* Alignment Mask*/
+     9                              <1> %define X86_CR0_NW      0x20000000 ;/* Not Write-through*/
+    10                              <1> %define X86_CR0_CD      0x40000000 ;/* Cache Disable*/
+    11                              <1> %define X86_CR0_PG      0x80000000 ;/* PaGine*/
+     6                                  
+     7                                  EXTERN __INIT_16_LMA
+     8                                  EXTERN start32_launcher
+     9                                  EXTERN __STACK_START_16
+    10                                  EXTERN __STACK_END_16
+    11                                  
+    12                                  GLOBAL start16
+    13                                  GLOBAL DS_SEL_32_prim
+    14                                  start16:
+    15 00000000 66A900000000                test    eax, 0x0 ; Verifico que el uP no este en fallo
+    16 00000006 7537                        jne     fault_end 
+    17 00000008 6631C0                      xor     eax, eax ; Pongo en 0 al acumulador
+    18 0000000B 0F22D8                      mov     cr3, eax ; Invalidar TLB (se va a utilizar mas en paginación y cache})
+    19                                  
+    20                                      ; ->Seteo 16 bits stack (SI NO ESTABA, NO SE CARGA LA GDT. HAY QUE INICIALIZAR UN STACK EN 16 BITS AUNQUE NO SE USE!)
+    21 0000000E 8CC8                        mov ax,cs
+    22 00000010 8ED8                        mov ds,ax
+    23 00000012 B8[0000]                    mov ax,__STACK_START_16
+    24 00000015 8ED0                        mov ss,ax
+    25 00000017 BC[0000]                    mov sp,__STACK_END_16
+    26                                  
+    27                                      ;-> Deshabilitar cache <-
+    28 0000001A 0F20C0                      mov     eax, cr0
+    29 0000001D 660D00000060                or      eax, (X86_CR0_NW | X86_CR0_CD)
+    30 00000023 0F22C0                      mov     cr0, eax
+    31 00000026 0F09                        wbinvd    ; Write back and invalidates cache
+    32                                  
+    33 00000028 660F0116[6000]              o32 lgdt [gdtr_16] ; Carga de la GDT pero sin entrar en MP . [ds:_gtdr] está implícito usando []
+    34                                  
+    35                                      ; -> Establecer el uP en MP (Modo Protegido) <-
+    36 0000002E 0F01E0                      smsw    ax ; Stores the machine status word (bits 0 through 15 of control register CR0) into the destination operand. The destination operand can be a general-purpose register or a memory location.
+    37 00000031 83C801                      or      ax, X86_CR0_PE
+    38 00000034 0F01F0                      lmsw    ax ; Loads the source operand into the machine status word, bits 0 through 15 of register CR0. The source operand can be a 16-bit general-purpose register or a memory location
+    39                                      ;xchg    bx, bx ; Breakpoint. En este punto el uP entró en MP
+    40 00000037 66EA[00000000]1000          jmp     dword CS_SEL_32_prim:start32_launcher ; Salto en memoria a la seccion de codigo de 32 bits.
+    41                                  
+    42                                  fault_end:
+    43 0000003F F4                          hlt
+    44                                  
+    45                                  ;------------------------------------GDT 16 BITS------------------------------------------------
+    46                                  GDT:
+    47                                  NULL_SEL_16     equ $-GDT       ;0x00
+    48 00000040 0000000000000000            dq 0x0
+    49                                  CS_SEL_16       equ $-GDT       ;0x08
+    50 00000048 FFFF                        dw 0xFFFF       ;Limit 15-0
+    51 0000004A 0000                        dw 0x0000       ;Base 15-0
+    52 0000004C FF                          db 0xFF         ;Base 23-16
+    53 0000004D 99                          db 10011001b    ;Atributos:
+    54                                                      ;P
+    55                                                      ;DPL
+    56                                                      ;S
+    57                                                      ;D/C
+    58                                                      ;ED/C
+    59                                                      ;R/w
+    60                                                      ;A
+    61 0000004E 40                          db 01000000b    ;Limit
+    62                                                      ;G
+    63                                                      ;D/B
+    64                                                      ;L
+    65                                                      ;AVL
+    66 0000004F FF                          db 0xFF         ;Base 31-24
+    67                                  
+    68                                  CS_SEL_32_prim  equ $-GDT       ;0x10
+    69 00000050 FFFF                        dw 0xFFFF       ;Limit 15-0
+    70 00000052 0000                        dw 0x0000       ;Base 15-0
+    71 00000054 00                          db 0x00         ;Base 23-16
+    72 00000055 99                          db 10011001b    ;Atributos:                   
+    73                                                          ;P=1 Presente en el segmento
+    74                                                          ;DPL=00 Privilegio nivel 0 - Kernel
+    75                                                          ;S=1 Descriptor de Codigo/Datos        
+    76                                                          ;D/C=1 Segmento de Codigo 
+    77                                                          ;C=0 No puede ser invocado
+    78                                                          ;R=0 No legible
+    79                                                          ;A=1 por defecto Accedido
+    80 00000056 CF                          db 11001111b    ;Limit 19-16 (Parte baja)
+    81                                                      ;Parte alta:
+    82                                                          ;G=1 Maximo offset = Limite*0x1000+0xFFF
+    83                                                          ;D/B=1 Big, Segmento de 32
+    84                                                          ;L=0 No 64 bits nativo
+    85                                                          ;AVL=0 No utilizado
+    86 00000057 00                          db 0x00         ;Base
+    87                                  DS_SEL_32_prim  equ $-GDT       ;0X20
+    88 00000058 FFFF                        dw 0xFFFF       ;Limit 15-0
+    89 0000005A 0000                        dw 0x0000       ;Base 15-0
+    90 0000005C 00                          db 0x00         ;Base 23-16
+    91 0000005D 92                          db 10010010b    ;Atributos:
+    92                                                          ;P=1 Presente en el segmento
+    93                                                          ;DPL=00 Privilegio nivel 0 - Kernel
+    94                                                          ;S=1 Descriptor de Codigo/Datos                        
+    95                                                          ;D/C=0 Segmento de Datos 
+    96                                                          ;ED=0 Segmento de datos comun
+    97                                                          ;W=1 Escribible
+    98                                                          ;A=0 por defecto No Accedido
+    99 0000005E CF                          db 11001111b    ;Limit
+   100                                                      ;G
+   101                                                      ;D/B
+   102                                                      ;L
+   103                                                      ;AVL
+   104 0000005F 00                          db 0x00         ;Base
+   105                                  GDT_LENGTH EQU $-GDT
+   106                                  
+   107                                  gdtr_16:                                
+   108 00000060 1F00                        dw  GDT_LENGTH - 1                 ;Li­mite GDT (16 bits).
+   109 00000062 [40000000]                  dd  GDT                            ;Base GDT (32 bits). __SYS_TABLES_LMA

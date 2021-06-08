@@ -1,0 +1,87 @@
+     1                                  USE32
+     2                                  
+     3                                  SECTION .start32
+     4                                  
+     5                                  %include "inc/processor-flags.h" 
+     1                              <1> %define X86_CR0_PE      0x00000001 ;/* Protectede mode enable*/
+     2                              <1> %define X86_CR0_MP      0x00000002 ;/* Monitor coProcessor*/
+     3                              <1> %define X86_CR0_EM      0x00000004 ;/* Emulation*/
+     4                              <1> %define X86_CR0_TS      0x00000008 ;/* Task Switched*/
+     5                              <1> %define X86_CR0_ET      0x00000010 ;/* Extension Type*/
+     6                              <1> %define X86_CR0_NE      0x00000020 ;/* Numeric Error*/
+     7                              <1> %define X86_CR0_WP      0x00010000 ;/* Write Protect*/
+     8                              <1> %define X86_CR0_AM      0x00040000 ;/* Alignment Mask*/
+     9                              <1> %define X86_CR0_NW      0x20000000 ;/* Not Write-through*/
+    10                              <1> %define X86_CR0_CD      0x40000000 ;/* Cache Disable*/
+    11                              <1> %define X86_CR0_PG      0x80000000 ;/* PaGine*/
+     6                                  
+     7                                  
+     8                                  EXTERN DS_SEL
+     9                                  EXTERN __STACK_END_32
+    10                                  EXTERN __STACK_SIZE_32
+    11                                  EXTERN CS_SEL_32
+    12                                  EXTERN kernel32_init
+    13                                  EXTERN __KERNEL_32_LMA
+    14                                  EXTERN __codigo_kernel32_size
+    15                                  EXTERN __fast_memcpy
+    16                                  EXTERN __fast_memcpy_rom
+    17                                  EXTERN kernel32_code_size
+    18                                  EXTERN __functions_size
+    19                                  EXTERN __FUNCTIONS_LMA
+    20                                  EXTERN __KERNEL_32_VMA
+    21                                  EXTERN __FUNCTIONS_VMA
+    22                                  
+    23                                  GLOBAL start32_launcher
+    24                                  
+    25                                  start32_launcher:
+    26 00000000 6687DB                      xchg    bx, bx ; Breakpoint. Estoy en 32 bits
+    27                                      ; -> Inicializar los selectores de datos
+    28 00000003 66B8[0000]                  mov     ax, DS_SEL ; Selector de la GDT de datos de 32 bits FLAT. Ahora puedo acceder a todos los datos de toda la memoria.
+    29 00000007 8ED8                        mov     ds, ax
+    30 00000009 8EC0                        mov     es, ax
+    31 0000000B 8EE8                        mov     gs, ax
+    32 0000000D 8EE0                        mov     fs, ax
+    33                                      ; -> Inicializar la pila en 32 bits
+    34 0000000F 8ED0                        mov     ss, ax
+    35 00000011 BC[00000000]                mov     esp, __STACK_END_32
+    36 00000016 31C0                        xor     eax, eax
+    37                                      ; -> Limpio la pila
+    38 00000018 B9[00000000]                mov     ecx, __STACK_SIZE_32 ; Cargo el tamaño del stack en el registro counter.
+    39                                  .stack_init:
+    40 0000001D 50                          push    eax ; Pusheo ceros en el stack.
+    41 0000001E E2FD                        loop    .stack_init
+    42 00000020 BC[00000000]                mov     esp, __STACK_END_32 ; Lo apunto al final
+    43 00000025 6687DB                      xchg    bx, bx ; Breakpoint
+    44                                      ; -> Desempaquetamiento de la ROM (copia de las funciones a RAM)
+    45 00000028 55                          push    ebp
+    46 00000029 89E5                        mov     ebp, esp ; Genero el STACK FRAME
+    47                                      ; -> Paso argumentos y llamo memcopy 
+    48 0000002B 68[00000000]                push    __functions_size
+    49 00000030 68[00000000]                push    __FUNCTIONS_VMA
+    50 00000035 68[00000000]                push    __FUNCTIONS_LMA
+    51 0000003A E8(00000000)                call    __fast_memcpy_rom
+    52 0000003F 6687DB                      xchg    bx, bx ; Breakpoint
+    53 00000042 C9                          leave
+    54 00000043 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+    55 00000046 752D                        jne     .guard
+    56 00000048 6687DB                      xchg    bx, bx ; Breakpoint
+    57                                      ; -> Desempaquetamiento de la ROM (copia del kernel a RAM)
+    58 0000004B 55                          push    ebp
+    59 0000004C 89E5                        mov     ebp, esp 
+    60 0000004E 68[00000000]                push    __codigo_kernel32_size
+    61 00000053 68[00000000]                push    __KERNEL_32_VMA
+    62 00000058 68[00000000]                push    __KERNEL_32_LMA
+    63 0000005D E8(00000000)                call    __fast_memcpy_rom
+    64 00000062 6687DB                      xchg    bx, bx ; Breakpoint
+    65 00000065 C9                          leave
+    66 00000066 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+    67 00000069 750A                        jne     .guard
+    68 0000006B 6687DB                      xchg    bx, bx ; Breakpoint
+    69 0000006E EA[00000000][0000]          jmp CS_SEL_32:kernel32_init ; Salto en memoria a la sección del núcleo
+    70                                  
+    71                                  .guard:
+    72 00000075 F4                          hlt
+    73                                  
+    74                                  
+    75                                  
+    76                                  

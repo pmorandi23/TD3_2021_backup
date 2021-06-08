@@ -1,0 +1,26 @@
+     1                                  ; Armamos una ROM de 4 KBytes
+     2                                  ; El procesador arranca en FFFF0 y en modo real, con
+     3                                  ; lo cual el mapa de memoria es de 1MB
+     4                                  
+     5                                  ORG 0xFF000	; Esto es: 1MB - 4KB + 1 -> 0xFFFFF-0x1000 = 0xFEFFF. Entonces
+     6                                  			; el origen de nuestra ROM es: 0xFEFFF +  1 (que es la sig posición
+     7                                  			; de memoria): 0xFF000
+     8                                  
+     9                                  USE16
+    10                                  code_size EQU (end - init16)	;Tamaño del código desde el final de la memoria 0xFFFFF (end) hasta la etiqueta el comienzo del código(init16)		
+    11                                  
+    12                                  ; Rellenamos la ROM con 0x90 (NOP) desde 0xFF000 hasta init16
+    13 00000000 90<rept>                times (4096-code_size) db 0x90 ; Otra opción: times 4096 resb 1
+    14                                  
+    15                                  init16:				
+    16 00000FF0 FA                      	cli
+    17 00000FF1 EBFD                    	jmp	init16
+    18                                  aqui:
+    19 00000FF3 F4                      	hlt		; Si por algún motivo sale del loop: HALT
+    20 00000FF4 EBFD                    	jmp	aqui    ; Solo sale por reset o por interrupción
+    21 00000FF6 90<rept>                align 16		; Completa hasta la siguiente dirección múltiplo
+    22                                  			; de 16 (verificar con que completa con NOP ’s).
+    23                                  
+    24                                  end:
+    25                                  
+    26                                  

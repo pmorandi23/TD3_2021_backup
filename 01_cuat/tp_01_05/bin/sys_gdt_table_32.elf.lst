@@ -1,0 +1,79 @@
+     1                                  SECTION .sys_tables_progbits
+     2                                  
+     3                                  
+     4                                  EXTERN  EXCEPTION_DUMMY
+     5                                  EXTERN __SYS_TABLES_LMA
+     6                                  GLOBAL  CS_SEL_16
+     7                                  GLOBAL  CS_SEL_32
+     8                                  GLOBAL  DS_SEL_32
+     9                                  GLOBAL  _gdtr
+    10                                  
+    11                                  
+    12                                  
+    13                                  ; Cada descriptor tiene 8 bytes.
+    14                                  GDT:
+    15                                  NULL_SEL    equ $-GDT       ;0x00
+    16 00000000 0000000000000000            dq 0x0
+    17                                  CS_SEL_16   equ $-GDT       ;0x08
+    18 00000008 FFFF                        dw 0xFFFF       ;Limit 15-0
+    19 0000000A 0000                        dw 0x0000       ;Base 15-0
+    20 0000000C FF                          db 0xFF         ;Base 23-16
+    21 0000000D 99                          db 10011001b    ;Atributos:
+    22                                                      ;P
+    23                                                      ;DPL
+    24                                                      ;S
+    25                                                      ;D/C
+    26                                                      ;ED/C
+    27                                                      ;R/w
+    28                                                      ;A
+    29 0000000E 40                          db 01000000b    ;Limit
+    30                                                      ;G
+    31                                                      ;D/B
+    32                                                      ;L
+    33                                                      ;AVL
+    34 0000000F FF                          db 0xFF         ;Base 31-24
+    35                                  
+    36                                  CS_SEL_32   equ $-GDT       ;0x10
+    37 00000010 FFFF                        dw 0xFFFF       ;Limit 15-0
+    38 00000012 0000                        dw 0x0000       ;Base 15-0
+    39 00000014 00                          db 0x00         ;Base 23-16
+    40 00000015 99                          db 10011001b    ;Atributos:                   
+    41                                                          ;P=1 Presente en el segmento
+    42                                                          ;DPL=00 Privilegio nivel 0 - Kernel
+    43                                                          ;S=1 Descriptor de Codigo/Datos        
+    44                                                          ;D/C=1 Segmento de Codigo 
+    45                                                          ;C=0 No puede ser invocado
+    46                                                          ;R=0 No legible
+    47                                                          ;A=1 por defecto Accedido
+    48 00000016 CF                          db 11001111b    ;Limit 19-16 (Parte baja)
+    49                                                      ;Parte alta:
+    50                                                          ;G=1 Maximo offset = Limite*0x1000+0xFFF
+    51                                                          ;D/B=1 Big, Segmento de 32
+    52                                                          ;L=0 No 64 bits nativo
+    53                                                          ;AVL=0 No utilizado
+    54 00000017 00                          db 0x00         ;Base
+    55                                  DS_SEL_32      equ $-GDT       ;0X20
+    56 00000018 FFFF                        dw 0xFFFF       ;Limit 15-0
+    57 0000001A 0000                        dw 0x0000       ;Base 15-0
+    58 0000001C 00                          db 0x00         ;Base 23-16
+    59 0000001D 92                          db 10010010b    ;Atributos:
+    60                                                          ;P=1 Presente en el segmento
+    61                                                          ;DPL=00 Privilegio nivel 0 - Kernel
+    62                                                          ;S=1 Descriptor de Codigo/Datos                        
+    63                                                          ;D/C=0 Segmento de Datos 
+    64                                                          ;ED=0 Segmento de datos comun
+    65                                                          ;W=1 Escribible
+    66                                                          ;A=0 por defecto No Accedido
+    67 0000001E CF                          db 11001111b    ;Limit
+    68                                                      ;G
+    69                                                      ;D/B
+    70                                                      ;L
+    71                                                      ;AVL
+    72 0000001F 00                          db 0x00         ;Base
+    73                                  GDT_LENGTH EQU $-GDT
+    74                                  
+    75                                  
+    76                                  _gdtr:
+    77 00000020 1F00                        dw GDT_LENGTH-1
+    78                                      ;dd 0x000FFD00 ; Base de la GDT en la section sys_tables. No van todas FFF al principio por el shadow.  
+    79 00000022 [00000000]                  dd __SYS_TABLES_LMA ; Base de la GDT en la section sys_tables. Use o32 cuando la cargo en init16.  

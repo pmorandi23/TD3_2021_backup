@@ -1,0 +1,33 @@
+     1                                  BITS 16
+     2                                  GLOBAL init16_entry
+     3                                  
+     4                                  SECTION .init16
+     5                                  
+     6                                  init16_size EQU end - init_bootstrap		
+     7                                  
+     8                                  init_bootstrap:
+     9 00000000 87DB                        xchg bx,bx ;magic breakpoint. Se habilitan desde el bochsrc. Si se copio OK deberia saltar acá
+    10 00000002 F4                      	hlt
+    11                                  memcopy:
+    12 00000003 FC                      	cld
+    13 00000004 F2A4                    	repnz movsb
+    14 00000006 C3                      	ret
+    15                                  init16_entry:
+    16                                  ;* Seteamos un stack en 0x00068000(par ss:sp deberia ser ss=0x6000 y sp=0x8000)
+    17 00000007 B80060                      mov ax,0x6000
+    18 0000000A 8ED0                        mov ss,ax
+    19 0000000C BC0080                  	mov sp,0x8000
+    20                                  ; Seteo pares de destino (es:di) y fuente (ds:si)
+    21 0000000F B80000                      mov ax,0x0
+    22 00000012 8EC0                        mov es,ax
+    23 00000014 BF007C                      mov di,0x7C00
+    24 00000017 BB00F0                      mov bx,0xF000 ;Valor para del segmento de codigo origen
+    25 0000001A 8EDB                    	mov ds,bx ; Funciona tambien con el bx
+    26 0000001C BE[0000]                    mov si,init_bootstrap
+    27                                  ; Seteo cantidad de bytes a copiar calculada al principio
+    28 0000001F B93000                      mov cx,init16_size
+    29 00000022 E8DEFF                      call memcopy
+    30 00000025 EA007C0000                  jmp 0x0:0x7C00
+    31 0000002A 90<rept>                    align 16
+    32                                  end:
+    33                                  

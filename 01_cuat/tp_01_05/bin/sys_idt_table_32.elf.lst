@@ -1,0 +1,277 @@
+     1                                  SECTION .sys_idt_table_32
+     2                                  
+     3                                  GLOBAL _idtr
+     4                                  
+     5                                  EXTERN __TECLADO_ISR_VMA
+     6                                  EXTERN CS_SEL_32
+     7                                  
+     8                                  EXTERN L_ISR00_Handler_DE
+     9                                  EXTERN L_ISR01_Handler_DB
+    10                                  EXTERN L_ISR02_Handler_NMI
+    11                                  EXTERN L_ISR03_Handler_BP
+    12                                  EXTERN L_ISR04_Handler_OF
+    13                                  EXTERN L_ISR05_Handler_BR
+    14                                  EXTERN L_ISR06_Handler_UD
+    15                                  EXTERN L_ISR07_Handler_NM
+    16                                  EXTERN L_ISR08_Handler_DF
+    17                                  EXTERN L_ISR10_Handler_TS
+    18                                  EXTERN L_ISR11_Handler_NP
+    19                                  EXTERN L_ISR12_Handler_SS
+    20                                  EXTERN L_ISR13_Handler_GP
+    21                                  EXTERN L_ISR14_Handler_PF
+    22                                  EXTERN L_ISR16_Handler_MF
+    23                                  EXTERN L_ISR17_Handler_AC
+    24                                  EXTERN L_ISR18_Handler_MC
+    25                                  EXTERN L_ISR19_Handler_XM
+    26                                  EXTERN L_IRQ01_Handler
+    27                                  ; Parte alta de las direcciones de los Handlers
+    28                                  H_ISRXX_Handler     EQU 0x0010
+    29                                  
+    30                                  ; Cada descriptor tiene 8 bytes.
+    31                                  IDT:
+    32                                  ; Divide Error
+    33                                  ISR00_IDT   EQU $-IDT   
+    34 00000000 [0000]                      dw L_ISR00_Handler_DE                       ; 2 bytes - Offset 15-0 - Segmento de referencia al código de la EXCEPTION 
+    35                                  
+    36 00000002 [0000]                      dw CS_SEL_32                                ; 2 bytes - Selector de segmento de código
+    37                                  
+    38 00000004 00                          db 00000000b                                ; 1 byte - 000 e indefinido
+    39 00000005 8F                          db 10001111b                                ; 1 byte - Atributos
+    40                                                                                      ; P = 1 (Presente en el segmento)
+    41                                                                                      ; DPL = 00 (Nivel de privilegio priotidad Kernel)
+    42                                                                                      ; S = 0 (Descriptor de sistema)
+    43                                                                                      ; TIPO = 1111 (Puerta de Excepcion de 32 bits 80386 - Trap Gate)
+    44 00000006 1000                        dw H_ISRXX_Handler       ; 2 bytes - Offset 31-16 - Segmento de referencia al código de la EXCEPTION 
+    45                                  ; Debug Exceptions - Reservada 
+    46                                  ISR01_IDT   EQU $-IDT   
+    47 00000008 0000000000000000            dq 0x0
+    48                                  ; NMI
+    49                                  ISR02_IDT   EQU $-IDT   
+    50                                  
+    51 00000010 [0000]                      dw L_ISR02_Handler_NMI                      ; 2 bytes - Offset 15-0 - Segmento de referencia al código de la EXCEPTION 
+    52 00000012 [0000]                      dw CS_SEL_32                                ; 2 bytes - Selector de segmento de código
+    53                                  
+    54 00000014 00                          db 00000000b                                ; 1 byte - 000 e indefinido
+    55 00000015 8F                          db 10001111b                                ; 1 byte - Atributos
+    56                                                                                      ; P = 1 (Presente en el segmento)
+    57                                                                                      ; DPL = 00 (Nivel de privilegio priotidad Kernel)
+    58                                                                                      ; S = 0 (Descriptor de sistema)
+    59                                                                                      ; TIPO = 1111 (Puerta de Excepcion de 32 bits 80386 - Trap Gate)
+    60 00000016 1000                        dw H_ISRXX_Handler                          ; 2 bytes - Offset 31-16 - Segmento de referencia al código de la EXCEPTION 
+    61                                  ; Breakpoint
+    62                                  ISR03_IDT   EQU $-IDT   
+    63 00000018 [0000]                      dw L_ISR03_Handler_BP                       ; 2 bytes - Offset 15-0 - Segmento de referencia al código de la EXCEPTION 
+    64 0000001A [0000]                      dw CS_SEL_32                                ; 2 bytes - Selector de segmento de código
+    65                                  
+    66 0000001C 00                          db 00000000b                                ; 1 byte - 000 e indefinido
+    67 0000001D 8F                          db 10001111b                                ; 1 byte - Atributos
+    68                                                                                      ; P = 1 (Presente en el segmento)
+    69                                                                                      ; DPL = 00 (Nivel de privilegio priotidad Kernel)
+    70                                                                                      ; S = 0 (Descriptor de sistema)
+    71                                                                                      ; TIPO = 1111 (Puerta de Excepcion de 32 bits 80386 - Trap Gate)
+    72 0000001E 1000                        dw H_ISRXX_Handler                           ; 2 bytes - Offset 31-16 - Segmento de referencia al código de la EXCEPTION 
+    73                                  ; Overflow
+    74                                  ISR04_IDT   EQU $-IDT   
+    75 00000020 [0000]                      dw L_ISR04_Handler_OF                       ; 2 bytes - Offset 15-0 - Segmento de referencia al código de la EXCEPTION 
+    76 00000022 [0000]                      dw CS_SEL_32                                ; 2 bytes - Selector de segmento de código
+    77                                  
+    78 00000024 00                          db 00000000b                                ; 1 byte - 000 e indefinido
+    79 00000025 8F                          db 10001111b                                ; 1 byte - Atributos
+    80                                                                                      ; P = 1 (Presente en el segmento)
+    81                                                                                      ; DPL = 00 (Nivel de privilegio priotidad Kernel)
+    82                                                                                      ; S = 0 (Descriptor de sistema)
+    83                                                                                      ; TIPO = 1111 (Puerta de Excepcion de 32 bits 80386 - Trap Gate)
+    84 00000026 1000                        dw H_ISRXX_Handler                          ; 2 bytes - Offset 31-16 - Segmento de referencia al código de la EXCEPTION 
+    85                                  ; BOUND Range Exceeded
+    86                                  ISR05_IDT   EQU $-IDT   
+    87 00000028 [0000]                      dw L_ISR05_Handler_BR                       ; 2 bytes - Offset 15-0 - Segmento de referencia al código de la EXCEPTION 
+    88 0000002A [0000]                      dw CS_SEL_32                                ; 2 bytes - Selector de segmento de código
+    89                                  
+    90 0000002C 00                          db 00000000b                                ; 1 byte - 000 e indefinido
+    91 0000002D 8F                          db 10001111b                                ; 1 byte - Atributos
+    92                                                                                      ; P = 1 (Presente en el segmento)
+    93                                                                                      ; DPL = 00 (Nivel de privilegio priotidad Kernel)
+    94                                                                                      ; S = 0 (Descriptor de sistema)
+    95                                                                                      ; TIPO = 1111 (Puerta de Excepcion de 32 bits 80386 - Trap Gate)
+    96 0000002E 1000                        dw H_ISRXX_Handler                          ; 2 bytes - Offset 31-16 - Segmento de referencia al código de la EXCEPTION 
+    97                                  ; Invalid Opcode (Undefined Opcode)
+    98                                  ISR06_IDT   EQU $-IDT   
+    99 00000030 [0000]                      dw L_ISR06_Handler_UD                       ; 2 bytes - Offset 15-0 - Segmento de referencia al código de la EXCEPTION 
+   100 00000032 [0000]                      dw CS_SEL_32                                ; 2 bytes - Selector de segmento de código
+   101                                  
+   102 00000034 00                          db 00000000b                                ; 1 byte - 000 e indefinido
+   103 00000035 8F                          db 10001111b                                ; 1 byte - Atributos
+   104                                                                                      ; P = 1 (Presente en el segmento)
+   105                                                                                      ; DPL = 00 (Nivel de privilegio priotidad Kernel)
+   106                                                                                      ; S = 0 (Descriptor de sistema)
+   107                                                                                      ; TIPO = 1111 (Puerta de Excepcion de 32 bits 80386 - Trap Gate)
+   108 00000036 1000                        dw H_ISRXX_Handler                          ; 2 bytes - Offset 31-16 - Segmento de referencia al código de la EXCEPTION 
+   109                                  ; Device Not Available (No Math Coprocessor)
+   110                                  ISR07_IDT   EQU $-IDT   
+   111 00000038 [0000]                      dw L_ISR07_Handler_NM                       ; 2 bytes - Offset 15-0 - Segmento de referencia al código de la EXCEPTION 
+   112 0000003A [0000]                      dw CS_SEL_32                                ; 2 bytes - Selector de segmento de código
+   113                                  
+   114 0000003C 00                          db 00000000b                                ; 1 byte - 000 e indefinido
+   115 0000003D 8F                          db 10001111b                                ; 1 byte - Atributos
+   116                                                                                      ; P = 1 (Presente en el segmento)
+   117                                                                                      ; DPL = 00 (Nivel de privilegio priotidad Kernel)
+   118                                                                                      ; S = 0 (Descriptor de sistema)
+   119                                                                                      ; TIPO = 1111 (Puerta de Excepcion de 32 bits 80386 - Trap Gate)
+   120 0000003E 1000                        dw H_ISRXX_Handler                          ; 2 bytes - Offset 31-16 - Segmento de referencia al código de la EXCEPTION
+   121                                  ; Double Fault
+   122                                  ISR08_IDT   EQU $-IDT   
+   123 00000040 [0000]                      dw L_ISR08_Handler_DF                       ; 2 bytes - Offset 15-0 - Segmento de referencia al código de la EXCEPTION 
+   124 00000042 [0000]                      dw CS_SEL_32                                ; 2 bytes - Selector de segmento de código
+   125                                  
+   126 00000044 00                          db 00000000b                                ; 1 byte - 000 e indefinido
+   127 00000045 8F                          db 10001111b                                ; 1 byte - Atributos
+   128                                                                                      ; P = 1 (Presente en el segmento)
+   129                                                                                      ; DPL = 00 (Nivel de privilegio priotidad Kernel)
+   130                                                                                      ; S = 0 (Descriptor de sistema)
+   131                                                                                      ; TIPO = 1111 (Puerta de Excepcion de 32 bits 80386 - Trap Gate)
+   132 00000046 1000                        dw H_ISRXX_Handler                          ; 2 bytes - Offset 31-16 - Segmento de referencia al código de la EXCEPTION
+   133                                  ; Coprocessor Segment Overrun (reserved)
+   134                                  ISR09_IDT   EQU $-IDT   
+   135 00000048 0000000000000000            dq 0x0
+   136                                  ; Invalid TSS
+   137                                  ISR10_IDT   EQU $-IDT   
+   138 00000050 [0000]                      dw L_ISR10_Handler_TS                       ; 2 bytes - Offset 15-0 - Segmento de referencia al código de la EXCEPTION 
+   139 00000052 [0000]                      dw CS_SEL_32                                ; 2 bytes - Selector de segmento de código
+   140                                  
+   141 00000054 00                          db 00000000b                                ; 1 byte - 000 e indefinido
+   142 00000055 8F                          db 10001111b                                ; 1 byte - Atributos
+   143                                                                                      ; P = 1 (Presente en el segmento)
+   144                                                                                      ; DPL = 00 (Nivel de privilegio priotidad Kernel)
+   145                                                                                      ; S = 0 (Descriptor de sistema)
+   146                                                                                      ; TIPO = 1111 (Puerta de Excepcion de 32 bits 80386 - Trap Gate)
+   147 00000056 1000                        dw H_ISRXX_Handler                          ; 2 bytes - Offset 31-16 - Segmento de referencia al código de la EXCEPTION
+   148                                  ; Segment Not Present
+   149                                  ISR11_IDT   EQU $-IDT   
+   150 00000058 [0000]                      dw L_ISR11_Handler_NP                       ; 2 bytes - Offset 15-0 - Segmento de referencia al código de la EXCEPTION 
+   151 0000005A [0000]                      dw CS_SEL_32                                ; 2 bytes - Selector de segmento de código
+   152                                  
+   153 0000005C 00                          db 00000000b                                ; 1 byte - 000 e indefinido
+   154 0000005D 8F                          db 10001111b                                ; 1 byte - Atributos
+   155                                                                                      ; P = 1 (Presente en el segmento)
+   156                                                                                      ; DPL = 00 (Nivel de privilegio priotidad Kernel)
+   157                                                                                      ; S = 0 (Descriptor de sistema)
+   158                                                                                      ; TIPO = 1111 (Puerta de Excepcion de 32 bits 80386 - Trap Gate)
+   159 0000005E 1000                        dw H_ISRXX_Handler                          ; 2 bytes - Offset 31-16 - Segmento de referencia al código de la EXCEPTION
+   160                                  ; Stack-Segment Fault
+   161                                  ISR12_IDT   EQU $-IDT   
+   162 00000060 [0000]                      dw L_ISR12_Handler_SS                       ; 2 bytes - Offset 15-0 - Segmento de referencia al código de la EXCEPTION 
+   163 00000062 [0000]                      dw CS_SEL_32                                ; 2 bytes - Selector de segmento de código
+   164                                  
+   165 00000064 00                          db 00000000b                                ; 1 byte - 000 e indefinido
+   166 00000065 8F                          db 10001111b                                ; 1 byte - Atributos
+   167                                                                                      ; P = 1 (Presente en el segmento)
+   168                                                                                      ; DPL = 00 (Nivel de privilegio priotidad Kernel)
+   169                                                                                      ; S = 0 (Descriptor de sistema)
+   170                                                                                      ; TIPO = 1111 (Puerta de Excepcion de 32 bits 80386 - Trap Gate)
+   171 00000066 1000                        dw H_ISRXX_Handler                          ; 2 bytes - Offset 31-16 - Segmento de referencia al código de la EXCEPTION
+   172                                  ; General Protection
+   173                                  ISR13_IDT   EQU $-IDT   
+   174 00000068 [0000]                      dw L_ISR13_Handler_GP                       ; 2 bytes - Offset 15-0 - Segmento de referencia al código de la EXCEPTION 
+   175 0000006A [0000]                      dw CS_SEL_32                                ; 2 bytes - Selector de segmento de código
+   176                                  
+   177 0000006C 00                          db 00000000b                                ; 1 byte - 000 e indefinido
+   178 0000006D 8F                          db 10001111b                                ; 1 byte - Atributos
+   179                                                                                      ; P = 1 (Presente en el segmento)
+   180                                                                                      ; DPL = 00 (Nivel de privilegio priotidad Kernel)
+   181                                                                                      ; S = 0 (Descriptor de sistema)
+   182                                                                                      ; TIPO = 1111 (Puerta de Excepcion de 32 bits 80386 - Trap Gate)
+   183 0000006E 1000                        dw H_ISRXX_Handler                          ; 2 bytes - Offset 31-16 - Segmento de referencia al código de la EXCEPTION
+   184                                  ; Page Fault
+   185                                  ISR14_IDT   EQU $-IDT   
+   186 00000070 [0000]                      dw L_ISR14_Handler_PF                       ; 2 bytes - Offset 15-0 - Segmento de referencia al código de la EXCEPTION 
+   187 00000072 [0000]                      dw CS_SEL_32                                ; 2 bytes - Selector de segmento de código
+   188                                  
+   189 00000074 00                          db 00000000b                                ; 1 byte - 000 e indefinido
+   190 00000075 8F                          db 10001111b                                ; 1 byte - Atributos
+   191                                                                                      ; P = 1 (Presente en el segmento)
+   192                                                                                      ; DPL = 00 (Nivel de privilegio priotidad Kernel)
+   193                                                                                      ; S = 0 (Descriptor de sistema)
+   194                                                                                      ; TIPO = 1111 (Puerta de Excepcion de 32 bits 80386 - Trap Gate)
+   195 00000076 1000                        dw H_ISRXX_Handler                          ; 2 bytes - Offset 31-16 - Segmento de referencia al código de la EXCEPTION
+   196                                  ; (Intel reserved. Do not use.)
+   197                                  ISR15_IDT   EQU $-IDT   
+   198 00000078 0000000000000000            dq 0x0
+   199                                  ; x87 FPU Floating-Point Error (Math Fault)
+   200                                  ISR16_IDT   EQU $-IDT   
+   201 00000080 [0000]                      dw L_ISR16_Handler_MF                       ; 2 bytes - Offset 15-0 - Segmento de referencia al código de la EXCEPTION 
+   202 00000082 [0000]                      dw CS_SEL_32                                ; 2 bytes - Selector de segmento de código
+   203                                  
+   204 00000084 00                          db 00000000b                                ; 1 byte - 000 e indefinido
+   205 00000085 8F                          db 10001111b                                ; 1 byte - Atributos
+   206                                                                                      ; P = 1 (Presente en el segmento)
+   207                                                                                      ; DPL = 00 (Nivel de privilegio priotidad Kernel)
+   208                                                                                      ; S = 0 (Descriptor de sistema)
+   209                                                                                      ; TIPO = 1111 (Puerta de Excepcion de 32 bits 80386 - Trap Gate)
+   210 00000086 1000                        dw H_ISRXX_Handler                          ; 2 bytes - Offset 31-16 - Segmento de referencia al código de la EXCEPTION
+   211                                  ; Alignment Check
+   212                                  ISR17_IDT   EQU $-IDT   
+   213 00000088 [0000]                      dw L_ISR17_Handler_AC                       ; 2 bytes - Offset 15-0 - Segmento de referencia al código de la EXCEPTION 
+   214 0000008A [0000]                      dw CS_SEL_32                                ; 2 bytes - Selector de segmento de código
+   215                                  
+   216 0000008C 00                          db 00000000b                                ; 1 byte - 000 e indefinido
+   217 0000008D 8F                          db 10001111b                                ; 1 byte - Atributos
+   218                                                                                      ; P = 1 (Presente en el segmento)
+   219                                                                                      ; DPL = 00 (Nivel de privilegio priotidad Kernel)
+   220                                                                                      ; S = 0 (Descriptor de sistema)
+   221                                                                                      ; TIPO = 1111 (Puerta de Excepcion de 32 bits 80386 - Trap Gate)
+   222 0000008E 1000                        dw H_ISRXX_Handler                          ; 2 bytes - Offset 31-16 - Segmento de referencia al código de la EXCEPTION
+   223                                  ; Machine Check
+   224                                  ISR18_IDT   EQU $-IDT   
+   225 00000090 [0000]                      dw L_ISR18_Handler_MC                       ; 2 bytes - Offset 15-0 - Segmento de referencia al código de la EXCEPTION 
+   226 00000092 [0000]                      dw CS_SEL_32                                ; 2 bytes - Selector de segmento de código
+   227                                  
+   228 00000094 00                          db 00000000b                                ; 1 byte - 000 e indefinido
+   229 00000095 8F                          db 10001111b                                ; 1 byte - Atributos
+   230                                                                                      ; P = 1 (Presente en el segmento)
+   231                                                                                      ; DPL = 00 (Nivel de privilegio priotidad Kernel)
+   232                                                                                      ; S = 0 (Descriptor de sistema)
+   233                                                                                      ; TIPO = 1111 (Puerta de Excepcion de 32 bits 80386 - Trap Gate)
+   234 00000096 1000                        dw H_ISRXX_Handler                          ; 2 bytes - Offset 31-16 - Segmento de referencia al código de la EXCEPTION
+   235                                  ; SIMD Floating-Point Exception
+   236                                  ISR19_IDT   EQU $-IDT   
+   237 00000098 [0000]                      dw L_ISR19_Handler_XM                       ; 2 bytes - Offset 15-0 - Segmento de referencia al código de la EXCEPTION 
+   238 0000009A [0000]                      dw CS_SEL_32                                ; 2 bytes - Selector de segmento de código
+   239                                  
+   240 0000009C 00                          db 00000000b                                ; 1 byte - 000 e indefinido
+   241 0000009D 8F                          db 10001111b                                ; 1 byte - Atributos
+   242                                                                                      ; P = 1 (Presente en el segmento)
+   243                                                                                      ; DPL = 00 (Nivel de privilegio priotidad Kernel)
+   244                                                                                      ; S = 0 (Descriptor de sistema)
+   245                                                                                      ; TIPO = 1111 (Puerta de Excepcion de 32 bits 80386 - Trap Gate)
+   246 0000009E 1000                        dw H_ISRXX_Handler                          ; 2 bytes - Offset 31-16 - Segmento de referencia al código de la EXCEPTION
+   247                                  ; Virtualization Exception (20) hasta Intel reserver. Do not use (31) todo reservado.
+   248                                  ISR20to31_idt EQU $-IDT
+   249 000000A0 0000000000000000-           times 12 dq 0x0  
+   249 000000A0 <rept>             
+   250                                  ; IRQ0 - Timer tick
+   251                                  ISR32_IRQ_0 EQU $-IDT
+   252 00000100 0000000000000000            dq 0x0
+   253                                  ; IRQ1 - KBI (Keyboard Interrupt)
+   254                                  ISR32_IRQ_1 EQU $-IDT
+   255 00000108 [0000]                      dw L_IRQ01_Handler                          ; 2 bytes - Offset 15-0 - Segmento de referencia al código de la EXCEPTION 
+   256 0000010A [0000]                      dw CS_SEL_32                                ; 2 bytes - Selector de segmento de código
+   257                                  
+   258 0000010C 00                          db 00000000b                                ; 1 byte - 000 e indefinido
+   259 0000010D 8E                          db 10001110b                                ; 1 byte - Atributos
+   260                                                                                      ; P = 1 (Presente en el segmento)
+   261                                                                                      ; DPL = 00 (Nivel de privilegio priotidad Kernel)
+   262                                                                                      ; S = 0 (Descriptor de sistema)
+   263                                                                                      ; TIPO = 1110 (Puerta de Interrupción de 32 bits 80386 - Int. Gate)
+   264 0000010E 1000                        dw H_ISRXX_Handler                          ; 2 bytes - Offset 31-16 - Segmento de referencia al código de la EXCEPTION
+   265                                  
+   266                                  ISR32_IRQ_2_15 EQU $-IDT   
+   267 00000110 0000000000000000-           times 13 dq 0x0000  ;Usuario
+   267 00000110 <rept>             
+   268                                  
+   269                                  
+   270                                  IDT_LENGTH EQU $-IDT
+   271                                  _idtr:
+   272 00000178 7701                        dw IDT_LENGTH-1
+   273 0000017A [00000000]                  dd IDT       ; Base de la IDT donde termina la GDT para que esten una arriba de la otra en ROM
+   274                                  
+   275                                  

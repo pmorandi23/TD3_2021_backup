@@ -1,0 +1,57 @@
+     1                                  USE16
+     2                                  
+     3                                  SECTION .ROM_init
+     4                                  
+     5                                  %include "inc/processor-flags.h" 
+     1                              <1> %define X86_CR0_PE      0x00000001 ;/* Protectede mode enable*/
+     2                              <1> %define X86_CR0_MP      0x00000002 ;/* Monitor coProcessor*/
+     3                              <1> %define X86_CR0_EM      0x00000004 ;/* Emulation*/
+     4                              <1> %define X86_CR0_TS      0x00000008 ;/* Task Switched*/
+     5                              <1> %define X86_CR0_ET      0x00000010 ;/* Extension Type*/
+     6                              <1> %define X86_CR0_NE      0x00000020 ;/* Numeric Error*/
+     7                              <1> %define X86_CR0_WP      0x00010000 ;/* Write Protect*/
+     8                              <1> %define X86_CR0_AM      0x00040000 ;/* Alignment Mask*/
+     9                              <1> %define X86_CR0_NW      0x20000000 ;/* Not Write-through*/
+    10                              <1> %define X86_CR0_CD      0x40000000 ;/* Cache Disable*/
+    11                              <1> %define X86_CR0_PG      0x80000000 ;/* PaGine*/
+     6                                  
+     7                                  EXTERN CS_SEL_32
+     8                                  EXTERN _gdtr
+     9                                  EXTERN start32_launcher
+    10                                  EXTERN __STACK_START_16
+    11                                  EXTERN __STACK_END_16
+    12                                  
+    13                                  GLOBAL start16
+    14                                  
+    15                                  start16:
+    16 00000000 66A900000000                test    eax, 0x0 ; Verifico que el uP no este en fallo
+    17 00000006 753A                        jne     fault_end 
+    18 00000008 6631C0                      xor     eax, eax ; Pongo en 0 al acumulador
+    19 0000000B 0F22D8                      mov     cr3, eax ; Invalidar TLB (se va a utilizar mas en paginación y cache})
+    20                                  
+    21                                      ; ->Seteo 16 bits stack (SI NO ESTABA, NO SE CARGA LA GDT. HAY QUE INICIALIZAR UN STACK EN 16 BITS AUNQUE NO SE USE!)
+    22 0000000E 8CC8                        mov ax,cs
+    23 00000010 8ED8                        mov ds,ax
+    24 00000012 B8[0000]                    mov ax,__STACK_START_16
+    25 00000015 8ED0                        mov ss,ax
+    26 00000017 BC[0000]                    mov sp,__STACK_END_16
+    27                                  
+    28                                      ;-> Deshabilitar cache <-
+    29 0000001A 0F20C0                      mov     eax, cr0
+    30 0000001D 660D00000060                or      eax, (X86_CR0_NW | X86_CR0_CD)
+    31 00000023 0F22C0                      mov     cr0, eax
+    32 00000026 0F09                        wbinvd    ; Write back and invalidates cache
+    33                                  
+    34 00000028 87DB                        xchg    bx, bx ; Breakpoint
+    35 0000002A 0F0116[0000]                lgdt [_gdtr] ; Carga de la GDT pero sin entrar en MP . [ds:_gtdr] está implícito usando []
+    36                                  
+    37                                      ; -> Establecer el uP en MP (Modo Protegido) <-
+    38 0000002F 0F01E0                      smsw    ax ; Stores the machine status word (bits 0 through 15 of control register CR0) into the destination operand. The destination operand can be a general-purpose register or a memory location.
+    39 00000032 83C801                      or      ax, X86_CR0_PE
+    40 00000035 0F01F0                      lmsw    ax ; Loads the source operand into the machine status word, bits 0 through 15 of register CR0. The source operand can be a 16-bit general-purpose register or a memory location
+    41 00000038 87DB                        xchg    bx, bx ; Breakpoint. En este punto el uP entró en MP
+    42 0000003A 66EA[00000000]-             jmp     dword CS_SEL_32:start32_launcher ; Salto en memoria a la seccion de codigo de 32 bits.
+    42 00000040 [0000]             
+    43                                  
+    44                                  fault_end:
+    45 00000042 F4                          hlt
