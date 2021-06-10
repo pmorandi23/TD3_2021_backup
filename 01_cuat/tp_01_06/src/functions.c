@@ -39,44 +39,30 @@ void determinar_tecla_presionada (byte teclaPresionada, buffer_t* buffer_vma)
 {
     byte valorReal_tecla;
     byte flag_rellenar_tabla = 0;
-    
-    /* Teclas del 0 al 9 
-        #define TECLA_1     0x02
-        #define TECLA_2     0x03
-        #define TECLA_3     0x04
-        #define TECLA_4     0x05
-        #define TECLA_5     0x06
-        #define TECLA_6     0x07
-        #define TECLA_7     0x08
-        #define TECLA_8     0x09
-        #define TECLA_9     0x0A
-        #define TECLA_0     0x0B*/
-
-    
-    /* Si es un número, lo almaceno en . */
-    if (teclaPresionada > 0x01 && teclaPresionada < 0x0B ){
-
-        if (teclaPresionada == TECLA_9){
-            valorReal_tecla = 0x09;
-        }else{
-            valorReal_tecla = teclaPresionada - 0x01;
-        }
-
-		//asm("xchg %bx,%bx");
-
-        escribir_buffer (valorReal_tecla, buffer_vma);
         
-        //asm("xchg %bx,%bx");
+    //asm("xchg %bx,%bx");
 
+    /* Si es un número, lo almaceno en el buffer reservado. */
+    if (teclaPresionada > 0x01 && teclaPresionada < 0x0C )
+    {
+        valorReal_tecla = teclaPresionada - 0x01;
+
+        if (teclaPresionada == TECLA_9)
+        {
+            valorReal_tecla = 0x09;
+        }
+        if (teclaPresionada == TECLA_0)
+        {
+            valorReal_tecla = 0x00;
+        }       
+        escribir_buffer (valorReal_tecla, buffer_vma);      
     }
-    
-    
     /* Si se escribieron 16 caracteres en el buffer y el head dio la vuelta genero un ENTER. O si se presiono ENTER. */
     if ((buffer_vma->cantidad >15 && buffer_vma->head < 1) || (teclaPresionada == TECLA_ENTER && buffer_vma->cantidad > 15)){
 
         //asm("xchg %bx,%bx");
         flag_rellenar_tabla = 0;
-        escribir_tabla_digitos(buffer_vma, &__DIGITS_TABLE,flag_rellenar_tabla);
+        escribir_tabla_digitos(buffer_vma, (tabla_t*)&__DIGITS_TABLE,flag_rellenar_tabla);
 
     }
     /* Si se presiono ENTER y no hay 16 caracteres , hay que rellenar con 0 la tabla*/
@@ -85,11 +71,10 @@ void determinar_tecla_presionada (byte teclaPresionada, buffer_t* buffer_vma)
         //asm("xchg %bx,%bx");
 
         flag_rellenar_tabla = 1;
-        escribir_tabla_digitos(buffer_vma, &__DIGITS_TABLE,flag_rellenar_tabla);
+        escribir_tabla_digitos(buffer_vma, (tabla_t*)&__DIGITS_TABLE,flag_rellenar_tabla);
 
     }
 
-    
     return;
 }
 /* Función que escribe el buffer. */
@@ -101,12 +86,13 @@ void escribir_buffer (byte tecla, buffer_t* buffer_vma){
         buffer_vma->buffer[buffer_vma->head] = tecla;
         buffer_vma->cantidad++;
         buffer_vma->head++;
-        if(buffer_vma->head == BUFFER_MAX)
+        if(buffer_vma->head == BUFFER_MAX )
         {
             buffer_vma->head = 0; //Buffer da la vuelta. Se debe insertar en tabla y limpiar.
         } 
-    }else{
-
+    }
+    else
+    {
         limpiar_buffer(buffer_vma); //Si llegase a entrar acá
     }
 }
@@ -116,20 +102,36 @@ void escribir_tabla_digitos(buffer_t* buffer_vma, tabla_t* tabla_digitos_vma, by
 {
     static int i =0;
     byte lectura_buffer;
-    qword digito_64;
-
-    asm("xchg %bx,%bx");
-
-    /* Leo el buffer y armo el dígito de 64 bits (8 bytes) */
+    dword digito_H = 0x00; //4 bytes mas significatvos (8 teclas)
+    dword digito_L = 0x00; //4 bytes menos significativos (8 teclas)
+  
+    /* Leo el buffer con la cantidad de numeros ingresados. Las pos. restantes deberían ser 0 por el limpiar_buffer */
     for (i=0;i<BUFFER_MAX;i++)
     {
-        lectura_buffer = leer_buffer(buffer_vma);
+        lectura_buffer = leer_buffer(buffer_vma); //Comienzo a leerlo desde la última posición [16]
+        if(i<8)
+        {
+            digito_L = digito_L + (lectura_buffer << 4*i);
+        }
+        else
+        {
+            digito_H = digito_H + (lectura_buffer << 4*i);
+        }      
+    }
+    
+    if(tabla_digitos_vma->indice_tabla < LONG_TABLA){
 
-        lectura_buffer = lectura_buffer + digito_64;
-
-        digito_64 = digito_64 * 10 ; //Desplazo el número hacia la izquierda y me quedan 0 en las 4 pos menos significativas para el nuevo numero.
+        tabla_digitos_vma->tabla[tabla_digitos_vma->indice_tabla]= digito_H ;
+        tabla_digitos_vma->indice_tabla++; //Sumo el índice para el siguiente dígito de 32 bits (8 bytes, 16 números ingresados)
+        tabla_digitos_vma->tabla[tabla_digitos_vma->indice_tabla]= digito_L ;
+        tabla_digitos_vma->indice_tabla++; //Sumo el índice para el siguiente dígito de 32 bits (8 bytes, 16 números ingresados)
 
     }
+    else{
+
+        tabla_digitos_vma->indice_tabla = 0;    //Reseteo índice para empezar a sobreescribir la tabla por si me guardan más de 10 
+    }
+    limpiar_buffer(buffer_vma);                 //Limpio el buffer para la próxima entrada de datos.
     asm("xchg %bx,%bx");
 
     return;
@@ -140,7 +142,7 @@ void escribir_tabla_digitos(buffer_t* buffer_vma, tabla_t* tabla_digitos_vma, by
 __attribute__(( section(".functions_c"))) 
 byte leer_buffer (buffer_t*buffer_vma)
 {
-    byte lectura = 0xFF;
+    byte lectura = 0x00;
 
 	if(buffer_vma->cantidad > 0)	
 	{

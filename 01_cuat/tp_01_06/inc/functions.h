@@ -1,7 +1,18 @@
 /* --------------DEFINES-----------------------*/
 #define ERROR_DEFECTO 0
 #define EXITO 1
-/* --------------DEFINES TECLAS-------------------------*/
+/* --------------DEFINES TECLAS (Releases codes)-------------------------*/
+/* #define TECLA_1     0x82
+#define TECLA_2     0x83
+#define TECLA_3     0x84
+#define TECLA_4     0x85
+#define TECLA_5     0x86
+#define TECLA_6     0x87
+#define TECLA_7     0x88
+#define TECLA_8     0x89
+#define TECLA_9     0x8A
+#define TECLA_0     0x8B */
+
 #define TECLA_1     0x02
 #define TECLA_2     0x03
 #define TECLA_3     0x04
@@ -64,7 +75,7 @@ typedef struct buffer_teclado
 }buffer_t;
 typedef struct tabla_digitos
 {
-    qword tabla [LONG_TABLA];
+    dword tabla [LONG_TABLA];
     byte indice_tabla;
 
 }tabla_t;

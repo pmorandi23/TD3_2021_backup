@@ -55,30 +55,25 @@ L_IRQ01_Handler     EQU IRQ01_Handler       - VMA_ISR_TECLADO
 SECTION .teclado_and_ISR
 ;----------HANDLER IRQ TECLADO-----------------
 IRQ01_Handler:
-    ;xchg    bx, bx                              ; Breakpoint
     pushad                                      ; Guardo todos los registros  para asegurarme que no se rompa el estado actual.
     mov     dl,0x21                             ; Guardo la interrupcion en el registro DX
     xor     eax, eax
-    in      al, CTRL_PORT_8042                  ; Leo el puerto 0x64 (Keyboard Controller Status Register)
-    and     al, 0x01                            ; Hago un AND para obtener el bit 0 (Output buffer status)
-    cmp     al, 0x01                            ; Si el bit vale 1 el buffer de salida esta lleno (se puede leer)
-    jnz     end_handler_teclado                 ; Si está vacío me voy. Si hay algo, lo leo.
     ; ->Leo el puerto
     in      al, PORT_A_8042                     ; Leo el puerto 0x60 (Keyboard Output Buffer Register)
     mov     bl, al                              ; Copio lo leído en otro registro
     and     bl, 0x80                            ; Hago un AND para obtener el bit 7 (BRK)
     cmp     bl, 0x80                            ; Si el bit vale 0 la tecla fue presionada (Make), si es 1 se dejó de presionar (Break)
-    jz      end_handler_teclado                 ; Si la tecla fue presionada me voy (detecto solo cuando se suelta)
+    jz      end_handler_teclado                 ; Si se dejo de presionar, no la leo. Solo leo cuando se presionada (Make)
     push    dword memoria_buffer_reservada      ; Buffer en VMA
     push    eax                                 ; Tecla presionada.
     call determinar_tecla_presionada
     add     esp, 8
-    ;leave
 end_handler_teclado:
-    mov     al, 0x20                    ; ACK de la IRQ para el PIC 
+    ;xchg    bx, bx                              ; Breakpoint
+    mov     al, 0x20                            ; ACK de la IRQ para el PIC 
     out     0x20, al
-    popad                               ; Recupero registros
-    iret                                ; Retorno de la IRQ
+    popad                                       ; Recupero registros
+    iret                                        ; Retorno de la IRQ
 
 ;-----------HANDLERs DE EXCEPTIONS-------------
 ;#DE (Divide Error)

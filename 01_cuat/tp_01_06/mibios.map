@@ -41,44 +41,44 @@ Linker script and memory map
                 0x0000000000000196                _idtr_32
                 0x000000000000019c                __sys_tables_size = SIZEOF (.sys_tables_32)
 
-.functions      0x0000000000010000      0x2b6 load address 0x00000000ffff2000
+.functions      0x0000000000010000      0x352 load address 0x00000000ffff2000
  *(.functions_c)
- .functions_c   0x0000000000010000      0x289 ./bin/functions.elf
+ .functions_c   0x0000000000010000      0x325 ./bin/functions.elf
                 0x0000000000010000                __fast_memcpy
                 0x000000000001003c                limpiar_buffer
                 0x0000000000010086                determinar_tecla_presionada
-                0x000000000001013f                escribir_buffer
-                0x00000000000101ac                escribir_tabla_digitos
-                0x0000000000010222                leer_buffer
+                0x0000000000010147                escribir_buffer
+                0x00000000000101b4                escribir_tabla_digitos
+                0x00000000000102be                leer_buffer
  *(.functions_asm)
  .functions_asm
-                0x0000000000010289       0x2d ./bin/functions_asm.elf
-                0x0000000000010289                init_pic
-                0x00000000000002b6                __functions_size = SIZEOF (.functions)
+                0x0000000000010325       0x2d ./bin/functions_asm.elf
+                0x0000000000010325                init_pic
+                0x0000000000000352                __functions_size = SIZEOF (.functions)
 
-.handlers       0x0000000000100000       0x6d load address 0x00000000ffff4000
+.handlers       0x0000000000100000       0x65 load address 0x00000000ffff4000
  *(.teclado_and_ISR)
  .teclado_and_ISR
-                0x0000000000100000       0x6d ./bin/handlers_32.elf
+                0x0000000000100000       0x65 ./bin/handlers_32.elf
                 0x0000000100000000                L_IRQ01_Handler
-                0x000000010000002d                L_ISR00_Handler_DE
-                0x0000000100000036                L_ISR02_Handler_NMI
-                0x0000000100000039                L_ISR03_Handler_BP
-                0x000000010000003c                L_ISR04_Handler_OF
-                0x000000010000003f                L_ISR05_Handler_BR
-                0x0000000100000042                L_ISR06_Handler_UD
-                0x0000000100000048                L_ISR07_Handler_NM
-                0x000000010000004b                L_ISR08_Handler_DF
-                0x000000010000004e                L_ISR10_Handler_TS
-                0x0000000100000051                L_ISR11_Handler_NP
-                0x0000000100000054                L_ISR12_Handler_SS
-                0x0000000100000057                L_ISR13_Handler_GP
-                0x000000010000005b                L_ISR14_Handler_PF
-                0x0000000100000061                L_ISR16_Handler_MF
-                0x0000000100000064                L_ISR17_Handler_AC
-                0x0000000100000067                L_ISR18_Handler_MC
-                0x000000010000006a                L_ISR19_Handler_XM
-                0x000000000000006d                __handlers_32_size = SIZEOF (.handlers)
+                0x0000000100000025                L_ISR00_Handler_DE
+                0x000000010000002e                L_ISR02_Handler_NMI
+                0x0000000100000031                L_ISR03_Handler_BP
+                0x0000000100000034                L_ISR04_Handler_OF
+                0x0000000100000037                L_ISR05_Handler_BR
+                0x000000010000003a                L_ISR06_Handler_UD
+                0x0000000100000040                L_ISR07_Handler_NM
+                0x0000000100000043                L_ISR08_Handler_DF
+                0x0000000100000046                L_ISR10_Handler_TS
+                0x0000000100000049                L_ISR11_Handler_NP
+                0x000000010000004c                L_ISR12_Handler_SS
+                0x000000010000004f                L_ISR13_Handler_GP
+                0x0000000100000053                L_ISR14_Handler_PF
+                0x0000000100000059                L_ISR16_Handler_MF
+                0x000000010000005c                L_ISR17_Handler_AC
+                0x000000010000005f                L_ISR18_Handler_MC
+                0x0000000100000062                L_ISR19_Handler_XM
+                0x0000000000000065                __handlers_32_size = SIZEOF (.handlers)
 
 .codigo_kernel32
                 0x0000000000202000       0x1a load address 0x00000000ffff3000
