@@ -79,6 +79,7 @@ typedef struct tabla_digitos
     byte indice_tabla;
 
 }tabla_t;
+
 /* ----------------PROTOTIPOS DE FUNCION----------- */
 byte __fast_memcpy (dword*, dword *,dword);
 void determinar_tecla_presionada (byte , buffer_t*);
@@ -86,3 +87,4 @@ void limpiar_buffer (buffer_t* );
 void escribir_buffer (byte , buffer_t* );
 byte leer_buffer (buffer_t*);
 void escribir_tabla_digitos(buffer_t* , tabla_t*,byte );
+void contador_handler (dword* );

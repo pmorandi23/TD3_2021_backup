@@ -8,6 +8,7 @@ EXTERN limpiar_buffer
 GLOBAL kernel32_code_size
 GLOBAL kernel32_init
 GLOBAL memoria_buffer_reservada
+GLOBAL contador_timer
 
 kernel21_code_size EQU kernel32_end-kernel32_init
 ;---------EQU-----------------------------
@@ -20,15 +21,14 @@ kernel32_init:
     xor ebx,ebx
     xor ecx,ecx
     xor edx,edx
-
     push dword memoria_buffer_reservada
-    call limpiar_buffer ; Limpio el buffer de teclado para inicializarlo. 
+    call limpiar_buffer                     ; Limpio el buffer de teclado para inicializarlo. 
     add esp,4
 
 main:
     jmp main
 guard:
-    hlt         ; Aguardo por interrupciones / excepciones
+    hlt                                     ; Aguardo por interrupciones / excepciones
     jmp guard
 
 
@@ -38,5 +38,6 @@ kernel32_end:
 ;-------- VARIABLES DE DATOS PARA PROPOSITO GENERAL----
 SECTION .data
 
-memoria_buffer_reservada resb 19 ;Reservo para buffer[0-16] + head[17] + tail[18] + cantidad[19] 
-  
+memoria_buffer_reservada    resb 19             ;Reservo para buffer[0-16] + head[17] + tail[18] + cantidad[19] 
+
+contador_timer              resw 1              ; Contador del timer

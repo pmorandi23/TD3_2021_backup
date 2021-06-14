@@ -1,0 +1,50 @@
+     1                                  USE32
+     2                                  
+     3                                  SECTION .kernel32
+     4                                  
+     5                                  EXTERN __DATA_VMA
+     6                                  EXTERN limpiar_buffer
+     7                                  ;--------------GLOBAL----------------------
+     8                                  GLOBAL kernel32_code_size
+     9                                  GLOBAL kernel32_init
+    10                                  GLOBAL memoria_buffer_reservada
+    11                                  GLOBAL contador_timer
+    12                                  GLOBAL resultado_promedio
+    13                                  
+    14                                  kernel21_code_size EQU kernel32_end-kernel32_init
+    15                                  ;---------EQU-----------------------------
+    16                                  CANTIDAD_DATOS  EQU 10
+    17                                  LONG_BUFFER     EQU 16
+    18                                  
+    19                                  kernel32_init:
+    20                                      ;xchg bx,bx
+    21 00000000 31C0                        xor eax,eax
+    22 00000002 31DB                        xor ebx,ebx
+    23 00000004 31C9                        xor ecx,ecx
+    24 00000006 31D2                        xor edx,edx
+    25 00000008 68[00000000]                push dword memoria_buffer_reservada
+    26 0000000D E8(00000000)                call limpiar_buffer                     ; Limpio el buffer de teclado para inicializarlo. 
+    27 00000012 83C404                      add esp,4
+    28                                  
+    29                                  
+    30                                  main:
+    31 00000015 EBFE                        jmp main
+    32                                  guard:
+    33 00000017 F4                          hlt                                     ; Aguardo por interrupciones / excepciones
+    34 00000018 EBFD                        jmp guard
+    35                                  
+    36                                  
+    37                                  kernel32_end:
+    38                                      
+    39                                  
+    40                                  ;-------- VARIABLES DE DATOS PARA PROPOSITO GENERAL----
+    41                                  SECTION .data
+    42                                  
+    43 00000000 <res 00000013>          memoria_buffer_reservada    resb 19             ;Reservo para buffer[0-16] + head[17] + tail[18] + cantidad[19] 
+    43          ******************       warning: uninitialized space declared in non-BSS section `.data': zeroing
+    44                                  
+    45 00000013 <res 00000002>          contador_timer              resw 1              ; Contador del timer
+    45          ******************       warning: uninitialized space declared in non-BSS section `.data': zeroing
+    46                                  
+    47 00000015 <res 00000008>          resultado_promedio          resq 1              ; Resultado del promedio cada 500ms de los dígitos en tabla.
+    47          ******************       warning: uninitialized space declared in non-BSS section `.data': zeroing

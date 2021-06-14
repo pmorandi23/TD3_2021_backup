@@ -9,6 +9,8 @@ EXTERN __TECLADO_ISR_VMA
 EXTERN __DIGITS_TABLE_INIT
 EXTERN determinar_tecla_presionada
 EXTERN memoria_buffer_reservada
+EXTERN contador_handler
+EXTERN contador_timer
 ;----------------EXTERN--------------------
 GLOBAL L_ISR00_Handler_DE
 GLOBAL L_ISR02_Handler_NMI
@@ -27,6 +29,7 @@ GLOBAL L_ISR16_Handler_MF
 GLOBAL L_ISR17_Handler_AC
 GLOBAL L_ISR18_Handler_MC
 GLOBAL L_ISR19_Handler_XM
+GLOBAL L_IRQ00_Handler
 GLOBAL L_IRQ01_Handler
 ;----------------EQU--------------------
 VMA_ISR_TECLADO     EQU 0x00100000
@@ -49,10 +52,30 @@ L_ISR16_Handler_MF  EQU ISR16_Handler_MF    - VMA_ISR_TECLADO
 L_ISR17_Handler_AC  EQU ISR17_Handler_AC    - VMA_ISR_TECLADO 
 L_ISR18_Handler_MC  EQU ISR18_Handler_MC    - VMA_ISR_TECLADO 
 L_ISR19_Handler_XM  EQU ISR19_Handler_XM    - VMA_ISR_TECLADO 
+L_IRQ00_Handler     EQU IRQ00_Handler       - VMA_ISR_TECLADO
 L_IRQ01_Handler     EQU IRQ01_Handler       - VMA_ISR_TECLADO
 
 ;----------------SECTION-----------------------
 SECTION .teclado_and_ISR
+;------------ HANDLER IRQ TIMER---------------------
+IRQ00_Handler:
+    pushad                                      ;Salvo los registros de uso general.
+
+    ;xchg    bx, bx                              ; Breakpoint
+    ;mov eax , [contador_timer]                  ; Si lo quiero hacer en asm... pero sin resetear variable. 
+    ;inc eax
+    ;mov [contador_timer], eax
+    push    ebp
+    mov     ebp, esp 
+    push contador_timer                         
+    call contador_handler                       ; Sumo contador y lo reseteo si se va de rango en C (65535)
+    leave
+end_handler_timer:
+    mov al, 0x20                                ; ACK de la IRQ para el PIC 
+    out 0x20, al
+    popad                                       ;Recupero registros
+    iret                                        ;Retorno de la IRQ
+
 ;----------HANDLER IRQ TECLADO-----------------
 IRQ01_Handler:
     pushad                                      ; Guardo todos los registros  para asegurarme que no se rompa el estado actual.

@@ -8,27 +8,27 @@
      8                                  GLOBAL kernel32_code_size
      9                                  GLOBAL kernel32_init
     10                                  GLOBAL memoria_buffer_reservada
-    11                                  
-    12                                  kernel21_code_size EQU kernel32_end-kernel32_init
-    13                                  ;---------EQU-----------------------------
-    14                                  CANTIDAD_DATOS  EQU 10
-    15                                  LONG_BUFFER     EQU 16
-    16                                  
-    17                                  kernel32_init:
-    18                                      ;xchg bx,bx
-    19 00000000 31C0                        xor eax,eax
-    20 00000002 31DB                        xor ebx,ebx
-    21 00000004 31C9                        xor ecx,ecx
-    22 00000006 31D2                        xor edx,edx
-    23                                  
+    11                                  GLOBAL contador_timer
+    12                                  
+    13                                  kernel21_code_size EQU kernel32_end-kernel32_init
+    14                                  ;---------EQU-----------------------------
+    15                                  CANTIDAD_DATOS  EQU 10
+    16                                  LONG_BUFFER     EQU 16
+    17                                  
+    18                                  kernel32_init:
+    19                                      ;xchg bx,bx
+    20 00000000 31C0                        xor eax,eax
+    21 00000002 31DB                        xor ebx,ebx
+    22 00000004 31C9                        xor ecx,ecx
+    23 00000006 31D2                        xor edx,edx
     24 00000008 68[00000000]                push dword memoria_buffer_reservada
-    25 0000000D E8(00000000)                call limpiar_buffer ; Limpio el buffer de teclado para inicializarlo. 
+    25 0000000D E8(00000000)                call limpiar_buffer                     ; Limpio el buffer de teclado para inicializarlo. 
     26 00000012 83C404                      add esp,4
     27                                  
     28                                  main:
     29 00000015 EBFE                        jmp main
     30                                  guard:
-    31 00000017 F4                          hlt         ; Aguardo por interrupciones / excepciones
+    31 00000017 F4                          hlt                                     ; Aguardo por interrupciones / excepciones
     32 00000018 EBFD                        jmp guard
     33                                  
     34                                  
@@ -38,6 +38,8 @@
     38                                  ;-------- VARIABLES DE DATOS PARA PROPOSITO GENERAL----
     39                                  SECTION .data
     40                                  
-    41 00000000 <res 00000013>          memoria_buffer_reservada resb 19 ;Reservo para buffer[0-16] + head[17] + tail[18] + cantidad[19] 
+    41 00000000 <res 00000013>          memoria_buffer_reservada    resb 19             ;Reservo para buffer[0-16] + head[17] + tail[18] + cantidad[19] 
     41          ******************       warning: uninitialized space declared in non-BSS section `.data': zeroing
-    42                                    
+    42                                  
+    43 00000013 <res 00000002>          contador_timer              resw 1              ; Contador del timer
+    43          ******************       warning: uninitialized space declared in non-BSS section `.data': zeroing

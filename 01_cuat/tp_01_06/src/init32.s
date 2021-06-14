@@ -17,6 +17,8 @@ EXTERN __fast_memcpy_rom
 EXTERN init_pic
 EXTERN _idtr_32
 EXTERN _gdtr_32
+EXTERN init_timer
+EXTERN init_teclado
 ; Direcciones LMA
 EXTERN __KERNEL_32_LMA
 EXTERN __TECLADO_ISR_LMA
@@ -109,10 +111,14 @@ start32_launcher:
     jne     .guard
     ;-> Cargo la IDT y la GDT ya copiada en RAM
     lgdt [_gdtr_32]
-    lidt [_idtr_32]     
-    sti ; Habilitación de las Interrupciones
-    ; ->Llamo a reprogramar los pics
-    call init_pic ; Inicializo los PICs e interrupciones de Timer y Teclado
+    lidt [_idtr_32]  
+    ; -> Init PIC , IRQ y config. Timer y teclado
+    call init_teclado       ; Inicializo controlador de teclado
+    call init_timer         ;Configuro Timer tick para 100ms
+
+    call init_pic           ; Inicializo los PICs e interrupciones de Timer y Teclado
+
+    sti                     ; Habilitación de las Interrupciones
 
     jmp CS_SEL_32:kernel32_init ; Salto en memoria a la sección del núcleo
 

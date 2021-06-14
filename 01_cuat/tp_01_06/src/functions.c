@@ -131,8 +131,9 @@ void escribir_tabla_digitos(buffer_t* buffer_vma, tabla_t* tabla_digitos_vma, by
 
         tabla_digitos_vma->indice_tabla = 0;    //Reseteo índice para empezar a sobreescribir la tabla por si me guardan más de 10 
     }
+
     limpiar_buffer(buffer_vma);                 //Limpio el buffer para la próxima entrada de datos.
-    asm("xchg %bx,%bx");
+    //asm("xchg %bx,%bx");
 
     return;
     /* Escribo el numero en la tabla de dígitos de 64 bits */
@@ -146,7 +147,8 @@ byte leer_buffer (buffer_t*buffer_vma)
 
 	if(buffer_vma->cantidad > 0)	
 	{
-		lectura = buffer_vma->buffer[buffer_vma->tail];
+        /* Leo el buffer desde la primer tecla ingresada para guardarlo en orden. No uso el tail.*/
+		lectura = buffer_vma->buffer[buffer_vma->cantidad - 1];
 		buffer_vma->cantidad--;
 		buffer_vma->tail++;
 		if(buffer_vma->tail == BUFFER_MAX)
@@ -160,4 +162,19 @@ byte leer_buffer (buffer_t*buffer_vma)
 		return lectura;				//Buffer vacio
 	}
 
+}
+/* Función que cuenta las veces que interrumpe el timer y resetea el contador si se va de rango. */
+__attribute__(( section(".functions_c"))) 
+void contador_handler (dword* contador)
+{ 
+    if ( *contador > 0xFFFE)
+    { 
+        *contador = 0;
+    }
+    else
+    { 
+        *contador = *contador + 1;
+    }
+
+    return;
 }
