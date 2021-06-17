@@ -1,0 +1,158 @@
+     1                                  USE32
+     2                                  
+     3                                  SECTION .start32
+     4                                  
+     5                                  %include "inc/processor-flags.h" 
+     1                              <1> %define X86_CR0_PE      0x00000001 ;/* Protectede mode enable*/
+     2                              <1> %define X86_CR0_MP      0x00000002 ;/* Monitor coProcessor*/
+     3                              <1> %define X86_CR0_EM      0x00000004 ;/* Emulation*/
+     4                              <1> %define X86_CR0_TS      0x00000008 ;/* Task Switched*/
+     5                              <1> %define X86_CR0_ET      0x00000010 ;/* Extension Type*/
+     6                              <1> %define X86_CR0_NE      0x00000020 ;/* Numeric Error*/
+     7                              <1> %define X86_CR0_WP      0x00010000 ;/* Write Protect*/
+     8                              <1> %define X86_CR0_AM      0x00040000 ;/* Alignment Mask*/
+     9                              <1> %define X86_CR0_NW      0x20000000 ;/* Not Write-through*/
+    10                              <1> %define X86_CR0_CD      0x40000000 ;/* Cache Disable*/
+    11                              <1> %define X86_CR0_PG      0x80000000 ;/* PaGine*/
+     6                                  
+     7                                  ; Selectores de segmento
+     8                                  EXTERN CS_SEL_32
+     9                                  EXTERN DS_SEL_32_prim
+    10                                  ; Stack 32 bits
+    11                                  EXTERN __STACK_END_32
+    12                                  EXTERN __STACK_SIZE_32
+    13                                  ; Etiquetas externas
+    14                                  EXTERN kernel32_init
+    15                                  EXTERN __fast_memcpy
+    16                                  EXTERN __fast_memcpy_rom
+    17                                  EXTERN init_pic
+    18                                  EXTERN _idtr_32
+    19                                  EXTERN _gdtr_32
+    20                                  EXTERN init_timer
+    21                                  EXTERN init_teclado
+    22                                  ; Direcciones LMA
+    23                                  EXTERN __KERNEL_32_LMA
+    24                                  EXTERN __TECLADO_ISR_LMA
+    25                                  EXTERN __FUNCTIONS_LMA
+    26                                  EXTERN __SYS_TABLES_LMA
+    27                                  EXTERN __DATA_LMA
+    28                                  EXTERN __TAREA_1_LMA
+    29                                  ; Direcciones VMA
+    30                                  EXTERN __KERNEL_32_VMA
+    31                                  EXTERN __FUNCTIONS_VMA
+    32                                  EXTERN __TECLADO_ISR_VMA
+    33                                  EXTERN __SYS_TABLES_VMA
+    34                                  EXTERN __DATA_VMA
+    35                                  EXTERN __TAREA_1_VMA
+    36                                  ; Tamaños de códigos
+    37                                  EXTERN __codigo_kernel32_size
+    38                                  EXTERN __functions_size
+    39                                  EXTERN __handlers_32_size
+    40                                  EXTERN __sys_tables_size
+    41                                  EXTERN __data_size
+    42                                  EXTERN __codigo_tarea_01_size
+    43                                  ; Etiquetas globales
+    44                                  GLOBAL start32_launcher
+    45                                  
+    46                                  start32_launcher:
+    47                                      ;xchg    bx, bx ; Breakpoint. Estoy en 32 bits
+    48                                      ; -> Inicializar los selectores de datos
+    49 00000000 66B8[0000]                  mov     ax, DS_SEL_32_prim ; Selector de la GDT de datos de 32 bits FLAT. Ahora puedo acceder a todos los datos de toda la memoria.
+    50 00000004 8ED8                        mov     ds, ax
+    51 00000006 8EC0                        mov     es, ax
+    52 00000008 8EE8                        mov     gs, ax
+    53 0000000A 8EE0                        mov     fs, ax
+    54                                      ; -> Inicializar la pila en 32 bits
+    55 0000000C 8ED0                        mov     ss, ax
+    56 0000000E BC[00000000]                mov     esp, __STACK_END_32
+    57 00000013 31C0                        xor     eax, eax
+    58                                      ; -> Limpio la pila
+    59 00000015 B9[00000000]                mov     ecx, __STACK_SIZE_32 ; Cargo el tamaño del stack en el registro counter.
+    60                                  .stack_init:
+    61 0000001A 50                          push    eax ; Pusheo ceros en el stack.
+    62 0000001B E2FD                        loop    .stack_init
+    63 0000001D BC[00000000]                mov     esp, __STACK_END_32 ; Lo apunto al final
+    64                                      ; -> Desempaquetamiento de la ROM (copia de las funciones a RAM)
+    65 00000022 55                          push    ebp
+    66 00000023 89E5                        mov     ebp, esp ; Genero el STACK FRAME
+    67                                      ; -> Paso argumentos y llamo memcopy 
+    68 00000025 68[00000000]                push    __functions_size
+    69 0000002A 68[00000000]                push    __FUNCTIONS_VMA
+    70 0000002F 68[00000000]                push    __FUNCTIONS_LMA
+    71 00000034 E8(00000000)                call    __fast_memcpy_rom
+    72 00000039 C9                          leave
+    73 0000003A 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+    74 0000003D 0F85BA000000                jne     .guard
+    75                                      ; -> Desempaquetamiento de la ROM (copia del kernel a RAM)
+    76 00000043 55                          push    ebp
+    77 00000044 89E5                        mov     ebp, esp 
+    78 00000046 68[00000000]                push    __codigo_kernel32_size
+    79 0000004B 68[00000000]                push    __KERNEL_32_VMA
+    80 00000050 68[00000000]                push    __KERNEL_32_LMA
+    81 00000055 E8(00000000)                call    __fast_memcpy
+    82 0000005A C9                          leave
+    83 0000005B 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+    84 0000005E 0F8599000000                jne     .guard
+    85                                      ; -> Desempaquetamiento de la ROM (copia de los handlers Teclado + ISR a RAM)
+    86 00000064 55                          push    ebp
+    87 00000065 89E5                        mov     ebp, esp 
+    88 00000067 68[00000000]                push    __handlers_32_size
+    89 0000006C 68[00000000]                push    __TECLADO_ISR_VMA
+    90 00000071 68[00000000]                push    __TECLADO_ISR_LMA
+    91 00000076 E8(00000000)                call    __fast_memcpy
+    92 0000007B C9                          leave
+    93 0000007C 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+    94 0000007F 757C                        jne     .guard
+    95                                      ; -> Desempaquetamiento de la ROM (copia de datos de ROM a RAM)
+    96 00000081 55                          push    ebp
+    97 00000082 89E5                        mov     ebp, esp 
+    98 00000084 68[00000000]                push    __data_size
+    99 00000089 68[00000000]                push    __DATA_VMA
+   100 0000008E 68[00000000]                push    __DATA_LMA
+   101 00000093 E8(00000000)                call    __fast_memcpy
+   102 00000098 C9                          leave
+   103 00000099 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+   104 0000009C 755F                        jne     .guard
+   105                                      ; -> Desempaquetamiento de la ROM (copia de las tablas de sistema (GDT e IDT) a RAM)
+   106 0000009E 55                          push    ebp
+   107 0000009F 89E5                        mov     ebp, esp 
+   108 000000A1 68[00000000]                push    __sys_tables_size
+   109 000000A6 68[00000000]                push    __TAREA_1_VMA
+   110 000000AB 68[00000000]                push    __TAREA_1_LMA
+   111 000000B0 E8(00000000)                call    __fast_memcpy
+   112 000000B5 C9                          leave
+   113 000000B6 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+   114 000000B9 7542                        jne     .guard
+   115                                  
+   116                                    ; -> Desempaquetamiento de la ROM (copia del código de la tarea 1 a RAM)
+   117 000000BB 55                          push    ebp
+   118 000000BC 89E5                        mov     ebp, esp 
+   119 000000BE 68[00000000]                push    __codigo_tarea_01_size
+   120 000000C3 68[00000000]                push    __SYS_TABLES_VMA
+   121 000000C8 68[00000000]                push    __SYS_TABLES_LMA
+   122 000000CD E8(00000000)                call    __fast_memcpy
+   123 000000D2 C9                          leave
+   124 000000D3 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+   125 000000D6 7525                        jne     .guard
+   126                                  
+   127                                  
+   128                                      ;-> Cargo la IDT y la GDT ya copiada en RAM
+   129 000000D8 0F0115[00000000]            lgdt [_gdtr_32]
+   130 000000DF 0F011D[00000000]            lidt [_idtr_32]  
+   131                                      ; -> Init PIC , IRQ y config. Timer y teclado
+   132 000000E6 E8(00000000)                call init_teclado       ; Inicializo controlador de teclado
+   133 000000EB E8(00000000)                call init_timer         ;Configuro Timer tick para 100ms
+   134                                  
+   135 000000F0 E8(00000000)                call init_pic           ; Inicializo los PICs e interrupciones de Timer y Teclado
+   136                                  
+   137 000000F5 FB                          sti                     ; Habilitación de las Interrupciones
+   138                                  
+   139 000000F6 EA[00000000][0000]          jmp CS_SEL_32:kernel32_init ; Salto en memoria a la sección del núcleo
+   140                                  
+   141                                  .guard:
+   142 000000FD F4                          hlt
+   143 000000FE EBFD                        jmp .guard
+   144                                  
+   145                                  
+   146                                  
+   147                                  
