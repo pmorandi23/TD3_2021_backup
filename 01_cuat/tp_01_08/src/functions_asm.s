@@ -1,4 +1,4 @@
-SECTION .functions_asm
+SECTION .functions_asm_rom
 ;---------------INCLUDES-----------------
 %include "inc/functions_asm.h"
 ;---------------EXTERN-------------------

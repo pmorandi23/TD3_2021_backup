@@ -27,23 +27,38 @@ EXTERN __KERNEL_32_LMA
 EXTERN __TECLADO_ISR_LMA
 EXTERN __FUNCTIONS_LMA
 EXTERN __SYS_TABLES_LMA
-EXTERN __DATA_LMA
-EXTERN __TAREA_1_LMA
+EXTERN __DATOS_SYS32_LMA
+EXTERN __TAREA1_BSS_LMA
+EXTERN __TAREA1_DATA_LMA
+EXTERN __TAREA1_TEXT_LMA
+EXTERN __TAREA1_RODATA_LMA
 ; Direcciones VMA
+EXTERN __DIGITS_TABLE
+EXTERN __TAREA1_BSS_VMA
+EXTERN __TAREA1_DATA_VMA
+EXTERN __TAREA1_TEXT_VMA
+EXTERN __TAREA1_RODATA_VMA
+EXTERN __STACK_START_32
+EXTERN __TAREA1_STACK_START
+EXTERN __INIT_32_VMA
 EXTERN __KERNEL_32_VMA
 EXTERN __FUNCTIONS_VMA
 EXTERN __TECLADO_ISR_VMA
 EXTERN __SYS_TABLES_VMA
-EXTERN __DATA_VMA
+EXTERN __DATOS_SYS32_VMA
 EXTERN __TAREA_1_VMA
 EXTERN __PAGE_TABLES_VMA
+EXTERN __VGA_VMA
 ; Tamaños de códigos
 EXTERN __codigo_kernel32_size
 EXTERN __functions_size
 EXTERN __handlers_32_size
 EXTERN __sys_tables_size
 EXTERN __data_size
-EXTERN __codigo_tarea_01_size
+EXTERN __tarea_01_size
+EXTERN __tarea_1_bss_size
+EXTERN __tarea_1_data_size
+EXTERN __tarea_1_rodata_size
 ; Etiquetas globales
 GLOBAL start32_launcher
 
@@ -100,8 +115,8 @@ start32_launcher:
     push    ebp
     mov     ebp, esp 
     push    __data_size
-    push    __DATA_VMA
-    push    __DATA_LMA
+    push    __DATOS_SYS32_VMA
+    push    __DATOS_SYS32_LMA
     call    __fast_memcpy
     leave
     cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
@@ -110,26 +125,57 @@ start32_launcher:
     push    ebp
     mov     ebp, esp 
     push    __sys_tables_size
-    push    __TAREA_1_VMA
-    push    __TAREA_1_LMA
-    call    __fast_memcpy
-    leave
-    cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
-    jne     .guard
-
-  ; -> Desempaquetamiento de la ROM (copia del código de la tarea 1 a RAM)
-    push    ebp
-    mov     ebp, esp 
-    push    __codigo_tarea_01_size
     push    __SYS_TABLES_VMA
     push    __SYS_TABLES_LMA
     call    __fast_memcpy
     leave
     cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
     jne     .guard
+  ; -> Desempaquetamiento de la ROM (copia del .text de la TAREA_1 a RAM)
+    push    ebp
+    mov     ebp, esp 
+    push    __tarea_01_size
+    push    __TAREA1_TEXT_VMA
+    push    __TAREA1_TEXT_LMA
+    call    __fast_memcpy
+    leave
+    cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+    jne     .guard
+ ; -> Desempaquetamiento de la ROM (copia del .bss de la TAREA _1 a RAM)
+    push    ebp
+    mov     ebp, esp 
+    push    __tarea_1_bss_size
+    push    __TAREA1_BSS_VMA
+    push    __TAREA1_BSS_LMA
+    call    __fast_memcpy
+    leave
+    cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+    jne     .guard
+   ; -> Desempaquetamiento de la ROM (copia del .data de la TAREA _1 a RAM)
+    push    ebp
+    mov     ebp, esp 
+    push    __tarea_1_data_size
+    push    __TAREA1_DATA_VMA
+    push    __TAREA1_DATA_LMA
+    call    __fast_memcpy
+    leave
+    cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+    jne     .guard
+    ; -> Desempaquetamiento de la ROM (copia del .rodata de la TAREA _1 a RAM)
+    push    ebp
+    mov     ebp, esp 
+    push    __tarea_1_rodata_size
+    push    __TAREA1_RODATA_VMA
+    push    __TAREA1_RODATA_LMA
+    call    __fast_memcpy
+    leave
+    cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+    jne     .guard
+
     ;-> Cargo la IDT y la GDT ya copiada en RAM
     lgdt [_gdtr_32]
     lidt [_idtr_32]  
+
     ; -> Init PIC , IRQ y config. Timer y teclado
     call init_teclado       ; Inicializo controlador de teclado
     call init_timer         ;Configuro Timer tick para 100ms
@@ -138,12 +184,14 @@ start32_launcher:
 
     ;;;;;;;;;;;;; PAGINACIÓN;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+    ;xchg    bx, bx
+
     ; -> Inicializo CR3 con la dirección base de la DPT (Directorio de Tablas de Página).
     push    ebp
     mov     ebp, esp
     push    PAG_PWT_YES
     push    PAG_PCD_YES
-    push    (dword)__PAGE_TABLES_VMA
+    push    dword __PAGE_TABLES_VMA
     call    set_cr3
     mov     cr3, eax
     leave
@@ -229,6 +277,7 @@ start32_launcher:
     push    dword(__PAGE_TABLES_VMA)            ; Base del DTP.
     call    set_dir_page_table_entry
     leave
+
 
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ;;;;;;;;;;;;;;;; MAPEO DE LAS ENTRIES DE LAS TABLAS DE PAGINAS (PT o TP);;;;;;;;;;;;;;;;;;;;;
@@ -334,7 +383,7 @@ start32_launcher:
     push PAG_D
     push PAG_PAT
     push PAG_G_YES
-    push dword(__PT_TECLADO_ISR)
+    push dword(__TECLADO_ISR_VMA)
     push 0x100
     push dword(__PAGE_TABLES_VMA+0x1000)
     call set_page_table_entry 
@@ -342,7 +391,7 @@ start32_launcher:
 
     ;-----------------------------------------------------------------
     ;6° Pagina de 4K - Datos 0x0020-0000 a 0x0020-0FFF
-    ; Indice en la TP = 0x200 (bits 21-12 de __DATA_VMA = 0x00200000)
+    ; Indice en la TP = 0x200 (bits 21-12 de __DATOS_SYS32_VMA = 0x00200000)
     ;-----------------------------------------------------------------
     push    ebp
     mov     ebp, esp
@@ -355,7 +404,7 @@ start32_launcher:
     push PAG_D
     push PAG_PAT
     push PAG_G_YES
-    push dword(__DATA_VMA)
+    push dword(__DATOS_SYS32_VMA)
     push 0x200
     push dword(__PAGE_TABLES_VMA+0x1000)
     call set_page_table_entry 
@@ -540,8 +589,8 @@ start32_launcher:
                           ;----------------------------
                           ;PAGINACION DE LA ROM DE 64 KB;
     ;-----------------------------------------------------------------
-    ;15° Pagina de 4K - Stack de TAREA 01 0x1FFF-F000 a 0x1FFF-FFFF
-    ; Indice en la TP = 0x3FB (bits 21-12 de __INIT_32_VMA = 0xFFFFB000)
+    ;15° Pagina de 4K - Stack de INIT_32_VMA 
+    ; Indice en la TP = 0x3F9 (bits 21-12 de __INIT_32_VMA = 0xFFFF938E que sale del .map)
     ;-----------------------------------------------------------------
     push    ebp
     mov     ebp, esp
@@ -555,16 +604,19 @@ start32_launcher:
     push PAG_PAT
     push PAG_G_YES
     push dword(__INIT_32_VMA)
-    push 0x3FB
+    push 0x3F9
     push dword(__PAGE_TABLES_VMA+0x1000+(0x1000*0x3FF))
     call set_page_table_entry 
     leave
+
+    ;xchg    bx, bx
 
     ; -> Habilito la paginación
     mov   eax, cr0 
     or    eax, X86_CR0_PG
     mov   cr0, eax
 
+    ;bx_dbg_read_linear: physical address not available for linear
 
     jmp CS_SEL_32:kernel32_init ; Salto en memoria a la sección del núcleo
 

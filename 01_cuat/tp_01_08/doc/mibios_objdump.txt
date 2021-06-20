@@ -6,66 +6,77 @@ EXEC_P, HAS_SYMS, D_PAGED
 start address 0xfffffff0
 
 Program Header:
-    LOAD off    0x00001000 vaddr 0xffff0000 paddr 0xffff0000 align 2**12
-         filesz 0x00000069 memsz 0x00000069 flags r--
-    LOAD off    0x00002000 vaddr 0x00210000 paddr 0xffff1000 align 2**12
-         filesz 0x00000054 memsz 0x00000054 flags rw-
-    LOAD off    0x00003000 vaddr 0x00050000 paddr 0xffff2000 align 2**12
-         filesz 0x00000666 memsz 0x00000666 flags r-x
-    LOAD off    0x00004000 vaddr 0x00202000 paddr 0xffff3000 align 2**12
-         filesz 0x0000001a memsz 0x0000001a flags r--
-    LOAD off    0x00005000 vaddr 0x00100000 paddr 0xffff4000 align 2**12
-         filesz 0x00000084 memsz 0x00000084 flags r--
-    LOAD off    0x00006000 vaddr 0xffff5000 paddr 0xffff5000 align 2**12
-         filesz 0x00001322 memsz 0x00001322 flags r--
-    LOAD off    0x00008000 vaddr 0x00300000 paddr 0xffff6500 align 2**12
-         filesz 0x000000ef memsz 0x000000ef flags r-x
-    LOAD off    0x00008800 vaddr 0xfffff800 paddr 0xfffff800 align 2**12
-         filesz 0x0000043c memsz 0x0000043c flags r-x
-    LOAD off    0x00009000 vaddr 0x00000000 paddr 0xfffffd00 align 2**12
+    LOAD off    0x00001000 vaddr 0x00000000 paddr 0xffff0000 align 2**12
          filesz 0x0000019c memsz 0x0000019c flags r--
-    LOAD off    0x00009ff0 vaddr 0xfffffff0 paddr 0xfffffff0 align 2**12
+    LOAD off    0x00002000 vaddr 0x00050000 paddr 0xffff019c align 2**12
+         filesz 0x00000875 memsz 0x00000875 flags rwx
+    LOAD off    0x00003000 vaddr 0x00100000 paddr 0xffff0a11 align 2**12
+         filesz 0x000000a6 memsz 0x000000a6 flags r--
+    LOAD off    0x00004000 vaddr 0x00200000 paddr 0xffff0ab7 align 2**12
+         filesz 0x0000003a memsz 0x0000003a flags rw-
+    LOAD off    0x00005000 vaddr 0x00220000 paddr 0xffff0af1 align 2**12
+         filesz 0x00000029 memsz 0x00000029 flags r--
+    LOAD off    0x00006000 vaddr 0x00310000 paddr 0xffff0b1a align 2**12
+         filesz 0x0000035d memsz 0x0000035d flags r-x
+    LOAD off    0x00007000 vaddr 0x00320000 paddr 0xffff0e77 align 2**12
+         filesz 0x00000000 memsz 0x00000030 flags rw-
+    LOAD off    0x00007000 vaddr 0x00330000 paddr 0xffff0ea7 align 2**12
+         filesz 0x00000001 memsz 0x00000001 flags rw-
+    LOAD off    0x00008000 vaddr 0x00340000 paddr 0xffff0ea8 align 2**12
+         filesz 0x00000024 memsz 0x00000024 flags r--
+    LOAD off    0x00009000 vaddr 0xffff8000 paddr 0xffff8000 align 2**12
+         filesz 0x00001897 memsz 0x00001897 flags rwx
+    LOAD off    0x0000aff0 vaddr 0xfffffff0 paddr 0xfffffff0 align 2**12
          filesz 0x00000010 memsz 0x00000010 flags r--
    STACK off    0x00000000 vaddr 0x00000000 paddr 0x00000000 align 2**4
          filesz 0x00000000 memsz 0x00000000 flags rwx
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .sys_tables_32 0000019c  00000000  fffffd00  00009000  2**0
+  0 .sys_tables_32 0000019c  00000000  ffff0000  00001000  2**0
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  1 .functions    00000666  00050000  ffff2000  00003000  2**0
-                  CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .handlers     00000084  00100000  ffff4000  00005000  2**0
+  1 .functions    00000875  00050000  ffff019c  00002000  2**2
+                  CONTENTS, ALLOC, LOAD, CODE
+  2 .handlers_ISR 000000a6  00100000  ffff0a11  00003000  2**0
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  3 .codigo_kernel32 0000001a  00202000  ffff3000  00004000  2**0
-                  CONTENTS, ALLOC, LOAD, READONLY, DATA
-  4 .data         00000054  00210000  ffff1000  00002000  2**3
+  3 .datos_sys32  0000003a  00200000  ffff0ab7  00004000  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  5 .tarea_1      000000ef  00300000  ffff6500  00008000  2**0
+  4 .codigo_kernel32 00000029  00220000  ffff0af1  00005000  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  5 .tarea_1_text 0000035d  00310000  ffff0b1a  00006000  2**0
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  6 .video_init   00001322  ffff5000  ffff5000  00006000  2**0
+  6 .tarea_1_bss  00000030  00320000  ffff0e77  00007000  2**3
+                  ALLOC
+  7 .tarea_1_data 00000001  00330000  ffff0ea7  00007000  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  8 .tarea_1_rodata 00000024  00340000  ffff0ea8  00008000  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  7 .codigo_init16 00000069  ffff0000  ffff0000  00001000  2**0
+  9 .codigo_init16 00000069  ffff8000  ffff8000  00009000  2**0
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  8 .codigo_init32 00000100  fffff800  fffff800  00008800  2**0
+ 10 .video_init   00001322  ffff8069  ffff8069  00009069  2**0
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  9 .functions_rom 0000003c  fffffc00  fffffc00  00008c00  2**0
-                  CONTENTS, ALLOC, LOAD, READONLY, CODE
- 10 .codigo_reset 00000010  fffffff0  fffffff0  00009ff0  2**4
+ 11 .codigo_init32 0000046c  ffff938b  ffff938b  0000a38b  2**0
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
- 11 .comment      00000029  00000000  00000000  0000a000  2**0
+ 12 .functions_rom 000000a0  ffff97f7  ffff97f7  0000a7f7  2**0
+                  CONTENTS, ALLOC, LOAD, CODE
+ 13 .codigo_reset 00000010  fffffff0  fffffff0  0000aff0  2**4
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+ 14 .comment      00000029  00000000  00000000  0000b000  2**0
                   CONTENTS, READONLY
 SYMBOL TABLE:
 00000000 l    d  .sys_tables_32	00000000 .sys_tables_32
 00050000 l    d  .functions	00000000 .functions
-00100000 l    d  .handlers	00000000 .handlers
-00202000 l    d  .codigo_kernel32	00000000 .codigo_kernel32
-00210000 l    d  .data	00000000 .data
-00300000 l    d  .tarea_1	00000000 .tarea_1
-ffff5000 l    d  .video_init	00000000 .video_init
-ffff0000 l    d  .codigo_init16	00000000 .codigo_init16
-fffff800 l    d  .codigo_init32	00000000 .codigo_init32
-fffffc00 l    d  .functions_rom	00000000 .functions_rom
+00100000 l    d  .handlers_ISR	00000000 .handlers_ISR
+00200000 l    d  .datos_sys32	00000000 .datos_sys32
+00220000 l    d  .codigo_kernel32	00000000 .codigo_kernel32
+00310000 l    d  .tarea_1_text	00000000 .tarea_1_text
+00320000 l    d  .tarea_1_bss	00000000 .tarea_1_bss
+00330000 l    d  .tarea_1_data	00000000 .tarea_1_data
+00340000 l    d  .tarea_1_rodata	00000000 .tarea_1_rodata
+ffff8000 l    d  .codigo_init16	00000000 .codigo_init16
+ffff8069 l    d  .video_init	00000000 .video_init
+ffff938b l    d  .codigo_init32	00000000 .codigo_init32
+ffff97f7 l    d  .functions_rom	00000000 .functions_rom
 fffffff0 l    d  .codigo_reset	00000000 .codigo_reset
 00000000 l    d  .comment	00000000 .comment
 00000000 l    df *ABS*	00000000 src/sys_tables.s
@@ -100,175 +111,236 @@ fffffff0 l    d  .codigo_reset	00000000 .codigo_reset
 00000110 l       *ABS*	00000000 ISR34to46_idt
 00000178 l       *ABS*	00000000 IDT_LENGTH
 00000000 l    df *ABS*	00000000 functions.c
-00210020 l     O .data	00000004 i.1472
-00210024 l     O .data	00000004 i.1491
-00210028 l     O .data	00000008 a64.1513
-00210030 l     O .data	00000008 b64.1514
-00210038 l     O .data	00000008 r64aux.1515
-00210040 l     O .data	00000008 a64aux.1516
-00210048 l     O .data	00000001 i.1512
-0021004c l     O .data	00000004 i.1523
-00210050 l     O .data	00000004 pos_caracter.1531
-00000000 l    df *ABS*	00000000 src/functions_asm.s
-0005064e l       .functions	00000000 ciclo1
-0005065d l       .functions	00000000 ciclo2
+000507c8 l     O .functions	00000004 i.1510
+000507cc l     O .functions	00000004 i.1529
+000507d0 l     O .functions	00000004 pos_msg.1588
+000507d4 l     O .functions	00000004 pos_msg.1597
 00000000 l    df *ABS*	00000000 src/handlers_32.s
 00100000 l       *ABS*	00000000 VMA_ISR_TECLADO
-0000004a l       .handlers	00000000 L_ISR01_Handler_DB
-00100000 l       .handlers	00000000 IRQ00_Handler
-00100019 l       .handlers	00000000 end_handler_timer
-0010001f l       .handlers	00000000 IRQ01_Handler
-0010003e l       .handlers	00000000 end_handler_teclado
-00100044 l       .handlers	00000000 ISR00_Handler_DE
-0010004a l       .handlers	00000000 ISR01_Handler_DB
-0010004d l       .handlers	00000000 ISR02_Handler_NMI
-00100050 l       .handlers	00000000 ISR03_Handler_BP
-00100053 l       .handlers	00000000 ISR04_Handler_OF
-00100056 l       .handlers	00000000 ISR05_Handler_BR
-00100059 l       .handlers	00000000 ISR06_Handler_UD
-0010005f l       .handlers	00000000 ISR07_Handler_NM
-00100062 l       .handlers	00000000 ISR08_Handler_DF
-00100065 l       .handlers	00000000 ISR10_Handler_TS
-00100068 l       .handlers	00000000 ISR11_Handler_NP
-0010006b l       .handlers	00000000 ISR12_Handler_SS
-0010006e l       .handlers	00000000 ISR13_Handler_GP
-00100072 l       .handlers	00000000 ISR14_Handler_PF
-00100075 l       .handlers	00000000 ISR15_Handler_RES
-00100078 l       .handlers	00000000 ISR16_Handler_MF
-0010007b l       .handlers	00000000 ISR17_Handler_AC
-0010007e l       .handlers	00000000 ISR18_Handler_MC
-00100081 l       .handlers	00000000 ISR19_Handler_XM
+0000004a l       .handlers_ISR	00000000 L_ISR01_Handler_DB
+00100000 l       .handlers_ISR	00000000 IRQ00_Handler
+00100019 l       .handlers_ISR	00000000 end_handler_timer
+0010001f l       .handlers_ISR	00000000 IRQ01_Handler
+0010003e l       .handlers_ISR	00000000 end_handler_teclado
+00100044 l       .handlers_ISR	00000000 ISR00_Handler_DE
+0010004a l       .handlers_ISR	00000000 ISR01_Handler_DB
+0010004d l       .handlers_ISR	00000000 ISR02_Handler_NMI
+00100050 l       .handlers_ISR	00000000 ISR03_Handler_BP
+00100053 l       .handlers_ISR	00000000 ISR04_Handler_OF
+00100056 l       .handlers_ISR	00000000 ISR05_Handler_BR
+00100059 l       .handlers_ISR	00000000 ISR06_Handler_UD
+0010005f l       .handlers_ISR	00000000 ISR07_Handler_NM
+00100062 l       .handlers_ISR	00000000 ISR08_Handler_DF
+00100065 l       .handlers_ISR	00000000 ISR10_Handler_TS
+00100068 l       .handlers_ISR	00000000 ISR11_Handler_NP
+0010006b l       .handlers_ISR	00000000 ISR12_Handler_SS
+0010006e l       .handlers_ISR	00000000 ISR13_Handler_GP
+00100071 l       .handlers_ISR	00000000 ISR14_Handler_PF
+00100097 l       .handlers_ISR	00000000 ISR15_Handler_RES
+0010009a l       .handlers_ISR	00000000 ISR16_Handler_MF
+0010009d l       .handlers_ISR	00000000 ISR17_Handler_AC
+001000a0 l       .handlers_ISR	00000000 ISR18_Handler_MC
+001000a3 l       .handlers_ISR	00000000 ISR19_Handler_XM
 00000000 l    df *ABS*	00000000 src/main.s
-0000001a l       *ABS*	00000000 kernel21_code_size
+00000029 l       *ABS*	00000000 kernel21_code_size
 0000000a l       *ABS*	00000000 CANTIDAD_DATOS
 00000010 l       *ABS*	00000000 LONG_BUFFER
-00202015 l       .codigo_kernel32	00000000 main
-00202017 l       .codigo_kernel32	00000000 guard
-0020201a l       .codigo_kernel32	00000000 kernel32_end
-00000000 l    df *ABS*	00000000 functions_rom.c
-00000000 l    df *ABS*	00000000 src/init_screen.s
-ffff5000 l       .video_init	00000000 seq_regs_data
-ffff5005 l       .video_init	00000000 crtc_regs_data
-ffff501e l       .video_init	00000000 graphics_regs_data
-ffff5027 l       .video_init	00000000 attrcon_regs_data
-ffff503c l       .video_init	00000000 palette_data
-ffff50fc l       .video_init	00000000 font16x8
-ffff60fc l       .video_init	00000000 recorrer_bus_pci
-ffff610e l       .video_init	00000000 ciclo_recorrer_bus_pci
-ffff613a l       .video_init	00000000 dispositivo_hallado
-ffff6158 l       .video_init	00000000 procesar_funcion
-ffff6170 l       .video_init	00000000 ir_a_siguiente_funcion
-ffff6193 l       .video_init	00000000 funcion_hallada
-ffff61c3 l       .video_init	00000000 ciclo_llenar_BAR
-ffff6210 l       .video_init	00000000 mapeado_en_memoria
-ffff6232 l       .video_init	00000000 ajustar_BAR
-ffff623c l       .video_init	00000000 ajustar_siguiente_BAR
-ffff6249 l       .video_init	00000000 fin_recorrido_pci
-ffff6249 l       .video_init	00000000 habilitar_modo_texto
-ffff625b l       .video_init	00000000 seq_regs_loop
-ffff6278 l       .video_init	00000000 crtc_regs_loop
-ffff6289 l       .video_init	00000000 inicializar_paleta
-ffff628e l       .video_init	00000000 inicializar_paleta_loop
-ffff62aa l       .video_init	00000000 graphics_regs_loop
-ffff62c4 l       .video_init	00000000 attrcon_regs_loop
-ffff62fb l       .video_init	00000000 ciclo_copia_fonts
+00220024 l       .codigo_kernel32	00000000 main
+00220026 l       .codigo_kernel32	00000000 guard
+00220029 l       .codigo_kernel32	00000000 kernel32_end
+00200000 l       .datos_sys32	00000000 variables_globales
+00200025 l       .datos_sys32	00000000 mensajes_error
+00000000 l    df *ABS*	00000000 tarea_1.c
+00320000 l     O .tarea_1_bss	00000004 pos_caracter.1509
+00320008 l     O .tarea_1_bss	00000008 a64.1520
+00320010 l     O .tarea_1_bss	00000008 b64.1521
+00320018 l     O .tarea_1_bss	00000008 r64aux.1522
+00320020 l     O .tarea_1_bss	00000008 a64aux.1523
+00320028 l     O .tarea_1_bss	00000001 i.1519
+0032002c l     O .tarea_1_bss	00000004 i.1530
 00000000 l    df *ABS*	00000000 src/init16.s
-ffff0042 l       .codigo_init16	00000000 fault_end
-ffff0043 l       .codigo_init16	00000000 GDT
+00000001 l       *ABS*	00000000 PAG_PCD_YES
+00000000 l       *ABS*	00000000 PAG_PCD_NO
+00000001 l       *ABS*	00000000 PAG_PWT_YES
+00000000 l       *ABS*	00000000 PAG_PWT_NO
+00000001 l       *ABS*	00000000 PAG_P_YES
+00000000 l       *ABS*	00000000 PAG_P_NO
+00000001 l       *ABS*	00000000 PAG_RW_W
+00000000 l       *ABS*	00000000 PAG_RW_R
+00000000 l       *ABS*	00000000 PAG_US_SUP
+00000001 l       *ABS*	00000000 PAG_US_US
+00000000 l       *ABS*	00000000 PAG_D
+00000000 l       *ABS*	00000000 PAG_PAT
+00000000 l       *ABS*	00000000 PAG_G_YES
+00000000 l       *ABS*	00000000 PAG_A
+00000000 l       *ABS*	00000000 PAG_PS_4K
+ffff8042 l       .codigo_init16	00000000 fault_end
+ffff8043 l       .codigo_init16	00000000 GDT
 00000000 l       *ABS*	00000000 NULL_SEL_16
 00000008 l       *ABS*	00000000 CS_SEL_16
 00000010 l       *ABS*	00000000 CS_SEL_32_prim
 00000020 l       *ABS*	00000000 GDT_LENGTH
-ffff0063 l       .codigo_init16	00000000 gdtr_16
+ffff8063 l       .codigo_init16	00000000 gdtr_16
+00000000 l    df *ABS*	00000000 src/init_screen.s
+ffff8069 l       .video_init	00000000 seq_regs_data
+ffff806e l       .video_init	00000000 crtc_regs_data
+ffff8087 l       .video_init	00000000 graphics_regs_data
+ffff8090 l       .video_init	00000000 attrcon_regs_data
+ffff80a5 l       .video_init	00000000 palette_data
+ffff8165 l       .video_init	00000000 font16x8
+ffff9165 l       .video_init	00000000 recorrer_bus_pci
+ffff9177 l       .video_init	00000000 ciclo_recorrer_bus_pci
+ffff91a3 l       .video_init	00000000 dispositivo_hallado
+ffff91c1 l       .video_init	00000000 procesar_funcion
+ffff91d9 l       .video_init	00000000 ir_a_siguiente_funcion
+ffff91fc l       .video_init	00000000 funcion_hallada
+ffff922c l       .video_init	00000000 ciclo_llenar_BAR
+ffff9279 l       .video_init	00000000 mapeado_en_memoria
+ffff929b l       .video_init	00000000 ajustar_BAR
+ffff92a5 l       .video_init	00000000 ajustar_siguiente_BAR
+ffff92b2 l       .video_init	00000000 fin_recorrido_pci
+ffff92b2 l       .video_init	00000000 habilitar_modo_texto
+ffff92c4 l       .video_init	00000000 seq_regs_loop
+ffff92e1 l       .video_init	00000000 crtc_regs_loop
+ffff92f2 l       .video_init	00000000 inicializar_paleta
+ffff92f7 l       .video_init	00000000 inicializar_paleta_loop
+ffff9313 l       .video_init	00000000 graphics_regs_loop
+ffff932d l       .video_init	00000000 attrcon_regs_loop
+ffff9364 l       .video_init	00000000 ciclo_copia_fonts
 00000000 l    df *ABS*	00000000 src/init32.s
-fffff81a l       .codigo_init32	00000000 start32_launcher.stack_init
-fffff8fd l       .codigo_init32	00000000 start32_launcher.guard
+00000001 l       *ABS*	00000000 PAG_PCD_YES
+00000000 l       *ABS*	00000000 PAG_PCD_NO
+00000001 l       *ABS*	00000000 PAG_PWT_YES
+00000000 l       *ABS*	00000000 PAG_PWT_NO
+00000001 l       *ABS*	00000000 PAG_P_YES
+00000000 l       *ABS*	00000000 PAG_P_NO
+00000001 l       *ABS*	00000000 PAG_RW_W
+00000000 l       *ABS*	00000000 PAG_RW_R
+00000000 l       *ABS*	00000000 PAG_US_SUP
+00000001 l       *ABS*	00000000 PAG_US_US
+00000000 l       *ABS*	00000000 PAG_D
+00000000 l       *ABS*	00000000 PAG_PAT
+00000000 l       *ABS*	00000000 PAG_G_YES
+00000000 l       *ABS*	00000000 PAG_A
+00000000 l       *ABS*	00000000 PAG_PS_4K
+ffff93a5 l       .codigo_init32	00000000 start32_launcher.stack_init
+ffff97f4 l       .codigo_init32	00000000 start32_launcher.guard
+00000000 l    df *ABS*	00000000 functions_rom.c
+00000000 l    df *ABS*	00000000 src/functions_asm.s
+ffff987f l       .functions_rom	00000000 ciclo1
+ffff988e l       .functions_rom	00000000 ciclo2
 00000000 l    df *ABS*	00000000 src/reset.s
 fffffff5 l       .codigo_reset	00000000 halted
-0000004d g       .handlers	00000000 L_ISR02_Handler_NMI
-00000054 g       *ABS*	00000000 __data_size
+0000004d g       .handlers_ISR	00000000 L_ISR02_Handler_NMI
+0000003a g       *ABS*	00000000 __data_size
 fffffff0 g       *ABS*	00000000 __RESET_LMA
-00000062 g       .handlers	00000000 L_ISR08_Handler_DF
-ffff2000 g       *ABS*	00000000 __FUNCTIONS_LMA
-ffff0031 g       .codigo_init16	00000000 return_init_screen
-00000084 g       *ABS*	00000000 __handlers_32_size
-00000666 g       *ABS*	00000000 __functions_size
-fffffc00 g       *ABS*	00000000 __FUNCTIONS_ROM_VMA
-ffff0000 g       *ABS*	00000000 __INIT_16_LMA
-fffffc00 g       *ABS*	00000000 __FUNCTIONS_ROM_LMA
-00210013 g       .data	00000000 contador_timer
+00000062 g       .handlers_ISR	00000000 L_ISR08_Handler_DF
+00050379 g     F .functions	0000003d set_cr3
+ffff019c g       *ABS*	00000000 __FUNCTIONS_LMA
+ffff8031 g       .codigo_init16	00000000 return_init_screen
+000000a6 g       *ABS*	00000000 __handlers_32_size
+00000875 g       *ABS*	00000000 __functions_size
+ffff97f7 g       *ABS*	00000000 __FUNCTIONS_ROM_VMA
+ffff8000 g       *ABS*	00000000 __INIT_16_LMA
+ffff97f7 g       *ABS*	00000000 __FUNCTIONS_ROM_LMA
+00200013 g       .datos_sys32	00000000 contador_timer
+00340000 g     O .tarea_1_rodata	00000001 var_global_rodata
 00000018 g       *ABS*	00000000 DS_SEL_32_prim
 fffffff0 g       .codigo_reset	00000000 reset
 00100000 g       *ABS*	00000000 __TECLADO_ISR_VMA
 1fff8000 g       *ABS*	00000000 __STACK_START_32
 00050000 g       *ABS*	00000000 __FUNCTIONS_VMA
-ffff0000 g       *ABS*	00000000 __INIT_16_VMA
-00050602 g       .functions	00000000 init_pic
+ffff8000 g       *ABS*	00000000 __INIT_16_VMA
+00310000 g       *ABS*	00000000 __TAREA1_TEXT_VMA
+ffff9833 g       .functions_rom	00000000 init_pic
 0005003c g     F .functions	0000004a limpiar_buffer
-0005063e g       .functions	00000000 init_teclado
-00000078 g       .handlers	00000000 L_ISR16_Handler_MF
+ffff986f g       .functions_rom	00000000 init_teclado
+0000009a g       .handlers_ISR	00000000 L_ISR16_Handler_MF
 00010000 g       *ABS*	00000000 __PAGE_TABLES_VMA
-0005062f g       .functions	00000000 init_timer
-000000ef g       *ABS*	00000000 __codigo_tarea_01_size
-0000006b g       .handlers	00000000 L_ISR12_Handler_SS
-00000059 g       .handlers	00000000 L_ISR06_Handler_UD
+ffff9860 g       .functions_rom	00000000 init_timer
+0000006b g       .handlers_ISR	00000000 L_ISR12_Handler_SS
+00000059 g       .handlers_ISR	00000000 L_ISR06_Handler_UD
 000502d3 g     F .functions	0000006a leer_buffer
-00000050 g       .handlers	00000000 L_ISR03_Handler_BP
-ffff5000 g       *ABS*	00000000 __VGA_INIT_LMA
-ffff6500 g       *ABS*	00000000 __TAREA_1_LMA
+00000001 g       *ABS*	00000000 __tarea_1_data_size
+00050471 g     F .functions	000000e9 set_page_table_entry
+00000050 g       .handlers_ISR	00000000 L_ISR03_Handler_BP
+ffff8069 g       *ABS*	00000000 __VGA_INIT_LMA
+ffff0b1a g       *ABS*	00000000 __TAREA1_TEXT_LMA
 00000000 g       *ABS*	00000000 __SYS_TABLES_VMA
 00009000 g       *ABS*	00000000 __STACK_START_16
-ffff4000 g       *ABS*	00000000 __TECLADO_ISR_LMA
-ffff60fc g       .video_init	00000000 init_screen
-00202000 g       .codigo_kernel32	00000000 kernel32_init
+ffff0a11 g       *ABS*	00000000 __TECLADO_ISR_LMA
+00050608 g     F .functions	00000102 escribir_mensaje_VGA
+0005055a g     F .functions	000000ae escribir_caracter_VGA
+ffff9165 g       .video_init	00000000 init_screen
+00220000 g       .codigo_kernel32	00000000 kernel32_init
 00000196 g       .sys_tables_32	00000000 _idtr_32
 000501b4 g     F .functions	0000011f escribir_tabla_digitos
-0000006e g       .handlers	00000000 L_ISR13_Handler_GP
-00000065 g       .handlers	00000000 L_ISR10_Handler_TS
+0000006e g       .handlers_ISR	00000000 L_ISR13_Handler_GP
+00000065 g       .handlers_ISR	00000000 L_ISR10_Handler_TS
+00340000 g       *ABS*	00000000 __TAREA1_RODATA_VMA
+00320000 g       *ABS*	00000000 __TAREA1_BSS_VMA
+1fffffff g       *ABS*	00000000 __TAREA1_STACK_END
+ffff0000 g       *ABS*	00000000 __INIT_ROM_LMA
 1fff8fff g       *ABS*	00000000 __STACK_END_32
-00202000 g       *ABS*	00000000 __KERNEL_32_VMA
+00220000 g       *ABS*	00000000 __KERNEL_32_VMA
 00050000 g     F .functions	0000003c __fast_memcpy
 00050147 g     F .functions	0000006d escribir_buffer
-00210000 g       .data	00000000 memoria_buffer_reservada
-0000005f g       .handlers	00000000 L_ISR07_Handler_NM
+00200000 g       .datos_sys32	00000000 memoria_buffer_reservada
+0000005f g       .handlers_ISR	00000000 L_ISR07_Handler_NM
+ffff0ab7 g       *ABS*	00000000 __DATOS_SYS32_LMA
 00000008 g       *ABS*	00000000 CS_SEL_32
 00000018 g       .sys_tables_32	00000000 _gdtr_32
-00300000 g     F .tarea_1	000000ef ejecutar_tarea_1
+00310000 g     F .tarea_1_text	000000f0 ejecutar_tarea_1
+000003ff g       *ABS*	00000000 __TAREA1_STACK_SIZE
 00000010 g       *ABS*	00000000 DS_SEL_32
+00330000 g     O .tarea_1_data	00000001 variable_global_inicializada
+0005070a g     F .functions	0000002e convertir_ASCII
 000003ff g       *ABS*	00000000 __STACK_SIZE_32
+00200021 g       .datos_sys32	00000000 error_code_PF
 00009fff g       *ABS*	00000000 __STACK_END_16
-ffff3000 g       *ABS*	00000000 __KERNEL_32_LMA
-0000007b g       .handlers	00000000 L_ISR17_Handler_AC
+ffff0000 g       *ABS*	00000000 __INIT_ROM_VMA
+ffff0af1 g       *ABS*	00000000 __KERNEL_32_LMA
+0000009d g       .handlers_ISR	00000000 L_ISR17_Handler_AC
 fffffff0 g       *ABS*	00000000 __RESET_VMA
-00000044 g       .handlers	00000000 L_ISR00_Handler_DE
-00000081 g       .handlers	00000000 L_ISR19_Handler_XM
-00000072 g       .handlers	00000000 L_ISR14_Handler_PF
-00210015 g       .data	00000000 resultado_promedio
-00000053 g       .handlers	00000000 L_ISR04_Handler_OF
-0000007e g       .handlers	00000000 L_ISR18_Handler_MC
-fffff800 g       *ABS*	00000000 __INIT_32_VMA
+00000044 g       .handlers_ISR	00000000 L_ISR00_Handler_DE
+000000a3 g       .handlers_ISR	00000000 L_ISR19_Handler_XM
+00000071 g       .handlers_ISR	00000000 L_ISR14_Handler_PF
+00200015 g       .datos_sys32	00000000 resultado_promedio
+00000053 g       .handlers_ISR	00000000 L_ISR04_Handler_OF
+ffff0ea7 g       *ABS*	00000000 __TAREA1_DATA_LMA
+000000a0 g       .handlers_ISR	00000000 L_ISR18_Handler_MC
+ffff938b g       *ABS*	00000000 __INIT_32_VMA
 000b8000 g       *ABS*	00000000 __VGA_VMA
 00060000 g       *ABS*	00000000 __EH_FRAME
-00200000 g       *ABS*	00000000 __DIGITS_TABLE
+00210000 g       *ABS*	00000000 __DIGITS_TABLE
 0000019c g       *ABS*	00000000 __sys_tables_size
-00050599 g     F .functions	00000069 sumatoria_digitos_64
-ffff5000 g       *ABS*	00000000 __VGA_INIT_VMA
-00000056 g       .handlers	00000000 L_ISR05_Handler_BR
-ffff0000 g       .codigo_init16	00000000 start16
-00000000 g       .handlers	00000000 L_IRQ00_Handler
-00210000 g       *ABS*	00000000 __DATA_VMA
-00300000 g       *ABS*	00000000 __TAREA_1_VMA
-fffff800 g       *ABS*	00000000 __INIT_32_LMA
-fffffd00 g       *ABS*	00000000 __SYS_TABLES_LMA
-00050395 g     F .functions	00000204 promedio_digitos_64
-0000001a g       *ABS*	00000000 __codigo_kernel32_size
-fffffc00 g     F .functions_rom	0000003c __fast_memcpy_rom
+1ffff000 g       *ABS*	00000000 __TAREA1_STACK_START
+00200025 g       .datos_sys32	00000000 page_fault_msg
+003102f4 g     F .tarea_1_text	00000069 sumatoria_digitos_64
+00050738 g     F .functions	0000008e limpiar_VGA
+ffff0ea8 g       *ABS*	00000000 __TAREA1_RODATA_LMA
+ffff8069 g       *ABS*	00000000 __VGA_INIT_VMA
+00000056 g       .handlers_ISR	00000000 L_ISR05_Handler_BR
+0000035d g       *ABS*	00000000 __tarea_01_size
+ffff8000 g       .codigo_init16	00000000 start16
+00000000 g       .handlers_ISR	00000000 L_IRQ00_Handler
+ffff938b g       *ABS*	00000000 __INIT_32_LMA
+ffff0000 g       *ABS*	00000000 __SYS_TABLES_LMA
+003100f0 g     F .tarea_1_text	00000204 promedio_digitos_64
+00000029 g       *ABS*	00000000 __codigo_kernel32_size
+000503b6 g     F .functions	000000bb set_dir_page_table_entry
+ffff97f7 g     F .functions_rom	0000003c __fast_memcpy_rom
 00050086 g     F .functions	000000c1 determinar_tecla_presionada
-fffff800 g       .codigo_init32	00000000 start32_launcher
-ffff1000 g       *ABS*	00000000 __DATA_LMA
-0000001f g       .handlers	00000000 L_IRQ01_Handler
-00000068 g       .handlers	00000000 L_ISR11_Handler_NP
-0005033d g     F .functions	00000058 contador_handler
+00200000 g       *ABS*	00000000 __DATOS_SYS32_VMA
+ffff938b g       .codigo_init32	00000000 start32_launcher
+0020001d g       .datos_sys32	00000000 dir_lineal_page_fault
+00000024 g       *ABS*	00000000 __tarea_1_rodata_size
+0000001f g       .handlers_ISR	00000000 L_IRQ01_Handler
+00000068 g       .handlers_ISR	00000000 L_ISR11_Handler_NP
+00330000 g       *ABS*	00000000 __TAREA1_DATA_VMA
+0005033d g     F .functions	0000003c contador_handler
+ffff0e77 g       *ABS*	00000000 __TAREA1_BSS_LMA
+00000030 g       *ABS*	00000000 __tarea_1_bss_size
 
 
 Contents of section .sys_tables_32:
@@ -280,10 +352,10 @@ Contents of section .sys_tables_32:
  0050 0800008f 10005f00 0800008f 10006200  ......_.......b.
  0060 0800008f 10000000 00000000 00006500  ..............e.
  0070 0800008f 10006800 0800008f 10006b00  ......h.......k.
- 0080 0800008f 10006e00 0800008f 10007200  ......n.......r.
- 0090 0800008f 10000000 00000000 00007800  ..............x.
- 00a0 0800008f 10007b00 0800008f 10007e00  ......{.......~.
- 00b0 0800008f 10008100 0800008f 10000000  ................
+ 0080 0800008f 10006e00 0800008f 10007100  ......n.......q.
+ 0090 0800008f 10000000 00000000 00009a00  ................
+ 00a0 0800008f 10009d00 0800008f 1000a000  ................
+ 00b0 0800008f 1000a300 0800008f 10000000  ................
  00c0 00000000 00000000 00000000 00000000  ................
  00d0 00000000 00000000 00000000 00000000  ................
  00e0 00000000 00000000 00000000 00000000  ................
@@ -304,9 +376,9 @@ Contents of section .functions:
  50020 450c8d48 04894d0c 8b128910 837d1000  E..H..M......}..
  50030 75e0c645 ff010fb6 45ffc9c3 5589e58b  u..E....E...U...
  50040 4508c640 10008b45 08c64011 008b4508  E..@...E..@...E.
- 50050 c6401200 c7052000 21000000 0000eb19  .@.... .!.......
- 50060 a1200021 008b5508 c6040200 a1200021  . .!..U...... .!
- 50070 0083c001 a3200021 00a12000 210083f8  ..... .!.. .!...
+ 50050 c6401200 c705c807 05000000 0000eb19  .@..............
+ 50060 a1c80705 008b5508 c6040200 a1c80705  ......U.........
+ 50070 0083c001 a3c80705 00a1c807 050083f8  ................
  50080 0f7edd90 5dc35589 e583ec28 8b450888  .~..].U....(.E..
  50090 45e4c645 f600807d e4017637 807de40b  E..E...}..v7.}..
  500a0 77310fb6 45e483e8 018845f7 807de40a  w1..E.....E..}..
@@ -315,10 +387,10 @@ Contents of section .functions:
  500d0 83c4108b 450c0fb6 40123c0f 760b8b45  ....E...@.<.v..E
  500e0 0c0fb640 1084c074 11807de4 1c75278b  ...@...t..}..u'.
  500f0 450c0fb6 40123c0f 761cc645 f6000fb6  E...@.<.v..E....
- 50100 45f683ec 04506800 002000ff 750ce8a1  E....Ph.. ..u...
+ 50100 45f683ec 04506800 002100ff 750ce8a1  E....Ph..!..u...
  50110 00000083 c4108b45 0c0fb640 123c0e77  .......E...@.<.w
  50120 23807de4 1c751dc6 45f6010f b645f683  #.}..u..E....E..
- 50130 ec045068 00002000 ff750ce8 74000000  ..Ph.. ..u..t...
+ 50130 ec045068 00002100 ff750ce8 74000000  ..Ph..!..u..t...
  50140 83c41090 90c9c355 89e583ec 048b4508  .......U......E.
  50150 8845fc8b 450c0fb6 40123c0f 77488b45  .E..E...@.<.wH.E
  50160 0c0fb640 100fb6c0 8b550c0f b64dfc88  ...@.....U...M..
@@ -329,14 +401,14 @@ Contents of section .functions:
  501b0 0490c9c3 5589e556 5383ec30 8b451088  ....U..VS..0.E..
  501c0 45d4c745 f0000000 00c745f4 00000000  E..E......E.....
  501d0 c745e800 000000c7 45ec0000 0000c745  .E......E......E
- 501e0 e0000000 00c745e4 00000000 c7052400  ......E.......$.
- 501f0 21000000 0000eb5c 83ec0cff 7508e8d0  !......\....u...
- 50200 00000083 c4108845 dfa12400 210083f8  .......E..$.!...
- 50210 077f1b0f b655dfa1 24002100 c1e00289  .....U..$.!.....
+ 501e0 e0000000 00c745e4 00000000 c705cc07  ......E.........
+ 501f0 05000000 0000eb5c 83ec0cff 7508e8d0  .......\....u...
+ 50200 00000083 c4108845 dfa1cc07 050083f8  .......E........
+ 50210 077f1b0f b655dfa1 cc070500 c1e00289  .....U..........
  50220 c1d3e289 d0990145 e81155ec eb190fb6  .......E..U.....
- 50230 55dfa124 002100c1 e00289c1 d3e289d0  U..$.!..........
- 50240 990145f0 1155f4a1 24002100 83c001a3  ..E..U..$.!.....
- 50250 24002100 a1240021 0083f80f 7e9a8b45  $.!..$.!....~..E
+ 50230 55dfa1cc 070500c1 e00289c1 d3e289d0  U...............
+ 50240 990145f0 1155f4a1 cc070500 83c001a3  ..E..U..........
+ 50250 cc070500 a1cc0705 0083f80f 7e9a8b45  ............~..E
  50260 f08b55f4 89c2b800 00000089 c389d689  ..U.............
  50270 d90b4de8 894de089 f00b45ec 8945e48b  ..M..M....E..E..
  50280 450c0fb6 40503c09 772c8b45 0c0fb640  E...@P<.w,.E...@
@@ -351,433 +423,573 @@ Contents of section .functions:
  50310 45080fb6 40118d50 018b4508 8850118b  E...@..P..E..P..
  50320 45080fb6 40113c10 75078b45 08c64011  E...@.<.u..E..@.
  50330 000fb645 ffeb040f b645ffc9 c35589e5  ...E.....E...U..
- 50340 83ec088b 45108b00 83f83176 388b4510  ....E.....1v8.E.
- 50350 c7000000 000083ec 0cff750c e8380200  ..........u..8..
- 50360 0083c410 83ec08ff 7508ff75 0ce82300  ........u..u..#.
- 50370 000083c4 1083ec0c ff750ce8 80fc2a00  .........u....*.
- 50380 83c410eb 0e8b4510 8b008d50 018b4510  ......E....P..E.
- 50390 891090c9 c35589e5 565383ec 188b4508  .....U..VS....E.
- 503a0 8b50608b 405ca328 00210089 152c0021  .P`.@\.(.!...,.!
- 503b0 008b4508 0fb64850 0fb6c1ba 00000000  ..E...HP........
- 503c0 a3300021 00891534 002100c7 05380021  .0.!...4.!...8.!
- 503d0 00000000 00c7053c 00210000 000000c7  .......<.!......
- 503e0 05400021 00000000 00c70544 00210000  .@.!.......D.!..
- 503f0 000000c6 05480021 0000e93b 0100008b  .....H.!...;....
- 50400 1d280021 008b352c 0021000f b6054800  .(.!..5,.!....H.
- 50410 21000fb6 d0b83f00 000029d0 89c189d8  !.....?...).....
- 50420 89f20fad d0d3eaf6 c1207404 89d031d2  ......... t...1.
- 50430 89c683e6 018975f0 89d083e0 008945f4  ......u.......E.
- 50440 a1400021 008b1544 0021008b 5df08b75  .@.!...D.!..]..u
- 50450 f489d909 c1894de8 89d009f0 8945ec8b  ......M......E..
- 50460 45e88b55 eca34000 21008915 44002100  E..U..@.!...D.!.
- 50470 8b0d4000 21008b1d 44002100 a1300021  ..@.!...D.!..0.!
- 50480 008b1534 00210039 d3725e39 d3770439  ...4.!.9.r^9.w.9
- 50490 c17256a1 38002100 8b153c00 210089c6  .rV.8.!...<.!...
- 504a0 83ce0189 75e089d0 80cc0089 45e48b45  ....u.......E..E
- 504b0 e08b55e4 a3380021 0089153c 0021008b  ..U..8.!...<.!..
- 504c0 0d400021 008b1d44 002100a1 30002100  .@.!...D.!..0.!.
- 504d0 8b153400 210029c1 19d389c8 89daa340  ..4.!.)........@
- 504e0 00210089 15440021 008b1d38 0021008b  .!...D.!...8.!..
- 504f0 353c0021 0089d889 f20fa4c2 0101c0a3  5<.!............
- 50500 38002100 89153c00 21008b1d 40002100  8.!...<.!...@.!.
- 50510 8b354400 210089d8 89f20fa4 c20101c0  .5D.!...........
- 50520 a3400021 00891544 0021000f b6054800  .@.!...D.!....H.
- 50530 210083c0 01a24800 21000fb6 05480021  !.....H.!....H.!
- 50540 003c3f0f 86b6feff ff8b1d38 0021008b  .<?........8.!..
- 50550 353c0021 0089d889 f20facd0 01d1eaa3  5<.!............
- 50560 38002100 89153c00 2100a138 0021008b  8.!...<.!..8.!..
- 50570 153c0021 008b4d08 89415489 5158a138  .<.!..M..AT.QX.8
- 50580 0021008b 153c0021 008b4d0c 89018951  .!...<.!..M....Q
- 50590 049083c4 185b5e5d c35589e5 83ec10c7  .....[^].U......
- 505a0 45f80000 0000c745 fc000000 00c7054c  E......E.......L
- 505b0 00210000 000000eb 248b154c 0021008b  .!......$..L.!..
- 505c0 45088d14 d08b028b 52040145 f81155fc  E.......R..E..U.
- 505d0 a14c0021 0083c001 a34c0021 008b4508  .L.!.....L.!..E.
- 505e0 0fb64050 0fb6d0a1 4c002100 39c27fc9  ..@P....L.!.9...
- 505f0 8b4d088b 45f88b55 fc89415c 89516090  .M..E..U..A\.Q`.
- 50600 c9c3b011 e620b020 e621b004 e621b001  ..... . .!...!..
- 50610 e621b0fd e621b011 e6a0b028 e6a1b002  .!...!.....(....
- 50620 e6a1b001 e6a1b0ff e6a1b0fc e621c3b0  .............!..
- 50630 36e64366 b89c2ee6 4088e0e6 40c3b0ff  6.Cf....@...@...
- 50640 e664b900 010000e2 feb90000 0100e460  .d.............`
- 50650 a801e1fa b0f4e664 b9000001 00e460a8  .......d......`.
- 50660 01e1fae4 60c3                        ....`.          
-Contents of section .handlers:
- 100000 605589e5 68130021 00680000 20006815  `U..h..!.h.. .h.
- 100010 002100e8 2503f5ff c9b020e6 2061cf60  .!..%..... . a.`
+ 50340 83ec088b 45108b00 83f83176 1c8b4510  ....E.....1v..E.
+ 50350 c7000000 000083ec 08ff7508 ff750ce8  ..........u..u..
+ 50360 9cfc2b00 83c410eb 0e8b4510 8b008d50  ..+.......E....P
+ 50370 018b4510 891090c9 c35589e5 83ec188b  ..E......U......
+ 50380 550c8b45 108855ec 8845e8c7 45fc0000  U..E..U..E..E...
+ 50390 00008b45 082500f0 ffff0945 fc0fb645  ...E.%.....E...E
+ 503a0 ecc1e004 0945fc0f b645e8c1 e0030945  .....E...E.....E
+ 503b0 fc8b45fc c9c35589 e5575653 83ec308b  ..E...U..WVS..0.
+ 503c0 45148b4d 18894dc4 8b7d1c8b 75208b5d  E..M..M..}..u .]
+ 503d0 248b4d28 8b552c88 45e00fb6 45c48845  $.M(.U,.E...E..E
+ 503e0 dc89f888 45d889f0 8845d489 d88845d0  ....E....E....E.
+ 503f0 89c88845 cc89d088 45c8c745 f0000000  ...E....E..E....
+ 50400 008b4508 8945ec8b 45102500 f0ffff09  ..E..E..E.%.....
+ 50410 45f00fb6 45e0c1e0 070945f0 0fb645dc  E...E.....E...E.
+ 50420 c1e00509 45f00fb6 45d8c1e0 040945f0  ....E...E.....E.
+ 50430 0fb645d4 c1e00309 45f00fb6 45d0c1e0  ..E.....E...E...
+ 50440 020945f0 0fb645cc 01c00945 f00fb645  ..E...E....E...E
+ 50450 c80945f0 8b450c8d 14850000 00008b45  ..E..E.........E
+ 50460 ec01c28b 45f08902 9083c430 5b5e5f5d  ....E......0[^_]
+ 50470 c35589e5 57565383 ec408b45 148b5518  .U..WVS..@.E..U.
+ 50480 8b751c8b 4d20894d bc8b5d24 895db88b  .u..M .M..]$.]..
+ 50490 7d28897d b48b7d2c 8b5d308b 4d348845  }(.}..},.]0.M4.E
+ 504a0 e089d088 45dc89f0 8845d80f b645bc88  ....E....E...E..
+ 504b0 45d40fb6 45b88845 d00fb645 b48845cc  E...E..E...E..E.
+ 504c0 89f88845 c889d888 45c489c8 8845c0c7  ...E....E....E..
+ 504d0 45f00000 00008b45 088945ec 8b451025  E......E..E..E.%
+ 504e0 00f0ffff 0945f00f b645e0c1 e0080945  .....E...E.....E
+ 504f0 f00fb645 dcc1e007 0945f00f b645d8c1  ...E.....E...E..
+ 50500 e0060945 f00fb645 d4c1e005 0945f00f  ...E...E.....E..
+ 50510 b645d0c1 e0040945 f00fb645 ccc1e003  .E.....E...E....
+ 50520 0945f00f b645c8c1 e0020945 f00fb645  .E...E.....E...E
+ 50530 c401c009 45f00fb6 45c00945 f08b450c  ....E...E..E..E.
+ 50540 8d148500 0000008b 45ec01c2 8b45f089  ........E....E..
+ 50550 029083c4 405b5e5f 5dc35589 e5565383  ....@[^_].U..VS.
+ 50560 ec208b5d 088b4d0c 8b55108b 4514885d  . .]..M..U..E..]
+ 50570 e4884de0 8855dc88 45d8c745 f400800b  ..M..U..E..E....
+ 50580 00c645f3 07807dd8 0075160f b645e40f  ..E...}..u...E..
+ 50590 b6c083ec 0c50e86f 01000083 c4108845  .....P.o.......E
+ 505a0 e40fb645 e08d1400 0fb64ddc a1d00705  ...E......M.....
+ 505b0 0001c88d 34000fb6 4de48b5d f489d0c1  ....4...M..]....
+ 505c0 e00201d0 c1e00401 d801f088 080fb645  ...............E
+ 505d0 e08d1400 0fb645dc 8d0c00a1 d0070500  ......E.........
+ 505e0 01c083c0 018d1c01 8b4df489 d0c1e002  .........M......
+ 505f0 01d0c1e0 0401c88d 14180fb6 45f38802  ............E...
+ 50600 908d65f8 5b5e5dc3 5589e553 83ec248b  ..e.[^].U..S..$.
+ 50610 4d0c8b55 108b4514 884de488 55e08845  M..U..E..M..U..E
+ 50620 dcc745f4 00800b00 c645f307 c705d407  ..E......E......
+ 50630 05000000 0000e9b2 00000080 7ddc0075  ............}..u
+ 50640 2ea1d407 050089c2 8b450801 d00fb600  .........E......
+ 50650 0fb6c083 ec0c50e8 ae000000 83c41089  ......P.........
+ 50660 c2a1d407 050089c1 8b450801 c88810a1  .........E......
+ 50670 d4070500 89c28b45 0801d00f b6000fb6  .......E........
+ 50680 55e401d2 0fb65de0 8b0dd407 050001d9  U.....].........
+ 50690 8d1c0988 45db8b4d f489d0c1 e00201d0  ....E..M........
+ 506a0 c1e00401 c801d80f b65ddb88 180fb645  .........].....E
+ 506b0 e48d1400 0fb645e0 8d0c00a1 d4070500  ......E.........
+ 506c0 01c083c0 018d1c01 8b4df489 d0c1e002  .........M......
+ 506d0 01d0c1e0 0401c88d 14180fb6 45f38802  ............E...
+ 506e0 a1d40705 0083c001 a3d40705 00a1d407  ................
+ 506f0 050089c2 8b450801 d00fb600 84c00f85  .....E..........
+ 50700 37ffffff 908b5dfc c9c35589 e583ec04  7.....]...U.....
+ 50710 8b450888 45fc807d fc097706 8045fc30  .E..E..}..w..E.0
+ 50720 eb10807d fc09760a 807dfc5a 77048045  ...}..v..}.Zw..E
+ 50730 fc410fb6 45fcc9c3 5589e583 ec086a01  .A..E...U.....j.
+ 50740 6a0a6a00 68d80705 00e8bafe ffff83c4  j.j.h...........
+ 50750 106a016a 0a6a0168 00080500 e8a7feff  .j.j.j.h........
+ 50760 ff83c410 6a016a0a 6a0268d8 070500e8  ....j.j.j.h.....
+ 50770 94feffff 83c4106a 016a0a6a 03682808  .......j.j.j.h(.
+ 50780 0500e881 feffff83 c4106a01 6a006a15  ..........j.j.j.
+ 50790 68d80705 00e86efe ffff83c4 106a016a  h.....n......j.j
+ 507a0 006a1668 50080500 e85bfeff ff83c410  .j.hP....[......
+ 507b0 6a016a00 6a1768d8 070500e8 48feffff  j.j.j.h.....H...
+ 507c0 83c41090 c9c36690 00000000 00000000  ......f.........
+ 507d0 00000000 00000000 2d2d2d2d 2d2d2d2d  ........--------
+ 507e0 2d2d2d2d 2d2d2d2d 2d2d2d2d 2d2d2d2d  ----------------
+ 507f0 2d2d2d2d 2d2d2d2d 2d2d2d2d 00000000  ------------....
+ 50800 4269656e 76656e69 646f2061 20783836  Bienvenido a x86
+ 50810 2d4f5320 2d204350 553a2049 6e74656c  -OS - CPU: Intel
+ 50820 20333836 00000000 496e6772 65736520   386....Ingrese 
+ 50830 64696769 746f7320 64652068 61737461  digitos de hasta
+ 50840 20313020 6e756d65 726f732e 00000000   10 numeros.....
+ 50850 456a2e38 202d2050 6167696e 6163696f  Ej.8 - Paginacio
+ 50860 6e204261 73696361 202d2054 44332032  n Basica - TD3 2
+ 50870 30323120 00                          021 .           
+Contents of section .handlers_ISR:
+ 100000 605589e5 68130020 00680000 21006815  `U..h.. .h..!.h.
+ 100010 002000e8 2503f5ff c9b020e6 2061cf60  . ..%..... . a.`
  100020 b22131c0 e46088c3 80e38080 fb80740e  .!1..`........t.
- 100030 68000021 0050e84b 00f5ff83 c408b020  h..!.P.K....... 
+ 100030 68000020 0050e84b 00f5ff83 c408b020  h.. .P.K....... 
  100040 e62061cf 6687dbb2 00f4b201 f4b202f4  . a.f...........
  100050 b203f4b2 04f4b205 f46687db b206f4b2  .........f......
  100060 07f4b208 f4b20af4 b20bf4b2 0cf4b20d  ................
- 100070 f4cfb20e f4b20ff4 b210f4b2 11f4b212  ................
- 100080 f4b213f4                             ....            
+ 100070 f48b1c24 891d2100 20000f20 d0a31d00  ...$..!. .. ....
+ 100080 20006a0a 6a006825 002000e8 7805f5ff   .j.j.h%. ..x...
+ 100090 83c40c66 87dbf4b2 0ff4b210 f4b211f4  ...f............
+ 1000a0 b212f4b2 13f4                        ......          
+Contents of section .datos_sys32:
+ 200000 00000000 00000000 00000000 00000000  ................
+ 200010 00000000 00000000 00000000 00000000  ................
+ 200020 00000000 002d2d2d 2d2d5041 47452046  .....-----PAGE F
+ 200030 41554c54 2d2d2d2d 2d00               AULT-----.      
 Contents of section .codigo_kernel32:
- 202000 31c031db 31c931d2 68000021 00e82ae0  1.1.1.1.h..!..*.
- 202010 e4ff83c4 04ebfef4 ebfd               ..........      
-Contents of section .data:
- 210000 00000000 00000000 00000000 00000000  ................
- 210010 00000000 00000000 00000000 00000000  ................
- 210020 00000000 00000000 00000000 00000000  ................
- 210030 00000000 00000000 00000000 00000000  ................
- 210040 00000000 00000000 00000000 00000000  ................
- 210050 00000000                             ....            
-Contents of section .tarea_1:
- 300000 5589e556 5383ec20 8b45088b 50588b40  U..VS.. .E..PX.@
- 300010 548945e8 8955ecc6 45f700c6 45e707c7  T.E..U..E...E...
- 300020 45e00080 0b00c645 df7e8b45 080fb640  E......E.~.E...@
- 300030 5084c00f 84ae0000 00c70550 00210000  P..........P.!..
- 300040 000000e9 90000000 a1500021 008d0c85  .........P.!....
- 300050 00000000 8b45e88b 55ec0fad d0d3eaf6  .....E..U.......
- 300060 c1207404 89d031d2 89c389d6 89d883e0  . t...1.........
- 300070 0f8845f7 807df709 77068045 f730eb10  ..E..}..w..E.0..
- 300080 807df709 760a807d f70f7704 8045f737  .}..v..}..w..E.7
- 300090 0fb645df 8d5020a1 50002100 01c029c2  ..E..P .P.!...).
- 3000a0 89d18b45 e00fb655 f7881408 0fb645df  ...E...U......E.
- 3000b0 8d5020a1 50002100 01c083e8 0189d129  .P .P.!........)
- 3000c0 c18b45e0 0fb655e7 881408a1 50002100  ..E...U.....P.!.
- 3000d0 83c001a3 50002100 a1500021 0083f80f  ....P.!..P.!....
- 3000e0 0f8e62ff ffff9090 83c4205b 5e5dc3    ..b....... [^]. 
-Contents of section .video_init:
- ffff5000 03000300 025f4f50 825581bf 1f004f0d  ....._OP.U....O.
- ffff5010 0e000005 509c8e8f 281f96b9 a3ff0000  ....P...(.......
- ffff5020 00000010 0e00ff00 01020304 05140738  ...............8
- ffff5030 393a3b3c 3d3e3f0c 000f0800 00000000  9:;<=>?.........
- ffff5040 002a002a 00002a2a 2a00002a 002a2a2a  .*.*..***..*.***
- ffff5050 002a2a2a 00001500 003f002a 15002a3f  .***.....?.*..*?
- ffff5060 2a00152a 003f2a2a 152a2a3f 00150000  *..*.?**.**?....
- ffff5070 152a003f 00003f2a 2a15002a 152a2a3f  .*.?..?**..*.**?
- ffff5080 002a3f2a 00151500 153f003f 15003f3f  .*?*.....?.?..??
- ffff5090 2a15152a 153f2a3f 152a3f3f 15000015  *..*.?*?.*??....
- ffff50a0 002a152a 00152a2a 3f00003f 002a3f2a  .*.*..**?..?.*?*
- ffff50b0 003f2a2a 15001515 003f152a 15152a3f  .?**.....?.*..*?
- ffff50c0 3f00153f 003f3f2a 153f2a3f 15150015  ?..?.??*.?*?....
- ffff50d0 152a153f 00153f2a 3f15003f 152a3f3f  .*.?..?*?..?.*??
- ffff50e0 003f3f2a 15151515 153f153f 15153f3f  .??*.....?.?..??
- ffff50f0 3f15153f 153f3f3f 153f3f3f 00000000  ?..?.???.???....
- ffff5100 00000000 00000000 00000000 00007e81  ..............~.
- ffff5110 a58181bd 9981817e 00000000 00007eff  .......~......~.
- ffff5120 dbffffc3 e7ffff7e 00000000 00000000  .......~........
- ffff5130 6cfefefe fe7c3810 00000000 00000000  l....|8.........
- ffff5140 10387cfe 7c381000 00000000 00000018  .8|.|8..........
- ffff5150 3c3ce7e7 e718183c 00000000 00000018  <<.....<........
- ffff5160 3c7effff 7e18183c 00000000 00000000  <~..~..<........
- ffff5170 0000183c 3c180000 00000000 ffffffff  ...<<...........
- ffff5180 ffffe7c3 c3e7ffff ffffffff 00000000  ................
- ffff5190 003c6642 42663c00 00000000 ffffffff  .<fBBf<.........
- ffff51a0 ffc399bd bd99c3ff ffffffff 00001e0e  ................
- ffff51b0 1a3278cc cccccc78 00000000 00003c66  .2x....x......<f
- ffff51c0 6666663c 187e1818 00000000 00003f33  fff<.~........?3
- ffff51d0 3f303030 3070f0e0 00000000 00007f63  ?0000p.........c
- ffff51e0 7f636363 6367e7e6 c0000000 00000018  .ccccg..........
- ffff51f0 18db3ce7 3cdb1818 00000000 0080c0e0  ..<.<...........
- ffff5200 f0f8fef8 f0e0c080 00000000 0002060e  ................
- ffff5210 1e3efe3e 1e0e0602 00000000 0000183c  .>.>...........<
- ffff5220 7e181818 7e3c1800 00000000 00006666  ~...~<........ff
- ffff5230 66666666 66006666 00000000 00007fdb  fffff.ff........
- ffff5240 dbdb7b1b 1b1b1b1b 00000000 007cc660  ..{..........|.`
- ffff5250 386cc6c6 6c380cc6 7c000000 00000000  8l..l8..|.......
- ffff5260 00000000 fefefefe 00000000 0000183c  ...............<
- ffff5270 7e181818 7e3c187e 00000000 0000183c  ~...~<.~.......<
- ffff5280 7e181818 18181818 00000000 00001818  ~...............
- ffff5290 18181818 187e3c18 00000000 00000000  .....~<.........
- ffff52a0 00180cfe 0c180000 00000000 00000000  ................
- ffff52b0 003060fe 60300000 00000000 00000000  .0`.`0..........
- ffff52c0 0000c0c0 c0fe0000 00000000 00000000  ................
- ffff52d0 002466ff 66240000 00000000 00000000  .$f.f$..........
- ffff52e0 1038387c 7cfefe00 00000000 00000000  .88||...........
- ffff52f0 fefe7c7c 38381000 00000000 00000000  ..||88..........
- ffff5300 00000000 00000000 00000000 0000183c  ...............<
- ffff5310 3c3c1818 18001818 00000000 00666666  <<...........fff
- ffff5320 24000000 00000000 00000000 0000006c  $..............l
- ffff5330 6cfe6c6c 6cfe6c6c 00000000 18187cc6  l.lll.ll......|.
- ffff5340 c2c07c06 0686c67c 18180000 00000000  ..|....|........
- ffff5350 c2c60c18 3060c686 00000000 0000386c  ....0`........8l
- ffff5360 6c3876dc cccccc76 00000000 00303030  l8v....v.....000
- ffff5370 60000000 00000000 00000000 00000c18  `...............
- ffff5380 30303030 3030180c 00000000 00003018  000000........0.
- ffff5390 0c0c0c0c 0c0c1830 00000000 00000000  .......0........
- ffff53a0 00663cff 3c660000 00000000 00000000  .f<.<f..........
- ffff53b0 0018187e 18180000 00000000 00000000  ...~............
- ffff53c0 00000000 00181818 30000000 00000000  ........0.......
- ffff53d0 000000fe 00000000 00000000 00000000  ................
- ffff53e0 00000000 00001818 00000000 00000000  ................
- ffff53f0 02060c18 3060c080 00000000 00003c66  ....0`........<f
- ffff5400 c3c3dbdb c3c3663c 00000000 00001838  ......f<.......8
- ffff5410 78181818 1818187e 00000000 00007cc6  x......~......|.
- ffff5420 060c1830 60c0c6fe 00000000 00007cc6  ...0`.........|.
- ffff5430 06063c06 0606c67c 00000000 00000c1c  ..<....|........
- ffff5440 3c6cccfe 0c0c0c1e 00000000 0000fec0  <l..............
- ffff5450 c0c0fc06 0606c67c 00000000 00003860  .......|......8`
- ffff5460 c0c0fcc6 c6c6c67c 00000000 0000fec6  .......|........
- ffff5470 06060c18 30303030 00000000 00007cc6  ....0000......|.
- ffff5480 c6c67cc6 c6c6c67c 00000000 00007cc6  ..|....|......|.
- ffff5490 c6c67e06 06060c78 00000000 00000000  ..~....x........
- ffff54a0 18180000 00181800 00000000 00000000  ................
- ffff54b0 18180000 00181830 00000000 00000006  .......0........
- ffff54c0 0c183060 30180c06 00000000 00000000  ..0`0...........
- ffff54d0 007e0000 7e000000 00000000 00000060  .~..~..........`
- ffff54e0 30180c06 0c183060 00000000 00007cc6  0.....0`......|.
- ffff54f0 c60c1818 18001818 00000000 0000007c  ...............|
- ffff5500 c6c6dede dedcc07c 00000000 00001038  .......|.......8
- ffff5510 6cc6c6fe c6c6c6c6 00000000 0000fc66  l..............f
- ffff5520 66667c66 666666fc 00000000 00003c66  ff|ffff.......<f
- ffff5530 c2c0c0c0 c0c2663c 00000000 0000f86c  ......f<.......l
- ffff5540 66666666 66666cf8 00000000 0000fe66  ffffffl........f
- ffff5550 62687868 606266fe 00000000 0000fe66  bhxh`bf........f
- ffff5560 62687868 606060f0 00000000 00003c66  bhxh```.......<f
- ffff5570 c2c0c0de c6c6663a 00000000 0000c6c6  ......f:........
- ffff5580 c6c6fec6 c6c6c6c6 00000000 00003c18  ..............<.
- ffff5590 18181818 1818183c 00000000 00001e0c  .......<........
- ffff55a0 0c0c0c0c cccccc78 00000000 0000e666  .......x.......f
- ffff55b0 666c7878 6c6666e6 00000000 0000f060  flxxlff........`
- ffff55c0 60606060 606266fe 00000000 0000c3e7  `````bf.........
- ffff55d0 ffffdbc3 c3c3c3c3 00000000 0000c6e6  ................
- ffff55e0 f6fedece c6c6c6c6 00000000 00007cc6  ..............|.
- ffff55f0 c6c6c6c6 c6c6c67c 00000000 0000fc66  .......|.......f
- ffff5600 66667c60 606060f0 00000000 00007cc6  ff|````.......|.
- ffff5610 c6c6c6c6 c6d6de7c 0c0e0000 0000fc66  .......|.......f
- ffff5620 66667c6c 666666e6 00000000 00007cc6  ff|lfff.......|.
- ffff5630 c660380c 06c6c67c 00000000 0000ffdb  .`8....|........
- ffff5640 99181818 1818183c 00000000 0000c6c6  .......<........
- ffff5650 c6c6c6c6 c6c6c67c 00000000 0000c3c3  .......|........
- ffff5660 c3c3c3c3 c3663c18 00000000 0000c3c3  .....f<.........
- ffff5670 c3c3c3db dbff6666 00000000 0000c3c3  ......ff........
- ffff5680 663c1818 3c66c3c3 00000000 0000c3c3  f<..<f..........
- ffff5690 c3663c18 1818183c 00000000 0000ffc3  .f<....<........
- ffff56a0 860c1830 60c1c3ff 00000000 00003c30  ...0`.........<0
- ffff56b0 30303030 3030303c 00000000 00000080  0000000<........
- ffff56c0 c0e07038 1c0e0602 00000000 00003c0c  ..p8..........<.
- ffff56d0 0c0c0c0c 0c0c0c3c 00000000 10386cc6  .......<.....8l.
- ffff56e0 00000000 00000000 00000000 00000000  ................
- ffff56f0 00000000 00000000 00ff0000 30301800  ............00..
- ffff5700 00000000 00000000 00000000 00000000  ................
- ffff5710 00780c7c cccccc76 00000000 0000e060  .x.|...v.......`
- ffff5720 60786c66 6666667c 00000000 00000000  `xlffff|........
- ffff5730 007cc6c0 c0c0c67c 00000000 00001c0c  .|.....|........
- ffff5740 0c3c6ccc cccccc76 00000000 00000000  .<l....v........
- ffff5750 007cc6fe c0c0c67c 00000000 0000386c  .|.....|......8l
- ffff5760 6460f060 606060f0 00000000 00000000  d`.````.........
- ffff5770 0076cccc cccccc7c 0ccc7800 0000e060  .v.....|..x....`
- ffff5780 606c7666 666666e6 00000000 00001818  `lvffff.........
- ffff5790 00381818 1818183c 00000000 00000606  .8.....<........
- ffff57a0 000e0606 06060606 66663c00 0000e060  ........ff<....`
- ffff57b0 60666c78 786c66e6 00000000 00003818  `flxxlf.......8.
- ffff57c0 18181818 1818183c 00000000 00000000  .......<........
- ffff57d0 00e6ffdb dbdbdbdb 00000000 00000000  ................
- ffff57e0 00dc6666 66666666 00000000 00000000  ..ffffff........
- ffff57f0 007cc6c6 c6c6c67c 00000000 00000000  .|.....|........
- ffff5800 00dc6666 6666667c 6060f000 00000000  ..fffff|``......
- ffff5810 0076cccc cccccc7c 0c0c1e00 00000000  .v.....|........
- ffff5820 00dc7666 606060f0 00000000 00000000  ..vf```.........
- ffff5830 007cc660 380cc67c 00000000 00001030  .|.`8..|.......0
- ffff5840 30fc3030 3030361c 00000000 00000000  0.00006.........
- ffff5850 00cccccc cccccc76 00000000 00000000  .......v........
- ffff5860 00c3c3c3 c3663c18 00000000 00000000  .....f<.........
- ffff5870 00c3c3c3 dbdbff66 00000000 00000000  .......f........
- ffff5880 00c3663c 183c66c3 00000000 00000000  ..f<.<f.........
- ffff5890 00c6c6c6 c6c6c67e 060cf800 00000000  .......~........
- ffff58a0 00fecc18 3060c6fe 00000000 00000e18  ....0`..........
- ffff58b0 18187018 1818180e 00000000 00001818  ..p.............
- ffff58c0 18180018 18181818 00000000 00007018  ..............p.
- ffff58d0 18180e18 18181870 00000000 000076dc  .......p......v.
- ffff58e0 00000000 00000000 00000000 00000000  ................
- ffff58f0 10386cc6 c6c6fe00 00000000 00003c66  .8l...........<f
- ffff5900 c2c0c0c0 c2663c0c 067c0000 0000cc00  .....f<..|......
- ffff5910 00cccccc cccccc76 00000000 000c1830  .......v.......0
- ffff5920 007cc6fe c0c0c67c 00000000 0010386c  .|.....|......8l
- ffff5930 00780c7c cccccc76 00000000 0000cc00  .x.|...v........
- ffff5940 00780c7c cccccc76 00000000 00603018  .x.|...v.....`0.
- ffff5950 00780c7c cccccc76 00000000 00386c38  .x.|...v.....8l8
- ffff5960 00780c7c cccccc76 00000000 00000000  .x.|...v........
- ffff5970 3c666060 663c0c06 3c000000 0010386c  <f``f<..<.....8l
- ffff5980 007cc6fe c0c0c67c 00000000 0000c600  .|.....|........
- ffff5990 007cc6fe c0c0c67c 00000000 00603018  .|.....|.....`0.
- ffff59a0 007cc6fe c0c0c67c 00000000 00006600  .|.....|......f.
- ffff59b0 00381818 1818183c 00000000 00183c66  .8.....<......<f
- ffff59c0 00381818 1818183c 00000000 00603018  .8.....<.....`0.
- ffff59d0 00381818 1818183c 00000000 00c60010  .8.....<........
- ffff59e0 386cc6c6 fec6c6c6 00000000 386c3800  8l..........8l8.
- ffff59f0 386cc6c6 fec6c6c6 00000000 18306000  8l...........0`.
- ffff5a00 fe66607c 606066fe 00000000 00000000  .f`|``f.........
- ffff5a10 006e3b1b 7ed8dc77 00000000 00003e6c  .n;.~..w......>l
- ffff5a20 ccccfecc ccccccce 00000000 0010386c  ..............8l
- ffff5a30 007cc6c6 c6c6c67c 00000000 0000c600  .|.....|........
- ffff5a40 007cc6c6 c6c6c67c 00000000 00603018  .|.....|.....`0.
- ffff5a50 007cc6c6 c6c6c67c 00000000 003078cc  .|.....|.....0x.
- ffff5a60 00cccccc cccccc76 00000000 00603018  .......v.....`0.
- ffff5a70 00cccccc cccccc76 00000000 0000c600  .......v........
- ffff5a80 00c6c6c6 c6c6c67e 060c7800 00c6007c  .......~..x....|
- ffff5a90 c6c6c6c6 c6c6c67c 00000000 00c600c6  .......|........
- ffff5aa0 c6c6c6c6 c6c6c67c 00000000 0018187e  .......|.......~
- ffff5ab0 c3c0c0c0 c37e1818 00000000 00386c64  .....~.......8ld
- ffff5ac0 60f06060 6060e6fc 00000000 0000c366  `.````.........f
- ffff5ad0 3c18ff18 ff181818 00000000 00fc6666  <.............ff
- ffff5ae0 7c62666f 666666f3 00000000 000e1b18  |bfofff.........
- ffff5af0 18187e18 18181818 d8700000 00183060  ..~......p....0`
- ffff5b00 00780c7c cccccc76 00000000 000c1830  .x.|...v.......0
- ffff5b10 00381818 1818183c 00000000 00183060  .8.....<......0`
- ffff5b20 007cc6c6 c6c6c67c 00000000 00183060  .|.....|......0`
- ffff5b30 00cccccc cccccc76 00000000 000076dc  .......v......v.
- ffff5b40 00dc6666 66666666 00000000 76dc00c6  ..ffffff....v...
- ffff5b50 e6f6fede cec6c6c6 00000000 003c6c6c  .............<ll
- ffff5b60 3e007e00 00000000 00000000 00386c6c  >.~..........8ll
- ffff5b70 38007c00 00000000 00000000 00003030  8.|...........00
- ffff5b80 00303060 c0c6c67c 00000000 00000000  .00`...|........
- ffff5b90 0000fec0 c0c0c000 00000000 00000000  ................
- ffff5ba0 0000fe06 06060600 00000000 00c0c0c2  ................
- ffff5bb0 c6cc1830 60ce9b06 0c1f0000 00c0c0c2  ...0`...........
- ffff5bc0 c6cc1830 66ce963e 06060000 00001818  ...0f..>........
- ffff5bd0 00181818 3c3c3c18 00000000 00000000  ....<<<.........
- ffff5be0 00366cd8 6c360000 00000000 00000000  .6l.l6..........
- ffff5bf0 00d86c36 6cd80000 00000000 11441144  ..l6l........D.D
- ffff5c00 11441144 11441144 11441144 55aa55aa  .D.D.D.D.D.DU.U.
- ffff5c10 55aa55aa 55aa55aa 55aa55aa dd77dd77  U.U.U.U.U.U..w.w
- ffff5c20 dd77dd77 dd77dd77 dd77dd77 18181818  .w.w.w.w.w.w....
- ffff5c30 18181818 18181818 18181818 18181818  ................
- ffff5c40 181818f8 18181818 18181818 18181818  ................
- ffff5c50 18f818f8 18181818 18181818 36363636  ............6666
- ffff5c60 363636f6 36363636 36363636 00000000  666.66666666....
- ffff5c70 000000fe 36363636 36363636 00000000  ....66666666....
- ffff5c80 00f818f8 18181818 18181818 36363636  ............6666
- ffff5c90 36f606f6 36363636 36363636 36363636  6...666666666666
- ffff5ca0 36363636 36363636 36363636 00000000  666666666666....
- ffff5cb0 00fe06f6 36363636 36363636 36363636  ....666666666666
- ffff5cc0 36f606fe 00000000 00000000 36363636  6...........6666
- ffff5cd0 363636fe 00000000 00000000 18181818  666.............
- ffff5ce0 18f818f8 00000000 00000000 00000000  ................
- ffff5cf0 000000f8 18181818 18181818 18181818  ................
- ffff5d00 1818181f 00000000 00000000 18181818  ................
- ffff5d10 181818ff 00000000 00000000 00000000  ................
- ffff5d20 000000ff 18181818 18181818 18181818  ................
- ffff5d30 1818181f 18181818 18181818 00000000  ................
- ffff5d40 000000ff 00000000 00000000 18181818  ................
- ffff5d50 181818ff 18181818 18181818 18181818  ................
- ffff5d60 181f181f 18181818 18181818 36363636  ............6666
- ffff5d70 36363637 36363636 36363636 36363636  6667666666666666
- ffff5d80 3637303f 00000000 00000000 00000000  670?............
- ffff5d90 003f3037 36363636 36363636 36363636  .?07666666666666
- ffff5da0 36f700ff 00000000 00000000 00000000  6...............
- ffff5db0 00ff00f7 36363636 36363636 36363636  ....666666666666
- ffff5dc0 36373037 36363636 36363636 00000000  670766666666....
- ffff5dd0 00ff00ff 00000000 00000000 36363636  ............6666
- ffff5de0 36f700f7 36363636 36363636 18181818  6...66666666....
- ffff5df0 18ff00ff 00000000 00000000 36363636  ............6666
- ffff5e00 363636ff 00000000 00000000 00000000  666.............
- ffff5e10 00ff00ff 18181818 18181818 00000000  ................
- ffff5e20 000000ff 36363636 36363636 36363636  ....666666666666
- ffff5e30 3636363f 00000000 00000000 18181818  666?............
- ffff5e40 181f181f 00000000 00000000 00000000  ................
- ffff5e50 001f181f 18181818 18181818 00000000  ................
- ffff5e60 0000003f 36363636 36363636 36363636  ...?666666666666
- ffff5e70 363636ff 36363636 36363636 18181818  666.66666666....
- ffff5e80 18ff18ff 18181818 18181818 18181818  ................
- ffff5e90 181818f8 00000000 00000000 00000000  ................
- ffff5ea0 0000001f 18181818 18181818 ffffffff  ................
- ffff5eb0 ffffffff ffffffff ffffffff 00000000  ................
- ffff5ec0 000000ff ffffffff ffffffff f0f0f0f0  ................
- ffff5ed0 f0f0f0f0 f0f0f0f0 f0f0f0f0 0f0f0f0f  ................
- ffff5ee0 0f0f0f0f 0f0f0f0f 0f0f0f0f ffffffff  ................
- ffff5ef0 ffffff00 00000000 00000000 00000000  ................
- ffff5f00 0076dcd8 d8d8dc76 00000000 000078cc  .v.....v......x.
- ffff5f10 ccccd8cc c6c6c6cc 00000000 0000fec6  ................
- ffff5f20 c6c0c0c0 c0c0c0c0 00000000 00000000  ................
- ffff5f30 fe6c6c6c 6c6c6c6c 00000000 000000fe  .lllllll........
- ffff5f40 c6603018 3060c6fe 00000000 00000000  .`0.0`..........
- ffff5f50 007ed8d8 d8d8d870 00000000 00000000  .~.....p........
- ffff5f60 66666666 667c6060 c0000000 00000000  fffff|``........
- ffff5f70 76dc1818 18181818 00000000 0000007e  v..............~
- ffff5f80 183c6666 663c187e 00000000 00000038  .<fff<.~.......8
- ffff5f90 6cc6c6fe c6c66c38 00000000 0000386c  l.....l8......8l
- ffff5fa0 c6c6c66c 6c6c6cee 00000000 00001e30  ...llll........0
- ffff5fb0 180c3e66 6666663c 00000000 00000000  ..>ffff<........
- ffff5fc0 007edbdb db7e0000 00000000 00000003  .~...~..........
- ffff5fd0 067edbdb f37e60c0 00000000 00001c30  .~...~`........0
- ffff5fe0 60607c60 6060301c 00000000 0000007c  ``|```0........|
- ffff5ff0 c6c6c6c6 c6c6c6c6 00000000 00000000  ................
- ffff6000 fe0000fe 0000fe00 00000000 00000000  ................
- ffff6010 18187e18 180000ff 00000000 00000030  ..~............0
- ffff6020 180c060c 1830007e 00000000 0000000c  .....0.~........
- ffff6030 18306030 180c007e 00000000 00000e1b  .0`0...~........
- ffff6040 1b181818 18181818 18181818 18181818  ................
- ffff6050 18181818 d8d8d870 00000000 00000000  .......p........
- ffff6060 1818007e 00181800 00000000 00000000  ...~............
- ffff6070 0076dc00 76dc0000 00000000 00386c6c  .v..v........8ll
- ffff6080 38000000 00000000 00000000 00000000  8...............
- ffff6090 00000018 18000000 00000000 00000000  ................
- ffff60a0 00000000 18000000 00000000 000f0c0c  ................
- ffff60b0 0c0c0cec 6c6c3c1c 00000000 00d86c6c  ....ll<.......ll
- ffff60c0 6c6c6c00 00000000 00000000 0070d830  lll..........p.0
- ffff60d0 60c8f800 00000000 00000000 00000000  `...............
- ffff60e0 7c7c7c7c 7c7c7c00 00000000 ffffffff  |||||||.........
- ffff60f0 ffffffff ffffffff ffffffff 66bd0040  ............f..@
- ffff6100 000066bf 000000c0 66be0000 00806681  ..f.....f.....f.
- ffff6110 fe000001 800f8430 0166b800 00000066  .......0.f.....f
- ffff6120 09f0baf8 0c66efba fc0c66ed 83f8ff75  .....f....f....u
- ffff6130 096681c6 00080000 ebd466b8 0c000000  .f........f.....
- ffff6140 6609f0ba f80c66ef bafc0c66 edb50866  f.....f....f...f
- ffff6150 0fbae017 7202b501 66b80000 00006609  ....r...f.....f.
- ffff6160 f0baf80c 66efbafc 0c66ed83 f8ff7523  ....f....f....u#
- ffff6170 6681c600 010000fe cd75dd66 81ee0001  f........u.f....
- ffff6180 00006681 ce000700 006681c6 00010000  ..f......f......
- ffff6190 e97bff66 b80c0000 006609f0 baf80c66  .{.f.....f.....f
- ffff61a0 efbafc0c 66ed66a9 00007f00 75c266b8  ....f.f.....u.f.
- ffff61b0 08000000 6609f0ba f80c66ef bafc0c66  ....f.....f....f
- ffff61c0 edb11066 0fb6c166 09f0baf8 0c66ef66  ...f...f.....f.f
- ffff61d0 b8ffffff ffbafc0c 66ef660f b6c16689  ........f.f...f.
- ffff61e0 c06609f0 baf80c66 efbafc0c 66eda801  .f.....f....f...
- ffff61f0 741e83e0 fc744566 f7d06689 c34d09c5  t....tEf..f..M..
- ffff6200 45660fb6 c16609f0 baf80c66 89e8eb22  Ef...f.....f..."
- ffff6210 6683e0f0 742666f7 d06689c3 664f6609  f...t&f..f..fOf.
- ffff6220 c7664766 0fb6c166 09f0baf8 0c66ef66  .fGf...f.....f.f
- ffff6230 89f8bafc 0c66ef66 01dd6645 80c10480  .....f.f..fE....
- ffff6240 f9280f85 7dffe927 ffbac203 b067eeba  .(..}..'.....g..
- ffff6250 da03b000 eefcb100 be0050ba c40388c8  ..........P.....
- ffff6260 ee422eac eefec180 f90575ef b8112cba  .B........u...,.
- ffff6270 d403efb1 00be0550 bad40388 c8ee2eac  .......P........
- ffff6280 42eefec1 80f91972 efb100be 3c50bac8  B......r....<P..
- ffff6290 0388c8ee 422eacee 2eacee2e aceefec1  ....B...........
- ffff62a0 80f94072 e9b100be 1e50bace 0388c8ee  ..@r.....P......
- ffff62b0 2eac42ee fec180f9 0972efba da03ecb1  ..B......r......
- ffff62c0 00be2750 bac00388 c8ee2eac eefec180  ..'P............
- ffff62d0 f91572f0 b020eeba ce03b805 00efb806  ..r.. ..........
- ffff62e0 04efbac4 03b80204 efb80406 efb800a0  ................
- ffff62f0 8ec0bf00 00befc50 b900012e 66a52e66  .......P....f..f
- ffff6300 a52e66a5 2e66a583 c710e2ef b80203ef  ..f..f..........
- ffff6310 b80402ef bace03b8 0510efb8 060eefe9  ................
- ffff6320 0f9d                                 ..              
+ 220000 31c031db 31c931d2 5589e568 00002000  1.1.1.1.U..h.. .
+ 220010 e82700e3 ffc95589 e5680080 0b00e815  .'....U..h......
+ 220020 07e3ffc9 ebfef4eb fd                 .........       
+Contents of section .tarea_1_text:
+ 310000 5589e556 5383ec10 8b45088b 50588b40  U..VS....E..PX.@
+ 310010 548945e8 8955ecc6 45f7008b 45080fb6  T.E..U..E...E...
+ 310020 405084c0 0f84be00 000083ec 0cff7508  @P............u.
+ 310030 e8bf0200 0083c410 83ec08ff 750cff75  ............u..u
+ 310040 08e8aa00 000083c4 106a016a 316a0068  .........j.j1j.h
+ 310050 04003400 e8af05d4 ff83c410 c7050000  ..4.............
+ 310060 32000000 0000eb75 a1000032 008d0c85  2......u...2....
+ 310070 00000000 8b45e88b 55ec0fad d0d3eaf6  .....E..U.......
+ 310080 c1207404 89d031d2 89c389d6 89d883e0  . t...1.........
+ 310090 0f8845f7 807df709 77068045 f730eb10  ..E..}..w..E.0..
+ 3100a0 807df709 760a807d f70f7704 8045f737  .}..v..}..w..E.7
+ 3100b0 a1000032 0083c032 0fb6d00f b645f70f  ...2...2.....E..
+ 3100c0 bec06a01 526a0150 e88d04d4 ff83c410  ..j.Rj.P........
+ 3100d0 a1000032 0083c001 a3000032 00a10000  ...2.......2....
+ 3100e0 320083f8 0f7e8190 908d65f8 5b5e5dc3  2....~....e.[^].
+ 3100f0 5589e556 5383ec18 8b45088b 50608b40  U..VS....E..P`.@
+ 310100 5ca30800 32008915 0c003200 8b45080f  \...2.....2..E..
+ 310110 b648500f b6c1ba00 000000a3 10003200  .HP...........2.
+ 310120 89151400 3200c705 18003200 00000000  ....2.....2.....
+ 310130 c7051c00 32000000 0000c705 20003200  ....2....... .2.
+ 310140 00000000 c7052400 32000000 0000c605  ......$.2.......
+ 310150 28003200 00e93b01 00008b1d 08003200  (.2...;.......2.
+ 310160 8b350c00 32000fb6 05280032 000fb6d0  .5..2....(.2....
+ 310170 b83f0000 0029d089 c189d889 f20fadd0  .?...)..........
+ 310180 d3eaf6c1 20740489 d031d289 c683e601  .... t...1......
+ 310190 8975f089 d083e000 8945f4a1 20003200  .u.......E.. .2.
+ 3101a0 8b152400 32008b5d f08b75f4 89d909c1  ..$.2..]..u.....
+ 3101b0 894de889 d009f089 45ec8b45 e88b55ec  .M......E..E..U.
+ 3101c0 a3200032 00891524 0032008b 0d200032  . .2...$.2... .2
+ 3101d0 008b1d24 003200a1 10003200 8b151400  ...$.2....2.....
+ 3101e0 320039d3 725e39d3 770439c1 7256a118  2.9.r^9.w.9.rV..
+ 3101f0 0032008b 151c0032 0089c683 ce018975  .2.....2.......u
+ 310200 e089d080 cc008945 e48b45e0 8b55e4a3  .......E..E..U..
+ 310210 18003200 89151c00 32008b0d 20003200  ..2.....2... .2.
+ 310220 8b1d2400 3200a110 0032008b 15140032  ..$.2....2.....2
+ 310230 0029c119 d389c889 daa32000 32008915  .)........ .2...
+ 310240 24003200 8b1d1800 32008b35 1c003200  $.2.....2..5..2.
+ 310250 89d889f2 0fa4c201 01c0a318 00320089  .............2..
+ 310260 151c0032 008b1d20 0032008b 35240032  ...2... .2..5$.2
+ 310270 0089d889 f20fa4c2 0101c0a3 20003200  ............ .2.
+ 310280 89152400 32000fb6 05280032 0083c001  ..$.2....(.2....
+ 310290 a2280032 000fb605 28003200 3c3f0f86  .(.2....(.2.<?..
+ 3102a0 b6feffff 8b1d1800 32008b35 1c003200  ........2..5..2.
+ 3102b0 89d889f2 0facd001 d1eaa318 00320089  .............2..
+ 3102c0 151c0032 00a11800 32008b15 1c003200  ...2....2.....2.
+ 3102d0 8b4d0889 41548951 58a11800 32008b15  .M..AT.QX...2...
+ 3102e0 1c003200 8b4d0c89 01895104 9083c418  ..2..M....Q.....
+ 3102f0 5b5e5dc3 5589e583 ec10c745 f8000000  [^].U......E....
+ 310300 00c745fc 00000000 c7052c00 32000000  ..E.......,.2...
+ 310310 0000eb24 8b152c00 32008b45 088d14d0  ...$..,.2..E....
+ 310320 8b028b52 040145f8 1155fca1 2c003200  ...R..E..U..,.2.
+ 310330 83c001a3 2c003200 8b45080f b640500f  ....,.2..E...@P.
+ 310340 b6d0a12c 00320039 c27fc98b 4d088b45  ...,.2.9....M..E
+ 310350 f88b55fc 89415c89 516090c9 c3        ..U..A\.Q`...   
+Contents of section .tarea_1_data:
+ 330000 00                                   .               
+Contents of section .tarea_1_rodata:
+ 340000 01000000 50726f6d 6564696f 20646520  ....Promedio de 
+ 340010 64696769 746f7320 64652036 34206269  digitos de 64 bi
+ 340020 74733a00                             ts:.            
 Contents of section .codigo_init16:
- ffff0000 66a90000 0000753a 6631c00f 22d88cc8  f.....u:f1.."...
- ffff0010 8ed8b800 908ed0bc ff9f0f20 c0660d00  ........... .f..
- ffff0020 0000600f 22c00f09 660f0116 6300e9cb  ..`."...f...c...
- ffff0030 600f01e0 83c8010f 01f066ea 00f8ffff  `.........f.....
- ffff0040 1000f400 00000000 000000ff ff0000ff  ................
- ffff0050 9940ffff ff000000 99cf00ff ff000000  .@..............
- ffff0060 92cf001f 004300ff ff                 .....C...       
+ ffff8000 66a90000 0000753a 6631c00f 22d88cc8  f.....u:f1.."...
+ ffff8010 8ed8b800 908ed0bc ff9f0f20 c0660d00  ........... .f..
+ ffff8020 0000600f 22c00f09 660f0116 6380e934  ..`."...f...c..4
+ ffff8030 110f01e0 83c8010f 01f066ea 8b93ffff  ..........f.....
+ ffff8040 1000f400 00000000 000000ff ff0000ff  ................
+ ffff8050 9940ffff ff000000 99cf00ff ff000000  .@..............
+ ffff8060 92cf001f 004380ff ff                 .....C...       
+Contents of section .video_init:
+ ffff8069 03000300 025f4f50 825581bf 1f004f0d  ....._OP.U....O.
+ ffff8079 0e000005 509c8e8f 281f96b9 a3ff0000  ....P...(.......
+ ffff8089 00000010 0e00ff00 01020304 05140738  ...............8
+ ffff8099 393a3b3c 3d3e3f0c 000f0800 00000000  9:;<=>?.........
+ ffff80a9 002a002a 00002a2a 2a00002a 002a2a2a  .*.*..***..*.***
+ ffff80b9 002a2a2a 00001500 003f002a 15002a3f  .***.....?.*..*?
+ ffff80c9 2a00152a 003f2a2a 152a2a3f 00150000  *..*.?**.**?....
+ ffff80d9 152a003f 00003f2a 2a15002a 152a2a3f  .*.?..?**..*.**?
+ ffff80e9 002a3f2a 00151500 153f003f 15003f3f  .*?*.....?.?..??
+ ffff80f9 2a15152a 153f2a3f 152a3f3f 15000015  *..*.?*?.*??....
+ ffff8109 002a152a 00152a2a 3f00003f 002a3f2a  .*.*..**?..?.*?*
+ ffff8119 003f2a2a 15001515 003f152a 15152a3f  .?**.....?.*..*?
+ ffff8129 3f00153f 003f3f2a 153f2a3f 15150015  ?..?.??*.?*?....
+ ffff8139 152a153f 00153f2a 3f15003f 152a3f3f  .*.?..?*?..?.*??
+ ffff8149 003f3f2a 15151515 153f153f 15153f3f  .??*.....?.?..??
+ ffff8159 3f15153f 153f3f3f 153f3f3f 00000000  ?..?.???.???....
+ ffff8169 00000000 00000000 00000000 00007e81  ..............~.
+ ffff8179 a58181bd 9981817e 00000000 00007eff  .......~......~.
+ ffff8189 dbffffc3 e7ffff7e 00000000 00000000  .......~........
+ ffff8199 6cfefefe fe7c3810 00000000 00000000  l....|8.........
+ ffff81a9 10387cfe 7c381000 00000000 00000018  .8|.|8..........
+ ffff81b9 3c3ce7e7 e718183c 00000000 00000018  <<.....<........
+ ffff81c9 3c7effff 7e18183c 00000000 00000000  <~..~..<........
+ ffff81d9 0000183c 3c180000 00000000 ffffffff  ...<<...........
+ ffff81e9 ffffe7c3 c3e7ffff ffffffff 00000000  ................
+ ffff81f9 003c6642 42663c00 00000000 ffffffff  .<fBBf<.........
+ ffff8209 ffc399bd bd99c3ff ffffffff 00001e0e  ................
+ ffff8219 1a3278cc cccccc78 00000000 00003c66  .2x....x......<f
+ ffff8229 6666663c 187e1818 00000000 00003f33  fff<.~........?3
+ ffff8239 3f303030 3070f0e0 00000000 00007f63  ?0000p.........c
+ ffff8249 7f636363 6367e7e6 c0000000 00000018  .ccccg..........
+ ffff8259 18db3ce7 3cdb1818 00000000 0080c0e0  ..<.<...........
+ ffff8269 f0f8fef8 f0e0c080 00000000 0002060e  ................
+ ffff8279 1e3efe3e 1e0e0602 00000000 0000183c  .>.>...........<
+ ffff8289 7e181818 7e3c1800 00000000 00006666  ~...~<........ff
+ ffff8299 66666666 66006666 00000000 00007fdb  fffff.ff........
+ ffff82a9 dbdb7b1b 1b1b1b1b 00000000 007cc660  ..{..........|.`
+ ffff82b9 386cc6c6 6c380cc6 7c000000 00000000  8l..l8..|.......
+ ffff82c9 00000000 fefefefe 00000000 0000183c  ...............<
+ ffff82d9 7e181818 7e3c187e 00000000 0000183c  ~...~<.~.......<
+ ffff82e9 7e181818 18181818 00000000 00001818  ~...............
+ ffff82f9 18181818 187e3c18 00000000 00000000  .....~<.........
+ ffff8309 00180cfe 0c180000 00000000 00000000  ................
+ ffff8319 003060fe 60300000 00000000 00000000  .0`.`0..........
+ ffff8329 0000c0c0 c0fe0000 00000000 00000000  ................
+ ffff8339 002466ff 66240000 00000000 00000000  .$f.f$..........
+ ffff8349 1038387c 7cfefe00 00000000 00000000  .88||...........
+ ffff8359 fefe7c7c 38381000 00000000 00000000  ..||88..........
+ ffff8369 00000000 00000000 00000000 0000183c  ...............<
+ ffff8379 3c3c1818 18001818 00000000 00666666  <<...........fff
+ ffff8389 24000000 00000000 00000000 0000006c  $..............l
+ ffff8399 6cfe6c6c 6cfe6c6c 00000000 18187cc6  l.lll.ll......|.
+ ffff83a9 c2c07c06 0686c67c 18180000 00000000  ..|....|........
+ ffff83b9 c2c60c18 3060c686 00000000 0000386c  ....0`........8l
+ ffff83c9 6c3876dc cccccc76 00000000 00303030  l8v....v.....000
+ ffff83d9 60000000 00000000 00000000 00000c18  `...............
+ ffff83e9 30303030 3030180c 00000000 00003018  000000........0.
+ ffff83f9 0c0c0c0c 0c0c1830 00000000 00000000  .......0........
+ ffff8409 00663cff 3c660000 00000000 00000000  .f<.<f..........
+ ffff8419 0018187e 18180000 00000000 00000000  ...~............
+ ffff8429 00000000 00181818 30000000 00000000  ........0.......
+ ffff8439 000000fe 00000000 00000000 00000000  ................
+ ffff8449 00000000 00001818 00000000 00000000  ................
+ ffff8459 02060c18 3060c080 00000000 00003c66  ....0`........<f
+ ffff8469 c3c3dbdb c3c3663c 00000000 00001838  ......f<.......8
+ ffff8479 78181818 1818187e 00000000 00007cc6  x......~......|.
+ ffff8489 060c1830 60c0c6fe 00000000 00007cc6  ...0`.........|.
+ ffff8499 06063c06 0606c67c 00000000 00000c1c  ..<....|........
+ ffff84a9 3c6cccfe 0c0c0c1e 00000000 0000fec0  <l..............
+ ffff84b9 c0c0fc06 0606c67c 00000000 00003860  .......|......8`
+ ffff84c9 c0c0fcc6 c6c6c67c 00000000 0000fec6  .......|........
+ ffff84d9 06060c18 30303030 00000000 00007cc6  ....0000......|.
+ ffff84e9 c6c67cc6 c6c6c67c 00000000 00007cc6  ..|....|......|.
+ ffff84f9 c6c67e06 06060c78 00000000 00000000  ..~....x........
+ ffff8509 18180000 00181800 00000000 00000000  ................
+ ffff8519 18180000 00181830 00000000 00000006  .......0........
+ ffff8529 0c183060 30180c06 00000000 00000000  ..0`0...........
+ ffff8539 007e0000 7e000000 00000000 00000060  .~..~..........`
+ ffff8549 30180c06 0c183060 00000000 00007cc6  0.....0`......|.
+ ffff8559 c60c1818 18001818 00000000 0000007c  ...............|
+ ffff8569 c6c6dede dedcc07c 00000000 00001038  .......|.......8
+ ffff8579 6cc6c6fe c6c6c6c6 00000000 0000fc66  l..............f
+ ffff8589 66667c66 666666fc 00000000 00003c66  ff|ffff.......<f
+ ffff8599 c2c0c0c0 c0c2663c 00000000 0000f86c  ......f<.......l
+ ffff85a9 66666666 66666cf8 00000000 0000fe66  ffffffl........f
+ ffff85b9 62687868 606266fe 00000000 0000fe66  bhxh`bf........f
+ ffff85c9 62687868 606060f0 00000000 00003c66  bhxh```.......<f
+ ffff85d9 c2c0c0de c6c6663a 00000000 0000c6c6  ......f:........
+ ffff85e9 c6c6fec6 c6c6c6c6 00000000 00003c18  ..............<.
+ ffff85f9 18181818 1818183c 00000000 00001e0c  .......<........
+ ffff8609 0c0c0c0c cccccc78 00000000 0000e666  .......x.......f
+ ffff8619 666c7878 6c6666e6 00000000 0000f060  flxxlff........`
+ ffff8629 60606060 606266fe 00000000 0000c3e7  `````bf.........
+ ffff8639 ffffdbc3 c3c3c3c3 00000000 0000c6e6  ................
+ ffff8649 f6fedece c6c6c6c6 00000000 00007cc6  ..............|.
+ ffff8659 c6c6c6c6 c6c6c67c 00000000 0000fc66  .......|.......f
+ ffff8669 66667c60 606060f0 00000000 00007cc6  ff|````.......|.
+ ffff8679 c6c6c6c6 c6d6de7c 0c0e0000 0000fc66  .......|.......f
+ ffff8689 66667c6c 666666e6 00000000 00007cc6  ff|lfff.......|.
+ ffff8699 c660380c 06c6c67c 00000000 0000ffdb  .`8....|........
+ ffff86a9 99181818 1818183c 00000000 0000c6c6  .......<........
+ ffff86b9 c6c6c6c6 c6c6c67c 00000000 0000c3c3  .......|........
+ ffff86c9 c3c3c3c3 c3663c18 00000000 0000c3c3  .....f<.........
+ ffff86d9 c3c3c3db dbff6666 00000000 0000c3c3  ......ff........
+ ffff86e9 663c1818 3c66c3c3 00000000 0000c3c3  f<..<f..........
+ ffff86f9 c3663c18 1818183c 00000000 0000ffc3  .f<....<........
+ ffff8709 860c1830 60c1c3ff 00000000 00003c30  ...0`.........<0
+ ffff8719 30303030 3030303c 00000000 00000080  0000000<........
+ ffff8729 c0e07038 1c0e0602 00000000 00003c0c  ..p8..........<.
+ ffff8739 0c0c0c0c 0c0c0c3c 00000000 10386cc6  .......<.....8l.
+ ffff8749 00000000 00000000 00000000 00000000  ................
+ ffff8759 00000000 00000000 00ff0000 30301800  ............00..
+ ffff8769 00000000 00000000 00000000 00000000  ................
+ ffff8779 00780c7c cccccc76 00000000 0000e060  .x.|...v.......`
+ ffff8789 60786c66 6666667c 00000000 00000000  `xlffff|........
+ ffff8799 007cc6c0 c0c0c67c 00000000 00001c0c  .|.....|........
+ ffff87a9 0c3c6ccc cccccc76 00000000 00000000  .<l....v........
+ ffff87b9 007cc6fe c0c0c67c 00000000 0000386c  .|.....|......8l
+ ffff87c9 6460f060 606060f0 00000000 00000000  d`.````.........
+ ffff87d9 0076cccc cccccc7c 0ccc7800 0000e060  .v.....|..x....`
+ ffff87e9 606c7666 666666e6 00000000 00001818  `lvffff.........
+ ffff87f9 00381818 1818183c 00000000 00000606  .8.....<........
+ ffff8809 000e0606 06060606 66663c00 0000e060  ........ff<....`
+ ffff8819 60666c78 786c66e6 00000000 00003818  `flxxlf.......8.
+ ffff8829 18181818 1818183c 00000000 00000000  .......<........
+ ffff8839 00e6ffdb dbdbdbdb 00000000 00000000  ................
+ ffff8849 00dc6666 66666666 00000000 00000000  ..ffffff........
+ ffff8859 007cc6c6 c6c6c67c 00000000 00000000  .|.....|........
+ ffff8869 00dc6666 6666667c 6060f000 00000000  ..fffff|``......
+ ffff8879 0076cccc cccccc7c 0c0c1e00 00000000  .v.....|........
+ ffff8889 00dc7666 606060f0 00000000 00000000  ..vf```.........
+ ffff8899 007cc660 380cc67c 00000000 00001030  .|.`8..|.......0
+ ffff88a9 30fc3030 3030361c 00000000 00000000  0.00006.........
+ ffff88b9 00cccccc cccccc76 00000000 00000000  .......v........
+ ffff88c9 00c3c3c3 c3663c18 00000000 00000000  .....f<.........
+ ffff88d9 00c3c3c3 dbdbff66 00000000 00000000  .......f........
+ ffff88e9 00c3663c 183c66c3 00000000 00000000  ..f<.<f.........
+ ffff88f9 00c6c6c6 c6c6c67e 060cf800 00000000  .......~........
+ ffff8909 00fecc18 3060c6fe 00000000 00000e18  ....0`..........
+ ffff8919 18187018 1818180e 00000000 00001818  ..p.............
+ ffff8929 18180018 18181818 00000000 00007018  ..............p.
+ ffff8939 18180e18 18181870 00000000 000076dc  .......p......v.
+ ffff8949 00000000 00000000 00000000 00000000  ................
+ ffff8959 10386cc6 c6c6fe00 00000000 00003c66  .8l...........<f
+ ffff8969 c2c0c0c0 c2663c0c 067c0000 0000cc00  .....f<..|......
+ ffff8979 00cccccc cccccc76 00000000 000c1830  .......v.......0
+ ffff8989 007cc6fe c0c0c67c 00000000 0010386c  .|.....|......8l
+ ffff8999 00780c7c cccccc76 00000000 0000cc00  .x.|...v........
+ ffff89a9 00780c7c cccccc76 00000000 00603018  .x.|...v.....`0.
+ ffff89b9 00780c7c cccccc76 00000000 00386c38  .x.|...v.....8l8
+ ffff89c9 00780c7c cccccc76 00000000 00000000  .x.|...v........
+ ffff89d9 3c666060 663c0c06 3c000000 0010386c  <f``f<..<.....8l
+ ffff89e9 007cc6fe c0c0c67c 00000000 0000c600  .|.....|........
+ ffff89f9 007cc6fe c0c0c67c 00000000 00603018  .|.....|.....`0.
+ ffff8a09 007cc6fe c0c0c67c 00000000 00006600  .|.....|......f.
+ ffff8a19 00381818 1818183c 00000000 00183c66  .8.....<......<f
+ ffff8a29 00381818 1818183c 00000000 00603018  .8.....<.....`0.
+ ffff8a39 00381818 1818183c 00000000 00c60010  .8.....<........
+ ffff8a49 386cc6c6 fec6c6c6 00000000 386c3800  8l..........8l8.
+ ffff8a59 386cc6c6 fec6c6c6 00000000 18306000  8l...........0`.
+ ffff8a69 fe66607c 606066fe 00000000 00000000  .f`|``f.........
+ ffff8a79 006e3b1b 7ed8dc77 00000000 00003e6c  .n;.~..w......>l
+ ffff8a89 ccccfecc ccccccce 00000000 0010386c  ..............8l
+ ffff8a99 007cc6c6 c6c6c67c 00000000 0000c600  .|.....|........
+ ffff8aa9 007cc6c6 c6c6c67c 00000000 00603018  .|.....|.....`0.
+ ffff8ab9 007cc6c6 c6c6c67c 00000000 003078cc  .|.....|.....0x.
+ ffff8ac9 00cccccc cccccc76 00000000 00603018  .......v.....`0.
+ ffff8ad9 00cccccc cccccc76 00000000 0000c600  .......v........
+ ffff8ae9 00c6c6c6 c6c6c67e 060c7800 00c6007c  .......~..x....|
+ ffff8af9 c6c6c6c6 c6c6c67c 00000000 00c600c6  .......|........
+ ffff8b09 c6c6c6c6 c6c6c67c 00000000 0018187e  .......|.......~
+ ffff8b19 c3c0c0c0 c37e1818 00000000 00386c64  .....~.......8ld
+ ffff8b29 60f06060 6060e6fc 00000000 0000c366  `.````.........f
+ ffff8b39 3c18ff18 ff181818 00000000 00fc6666  <.............ff
+ ffff8b49 7c62666f 666666f3 00000000 000e1b18  |bfofff.........
+ ffff8b59 18187e18 18181818 d8700000 00183060  ..~......p....0`
+ ffff8b69 00780c7c cccccc76 00000000 000c1830  .x.|...v.......0
+ ffff8b79 00381818 1818183c 00000000 00183060  .8.....<......0`
+ ffff8b89 007cc6c6 c6c6c67c 00000000 00183060  .|.....|......0`
+ ffff8b99 00cccccc cccccc76 00000000 000076dc  .......v......v.
+ ffff8ba9 00dc6666 66666666 00000000 76dc00c6  ..ffffff....v...
+ ffff8bb9 e6f6fede cec6c6c6 00000000 003c6c6c  .............<ll
+ ffff8bc9 3e007e00 00000000 00000000 00386c6c  >.~..........8ll
+ ffff8bd9 38007c00 00000000 00000000 00003030  8.|...........00
+ ffff8be9 00303060 c0c6c67c 00000000 00000000  .00`...|........
+ ffff8bf9 0000fec0 c0c0c000 00000000 00000000  ................
+ ffff8c09 0000fe06 06060600 00000000 00c0c0c2  ................
+ ffff8c19 c6cc1830 60ce9b06 0c1f0000 00c0c0c2  ...0`...........
+ ffff8c29 c6cc1830 66ce963e 06060000 00001818  ...0f..>........
+ ffff8c39 00181818 3c3c3c18 00000000 00000000  ....<<<.........
+ ffff8c49 00366cd8 6c360000 00000000 00000000  .6l.l6..........
+ ffff8c59 00d86c36 6cd80000 00000000 11441144  ..l6l........D.D
+ ffff8c69 11441144 11441144 11441144 55aa55aa  .D.D.D.D.D.DU.U.
+ ffff8c79 55aa55aa 55aa55aa 55aa55aa dd77dd77  U.U.U.U.U.U..w.w
+ ffff8c89 dd77dd77 dd77dd77 dd77dd77 18181818  .w.w.w.w.w.w....
+ ffff8c99 18181818 18181818 18181818 18181818  ................
+ ffff8ca9 181818f8 18181818 18181818 18181818  ................
+ ffff8cb9 18f818f8 18181818 18181818 36363636  ............6666
+ ffff8cc9 363636f6 36363636 36363636 00000000  666.66666666....
+ ffff8cd9 000000fe 36363636 36363636 00000000  ....66666666....
+ ffff8ce9 00f818f8 18181818 18181818 36363636  ............6666
+ ffff8cf9 36f606f6 36363636 36363636 36363636  6...666666666666
+ ffff8d09 36363636 36363636 36363636 00000000  666666666666....
+ ffff8d19 00fe06f6 36363636 36363636 36363636  ....666666666666
+ ffff8d29 36f606fe 00000000 00000000 36363636  6...........6666
+ ffff8d39 363636fe 00000000 00000000 18181818  666.............
+ ffff8d49 18f818f8 00000000 00000000 00000000  ................
+ ffff8d59 000000f8 18181818 18181818 18181818  ................
+ ffff8d69 1818181f 00000000 00000000 18181818  ................
+ ffff8d79 181818ff 00000000 00000000 00000000  ................
+ ffff8d89 000000ff 18181818 18181818 18181818  ................
+ ffff8d99 1818181f 18181818 18181818 00000000  ................
+ ffff8da9 000000ff 00000000 00000000 18181818  ................
+ ffff8db9 181818ff 18181818 18181818 18181818  ................
+ ffff8dc9 181f181f 18181818 18181818 36363636  ............6666
+ ffff8dd9 36363637 36363636 36363636 36363636  6667666666666666
+ ffff8de9 3637303f 00000000 00000000 00000000  670?............
+ ffff8df9 003f3037 36363636 36363636 36363636  .?07666666666666
+ ffff8e09 36f700ff 00000000 00000000 00000000  6...............
+ ffff8e19 00ff00f7 36363636 36363636 36363636  ....666666666666
+ ffff8e29 36373037 36363636 36363636 00000000  670766666666....
+ ffff8e39 00ff00ff 00000000 00000000 36363636  ............6666
+ ffff8e49 36f700f7 36363636 36363636 18181818  6...66666666....
+ ffff8e59 18ff00ff 00000000 00000000 36363636  ............6666
+ ffff8e69 363636ff 00000000 00000000 00000000  666.............
+ ffff8e79 00ff00ff 18181818 18181818 00000000  ................
+ ffff8e89 000000ff 36363636 36363636 36363636  ....666666666666
+ ffff8e99 3636363f 00000000 00000000 18181818  666?............
+ ffff8ea9 181f181f 00000000 00000000 00000000  ................
+ ffff8eb9 001f181f 18181818 18181818 00000000  ................
+ ffff8ec9 0000003f 36363636 36363636 36363636  ...?666666666666
+ ffff8ed9 363636ff 36363636 36363636 18181818  666.66666666....
+ ffff8ee9 18ff18ff 18181818 18181818 18181818  ................
+ ffff8ef9 181818f8 00000000 00000000 00000000  ................
+ ffff8f09 0000001f 18181818 18181818 ffffffff  ................
+ ffff8f19 ffffffff ffffffff ffffffff 00000000  ................
+ ffff8f29 000000ff ffffffff ffffffff f0f0f0f0  ................
+ ffff8f39 f0f0f0f0 f0f0f0f0 f0f0f0f0 0f0f0f0f  ................
+ ffff8f49 0f0f0f0f 0f0f0f0f 0f0f0f0f ffffffff  ................
+ ffff8f59 ffffff00 00000000 00000000 00000000  ................
+ ffff8f69 0076dcd8 d8d8dc76 00000000 000078cc  .v.....v......x.
+ ffff8f79 ccccd8cc c6c6c6cc 00000000 0000fec6  ................
+ ffff8f89 c6c0c0c0 c0c0c0c0 00000000 00000000  ................
+ ffff8f99 fe6c6c6c 6c6c6c6c 00000000 000000fe  .lllllll........
+ ffff8fa9 c6603018 3060c6fe 00000000 00000000  .`0.0`..........
+ ffff8fb9 007ed8d8 d8d8d870 00000000 00000000  .~.....p........
+ ffff8fc9 66666666 667c6060 c0000000 00000000  fffff|``........
+ ffff8fd9 76dc1818 18181818 00000000 0000007e  v..............~
+ ffff8fe9 183c6666 663c187e 00000000 00000038  .<fff<.~.......8
+ ffff8ff9 6cc6c6fe c6c66c38 00000000 0000386c  l.....l8......8l
+ ffff9009 c6c6c66c 6c6c6cee 00000000 00001e30  ...llll........0
+ ffff9019 180c3e66 6666663c 00000000 00000000  ..>ffff<........
+ ffff9029 007edbdb db7e0000 00000000 00000003  .~...~..........
+ ffff9039 067edbdb f37e60c0 00000000 00001c30  .~...~`........0
+ ffff9049 60607c60 6060301c 00000000 0000007c  ``|```0........|
+ ffff9059 c6c6c6c6 c6c6c6c6 00000000 00000000  ................
+ ffff9069 fe0000fe 0000fe00 00000000 00000000  ................
+ ffff9079 18187e18 180000ff 00000000 00000030  ..~............0
+ ffff9089 180c060c 1830007e 00000000 0000000c  .....0.~........
+ ffff9099 18306030 180c007e 00000000 00000e1b  .0`0...~........
+ ffff90a9 1b181818 18181818 18181818 18181818  ................
+ ffff90b9 18181818 d8d8d870 00000000 00000000  .......p........
+ ffff90c9 1818007e 00181800 00000000 00000000  ...~............
+ ffff90d9 0076dc00 76dc0000 00000000 00386c6c  .v..v........8ll
+ ffff90e9 38000000 00000000 00000000 00000000  8...............
+ ffff90f9 00000018 18000000 00000000 00000000  ................
+ ffff9109 00000000 18000000 00000000 000f0c0c  ................
+ ffff9119 0c0c0cec 6c6c3c1c 00000000 00d86c6c  ....ll<.......ll
+ ffff9129 6c6c6c00 00000000 00000000 0070d830  lll..........p.0
+ ffff9139 60c8f800 00000000 00000000 00000000  `...............
+ ffff9149 7c7c7c7c 7c7c7c00 00000000 ffffffff  |||||||.........
+ ffff9159 ffffffff ffffffff ffffffff 66bd0040  ............f..@
+ ffff9169 000066bf 000000c0 66be0000 00806681  ..f.....f.....f.
+ ffff9179 fe000001 800f8430 0166b800 00000066  .......0.f.....f
+ ffff9189 09f0baf8 0c66efba fc0c66ed 83f8ff75  .....f....f....u
+ ffff9199 096681c6 00080000 ebd466b8 0c000000  .f........f.....
+ ffff91a9 6609f0ba f80c66ef bafc0c66 edb50866  f.....f....f...f
+ ffff91b9 0fbae017 7202b501 66b80000 00006609  ....r...f.....f.
+ ffff91c9 f0baf80c 66efbafc 0c66ed83 f8ff7523  ....f....f....u#
+ ffff91d9 6681c600 010000fe cd75dd66 81ee0001  f........u.f....
+ ffff91e9 00006681 ce000700 006681c6 00010000  ..f......f......
+ ffff91f9 e97bff66 b80c0000 006609f0 baf80c66  .{.f.....f.....f
+ ffff9209 efbafc0c 66ed66a9 00007f00 75c266b8  ....f.f.....u.f.
+ ffff9219 08000000 6609f0ba f80c66ef bafc0c66  ....f.....f....f
+ ffff9229 edb11066 0fb6c166 09f0baf8 0c66ef66  ...f...f.....f.f
+ ffff9239 b8ffffff ffbafc0c 66ef660f b6c16689  ........f.f...f.
+ ffff9249 c06609f0 baf80c66 efbafc0c 66eda801  .f.....f....f...
+ ffff9259 741e83e0 fc744566 f7d06689 c34d09c5  t....tEf..f..M..
+ ffff9269 45660fb6 c16609f0 baf80c66 89e8eb22  Ef...f.....f..."
+ ffff9279 6683e0f0 742666f7 d06689c3 664f6609  f...t&f..f..fOf.
+ ffff9289 c7664766 0fb6c166 09f0baf8 0c66ef66  .fGf...f.....f.f
+ ffff9299 89f8bafc 0c66ef66 01dd6645 80c10480  .....f.f..fE....
+ ffff92a9 f9280f85 7dffe927 ffbac203 b067eeba  .(..}..'.....g..
+ ffff92b9 da03b000 eefcb100 be6980ba c40388c8  .........i......
+ ffff92c9 ee422eac eefec180 f90575ef b8112cba  .B........u...,.
+ ffff92d9 d403efb1 00be6e80 bad40388 c8ee2eac  ......n.........
+ ffff92e9 42eefec1 80f91972 efb100be a580bac8  B......r........
+ ffff92f9 0388c8ee 422eacee 2eacee2e aceefec1  ....B...........
+ ffff9309 80f94072 e9b100be 8780bace 0388c8ee  ..@r............
+ ffff9319 2eac42ee fec180f9 0972efba da03ecb1  ..B......r......
+ ffff9329 00be9080 bac00388 c8ee2eac eefec180  ................
+ ffff9339 f91572f0 b020eeba ce03b805 00efb806  ..r.. ..........
+ ffff9349 04efbac4 03b80204 efb80406 efb800a0  ................
+ ffff9359 8ec0bf00 00be6581 b900012e 66a52e66  ......e.....f..f
+ ffff9369 a52e66a5 2e66a583 c710e2ef b80203ef  ..f..f..........
+ ffff9379 b80402ef bace03b8 0510efb8 060eefe9  ................
+ ffff9389 a6ec                                 ..              
 Contents of section .codigo_init32:
- fffff800 66b81800 8ed88ec0 8ee88ee0 8ed0bcff  f...............
- fffff810 8fff1f31 c0b9ff03 000050e2 fdbcff8f  ...1......P.....
- fffff820 ff1f5589 e5686606 00006800 00050068  ..U..hf...h....h
- fffff830 0020ffff e8c70300 00c983f8 010f85ba  . ..............
- fffff840 00000055 89e5681a 00000068 00202000  ...U..h....h.  .
- fffff850 680030ff ffe8a607 0500c983 f8010f85  h.0.............
- fffff860 99000000 5589e568 84000000 68000010  ....U..h....h...
- fffff870 00680040 ffffe885 070500c9 83f80175  .h.@...........u
- fffff880 7c5589e5 68540000 00680000 21006800  |U..hT...h..!.h.
- fffff890 10ffffe8 68070500 c983f801 755f5589  ....h.......u_U.
- fffff8a0 e5689c01 00006800 00300068 0065ffff  .h....h..0.h.e..
- fffff8b0 e84b0705 00c983f8 01754255 89e568ef  .K.......uBU..h.
- fffff8c0 00000068 00000000 6800fdff ffe82e07  ...h....h.......
- fffff8d0 0500c983 f8017525 0f011518 0000000f  ......u%........
- fffff8e0 011d9601 0000e853 0d0500e8 3f0d0500  .......S....?...
- fffff8f0 e80d0d05 00fbea00 20200008 00f4ebfd  ........  ......
+ ffff938b 66b81800 8ed88ec0 8ee88ee0 8ed0bcff  f...............
+ ffff939b 8fff1f31 c0b9ff03 000050e2 fdbcff8f  ...1......P.....
+ ffff93ab ff1f5589 e5687508 00006800 00050068  ..U..hu...h....h
+ ffff93bb 9c01ffff e8330400 00c983f8 010f8526  .....3.........&
+ ffff93cb 04000055 89e56829 00000068 00002200  ...U..h)...h..".
+ ffff93db 68f10aff ffe81b6c 0500c983 f8010f85  h......l........
+ ffff93eb 05040000 5589e568 a6000000 68000010  ....U..h....h...
+ ffff93fb 0068110a ffffe8fa 6b0500c9 83f8010f  .h......k.......
+ ffff940b 85e40300 005589e5 683a0000 00680000  .....U..h:...h..
+ ffff941b 200068b7 0affffe8 d96b0500 c983f801   .h......k......
+ ffff942b 0f85c303 00005589 e5689c01 00006800  ......U..h....h.
+ ffff943b 00000068 0000ffff e8b86b05 00c983f8  ...h......k.....
+ ffff944b 010f85a2 03000055 89e5685d 03000068  .......U..h]...h
+ ffff945b 00003100 681a0bff ffe8976b 0500c983  ..1.h......k....
+ ffff946b f8010f85 81030000 5589e568 30000000  ........U..h0...
+ ffff947b 68000032 0068770e ffffe876 6b0500c9  h..2.hw....vk...
+ ffff948b 83f8010f 85600300 005589e5 68010000  .....`...U..h...
+ ffff949b 00680000 330068a7 0effffe8 556b0500  .h..3.h.....Uk..
+ ffff94ab c983f801 0f853f03 00005589 e5682400  ......?...U..h$.
+ ffff94bb 00006800 00340068 a80effff e8346b05  ..h..4.h.....4k.
+ ffff94cb 00c983f8 010f851e 0300000f 01151800  ................
+ ffff94db 00000f01 1d960100 00e88603 0000e872  ...............r
+ ffff94eb 030000e8 40030000 fb5589e5 6a016a01  ....@....U..j.j.
+ ffff94fb 68000001 00e8746e 05000f22 d8c95589  h.....tn..."..U.
+ ffff950b e56a016a 016a006a 006a006a 006a0068  .j.j.j.j.j.j.j.h
+ ffff951b 00100100 6a006800 000100e8 8b6e0500  ....j.h......n..
+ ffff952b c95589e5 6a016a01 6a006a00 6a006a00  .U..j.j.j.j.j.j.
+ ffff953b 6a006800 0009006a 7f680000 0100e868  j.h....j.h.....h
+ ffff954b 6e0500c9 5589e56a 016a016a 006a006a  n...U..j.j.j.j.j
+ ffff955b 006a006a 00680000 410068ff 03000068  .j.j.h..A.h....h
+ ffff956b 00000100 e8426e05 00c95589 e56a016a  .....Bn...U..j.j
+ ffff957b 006a006a 006a006a 006a006a 006a0068  .j.j.j.j.j.j.j.h
+ ffff958b 00000000 6a006800 100100e8 d66e0500  ....j.h......n..
+ ffff959b c95589e5 6a016a00 6a006a00 6a006a00  .U..j.j.j.j.j.j.
+ ffff95ab 6a006a00 6a006800 0001006a 10680010  j.j.j.h....j.h..
+ ffff95bb 0100e8af 6e0500c9 5589e56a 016a006a  ....n...U..j.j.j
+ ffff95cb 006a006a 006a006a 006a006a 00680000  .j.j.j.j.j.j.h..
+ ffff95db 05006a50 68001001 00e8886e 0500c955  ..jPh......n...U
+ ffff95eb 89e56a01 6a016a00 6a006a00 6a006a00  ..j.j.j.j.j.j.j.
+ ffff95fb 6a006a00 6800800b 0068b800 00006800  j.j.h....h....h.
+ ffff960b 100100e8 5e6e0500 c95589e5 6a016a00  ....^n...U..j.j.
+ ffff961b 6a006a00 6a006a00 6a006a00 6a006800  j.j.j.j.j.j.j.h.
+ ffff962b 00100068 00010000 68001001 00e8346e  ...h....h.....4n
+ ffff963b 0500c955 89e56a01 6a016a00 6a006a00  ...U..j.j.j.j.j.
+ ffff964b 6a006a00 6a006a00 68000020 00680002  j.j.j.j.h.. .h..
+ ffff965b 00006800 100100e8 0a6e0500 c95589e5  ..h......n...U..
+ ffff966b 6a016a01 6a006a00 6a006a00 6a006a00  j.j.j.j.j.j.j.j.
+ ffff967b 6a006800 00210068 10020000 68001001  j.h..!.h....h...
+ ffff968b 00e8e06d 0500c955 89e56a01 6a006a00  ...m...U..j.j.j.
+ ffff969b 6a006a00 6a006a00 6a006a00 68000022  j.j.j.j.j.j.h.."
+ ffff96ab 00682002 00006800 100100e8 b66d0500  .h ...h......m..
+ ffff96bb c95589e5 6a016a00 6a006a00 6a006a00  .U..j.j.j.j.j.j.
+ ffff96cb 6a006a00 6a006800 00310068 10030000  j.j.j.h..1.h....
+ ffff96db 68001001 00e88c6d 0500c955 89e56a01  h......m...U..j.
+ ffff96eb 6a016a00 6a006a00 6a006a00 6a006a00  j.j.j.j.j.j.j.j.
+ ffff96fb 68000032 00682003 00006800 100100e8  h..2.h ...h.....
+ ffff970b 626d0500 c95589e5 6a016a01 6a006a00  bm...U..j.j.j.j.
+ ffff971b 6a006a00 6a006a00 6a006800 00330068  j.j.j.j.j.h..3.h
+ ffff972b 30030000 68001001 00e8386d 0500c955  0...h.....8m...U
+ ffff973b 89e56a01 6a006a00 6a006a00 6a006a00  ..j.j.j.j.j.j.j.
+ ffff974b 6a006a00 68000034 00684003 00006800  j.j.h..4.h@...h.
+ ffff975b 100100e8 0e6d0500 c95589e5 6a016a01  .....m...U..j.j.
+ ffff976b 6a006a00 6a006a00 6a006a00 6a006800  j.j.j.j.j.j.j.h.
+ ffff977b 80ff1f68 f8030000 68000009 00e8e46c  ...h....h......l
+ ffff978b 0500c955 89e56a01 6a016a00 6a006a00  ...U..j.j.j.j.j.
+ ffff979b 6a006a00 6a006a00 6800f0ff 1f68ff03  j.j.j.j.h....h..
+ ffff97ab 00006800 000900e8 ba6c0500 c95589e5  ..h......l...U..
+ ffff97bb 6a016a01 6a006a00 6a006a00 6a006a00  j.j.j.j.j.j.j.j.
+ ffff97cb 6a00688b 93ffff68 f9030000 68000041  j.h....h....h..A
+ ffff97db 00e8906c 0500c90f 20c00d00 0000800f  ...l.... .......
+ ffff97eb 22c0ea00 00220008 00f4ebfd           "...."......    
 Contents of section .functions_rom:
- fffffc00 5589e583 ec10c645 ff00837d 10007426  U......E...}..t&
- fffffc10 eb1a836d 10018b55 088d4204 8945088b  ...m...U..B..E..
- fffffc20 450c8d48 04894d0c 8b128910 837d1000  E..H..M......}..
- fffffc30 75e0c645 ff010fb6 45ffc9c3           u..E....E...    
+ ffff97f7 5589e583 ec10c645 ff00837d 10007426  U......E...}..t&
+ ffff9807 eb1a836d 10018b55 088d4204 8945088b  ...m...U..B..E..
+ ffff9817 450c8d48 04894d0c 8b128910 837d1000  E..H..M......}..
+ ffff9827 75e0c645 ff010fb6 45ffc9c3 b011e620  u..E....E...... 
+ ffff9837 b020e621 b004e621 b001e621 b0fde621  . .!...!...!...!
+ ffff9847 b011e6a0 b028e6a1 b002e6a1 b001e6a1  .....(..........
+ ffff9857 b0ffe6a1 b0fce621 c3b036e6 4366b89c  .......!..6.Cf..
+ ffff9867 2ee64088 e0e640c3 b0ffe664 b9000100  ..@...@....d....
+ ffff9877 00e2feb9 00000100 e460a801 e1fab0f4  .........`......
+ ffff9887 e664b900 000100e4 60a801e1 fae460c3  .d......`.....`.
 Contents of section .codigo_reset:
- fffffff0 fafce90b 00f4ebfd 90909090 90909090  ................
+ fffffff0 fafce90b 80f4ebfd 90909090 90909090  ................
 Contents of section .comment:
  0000 4743433a 20285562 756e7475 20372e35  GCC: (Ubuntu 7.5
  0010 2e302d33 7562756e 7475317e 31382e30  .0-3ubuntu1~18.0
@@ -814,15 +1026,15 @@ Disassembly of section .functions:
 00050049 <limpiar_buffer+0xd> movb   $0x0,0x11(%eax)
 0005004d <limpiar_buffer+0x11> mov    0x8(%ebp),%eax
 00050050 <limpiar_buffer+0x14> movb   $0x0,0x12(%eax)
-00050054 <limpiar_buffer+0x18> movl   $0x0,0x210020
+00050054 <limpiar_buffer+0x18> movl   $0x0,0x507c8
 0005005e <limpiar_buffer+0x22> jmp    00050079 <limpiar_buffer+0x3d>
-00050060 <limpiar_buffer+0x24> mov    0x210020,%eax
+00050060 <limpiar_buffer+0x24> mov    0x507c8,%eax
 00050065 <limpiar_buffer+0x29> mov    0x8(%ebp),%edx
 00050068 <limpiar_buffer+0x2c> movb   $0x0,(%edx,%eax,1)
-0005006c <limpiar_buffer+0x30> mov    0x210020,%eax
+0005006c <limpiar_buffer+0x30> mov    0x507c8,%eax
 00050071 <limpiar_buffer+0x35> add    $0x1,%eax
-00050074 <limpiar_buffer+0x38> mov    %eax,0x210020
-00050079 <limpiar_buffer+0x3d> mov    0x210020,%eax
+00050074 <limpiar_buffer+0x38> mov    %eax,0x507c8
+00050079 <limpiar_buffer+0x3d> mov    0x507c8,%eax
 0005007e <limpiar_buffer+0x42> cmp    $0xf,%eax
 00050081 <limpiar_buffer+0x45> jle    00050060 <limpiar_buffer+0x24>
 00050083 <limpiar_buffer+0x47> nop
@@ -871,7 +1083,7 @@ Disassembly of section .functions:
 000500fe <determinar_tecla_presionada+0x78> movzbl -0xa(%ebp),%eax
 00050102 <determinar_tecla_presionada+0x7c> sub    $0x4,%esp
 00050105 <determinar_tecla_presionada+0x7f> push   %eax
-00050106 <determinar_tecla_presionada+0x80> push   $0x200000
+00050106 <determinar_tecla_presionada+0x80> push   $0x210000
 0005010b <determinar_tecla_presionada+0x85> pushl  0xc(%ebp)
 0005010e <determinar_tecla_presionada+0x88> call   000501b4 <escribir_tabla_digitos>
 00050113 <determinar_tecla_presionada+0x8d> add    $0x10,%esp
@@ -885,7 +1097,7 @@ Disassembly of section .functions:
 0005012b <determinar_tecla_presionada+0xa5> movzbl -0xa(%ebp),%eax
 0005012f <determinar_tecla_presionada+0xa9> sub    $0x4,%esp
 00050132 <determinar_tecla_presionada+0xac> push   %eax
-00050133 <determinar_tecla_presionada+0xad> push   $0x200000
+00050133 <determinar_tecla_presionada+0xad> push   $0x210000
 00050138 <determinar_tecla_presionada+0xb2> pushl  0xc(%ebp)
 0005013b <determinar_tecla_presionada+0xb5> call   000501b4 <escribir_tabla_digitos>
 00050140 <determinar_tecla_presionada+0xba> add    $0x10,%esp
@@ -944,18 +1156,18 @@ Disassembly of section .functions:
 000501d7 <escribir_tabla_digitos+0x23> movl   $0x0,-0x14(%ebp)
 000501de <escribir_tabla_digitos+0x2a> movl   $0x0,-0x20(%ebp)
 000501e5 <escribir_tabla_digitos+0x31> movl   $0x0,-0x1c(%ebp)
-000501ec <escribir_tabla_digitos+0x38> movl   $0x0,0x210024
+000501ec <escribir_tabla_digitos+0x38> movl   $0x0,0x507cc
 000501f6 <escribir_tabla_digitos+0x42> jmp    00050254 <escribir_tabla_digitos+0xa0>
 000501f8 <escribir_tabla_digitos+0x44> sub    $0xc,%esp
 000501fb <escribir_tabla_digitos+0x47> pushl  0x8(%ebp)
 000501fe <escribir_tabla_digitos+0x4a> call   000502d3 <leer_buffer>
 00050203 <escribir_tabla_digitos+0x4f> add    $0x10,%esp
 00050206 <escribir_tabla_digitos+0x52> mov    %al,-0x21(%ebp)
-00050209 <escribir_tabla_digitos+0x55> mov    0x210024,%eax
+00050209 <escribir_tabla_digitos+0x55> mov    0x507cc,%eax
 0005020e <escribir_tabla_digitos+0x5a> cmp    $0x7,%eax
 00050211 <escribir_tabla_digitos+0x5d> jg     0005022e <escribir_tabla_digitos+0x7a>
 00050213 <escribir_tabla_digitos+0x5f> movzbl -0x21(%ebp),%edx
-00050217 <escribir_tabla_digitos+0x63> mov    0x210024,%eax
+00050217 <escribir_tabla_digitos+0x63> mov    0x507cc,%eax
 0005021c <escribir_tabla_digitos+0x68> shl    $0x2,%eax
 0005021f <escribir_tabla_digitos+0x6b> mov    %eax,%ecx
 00050221 <escribir_tabla_digitos+0x6d> shl    %cl,%edx
@@ -965,7 +1177,7 @@ Disassembly of section .functions:
 00050229 <escribir_tabla_digitos+0x75> adc    %edx,-0x14(%ebp)
 0005022c <escribir_tabla_digitos+0x78> jmp    00050247 <escribir_tabla_digitos+0x93>
 0005022e <escribir_tabla_digitos+0x7a> movzbl -0x21(%ebp),%edx
-00050232 <escribir_tabla_digitos+0x7e> mov    0x210024,%eax
+00050232 <escribir_tabla_digitos+0x7e> mov    0x507cc,%eax
 00050237 <escribir_tabla_digitos+0x83> shl    $0x2,%eax
 0005023a <escribir_tabla_digitos+0x86> mov    %eax,%ecx
 0005023c <escribir_tabla_digitos+0x88> shl    %cl,%edx
@@ -973,10 +1185,10 @@ Disassembly of section .functions:
 00050240 <escribir_tabla_digitos+0x8c> cltd   
 00050241 <escribir_tabla_digitos+0x8d> add    %eax,-0x10(%ebp)
 00050244 <escribir_tabla_digitos+0x90> adc    %edx,-0xc(%ebp)
-00050247 <escribir_tabla_digitos+0x93> mov    0x210024,%eax
+00050247 <escribir_tabla_digitos+0x93> mov    0x507cc,%eax
 0005024c <escribir_tabla_digitos+0x98> add    $0x1,%eax
-0005024f <escribir_tabla_digitos+0x9b> mov    %eax,0x210024
-00050254 <escribir_tabla_digitos+0xa0> mov    0x210024,%eax
+0005024f <escribir_tabla_digitos+0x9b> mov    %eax,0x507cc
+00050254 <escribir_tabla_digitos+0xa0> mov    0x507cc,%eax
 00050259 <escribir_tabla_digitos+0xa5> cmp    $0xf,%eax
 0005025c <escribir_tabla_digitos+0xa8> jle    000501f8 <escribir_tabla_digitos+0x44>
 0005025e <escribir_tabla_digitos+0xaa> mov    -0x10(%ebp),%eax
@@ -1063,342 +1275,730 @@ Disassembly of section .functions:
 00050343 <contador_handler+0x6> mov    0x10(%ebp),%eax
 00050346 <contador_handler+0x9> mov    (%eax),%eax
 00050348 <contador_handler+0xb> cmp    $0x31,%eax
-0005034b <contador_handler+0xe> jbe    00050385 <contador_handler+0x48>
+0005034b <contador_handler+0xe> jbe    00050369 <contador_handler+0x2c>
 0005034d <contador_handler+0x10> mov    0x10(%ebp),%eax
 00050350 <contador_handler+0x13> movl   $0x0,(%eax)
-00050356 <contador_handler+0x19> sub    $0xc,%esp
-00050359 <contador_handler+0x1c> pushl  0xc(%ebp)
-0005035c <contador_handler+0x1f> call   00050599 <sumatoria_digitos_64>
-00050361 <contador_handler+0x24> add    $0x10,%esp
-00050364 <contador_handler+0x27> sub    $0x8,%esp
-00050367 <contador_handler+0x2a> pushl  0x8(%ebp)
-0005036a <contador_handler+0x2d> pushl  0xc(%ebp)
-0005036d <contador_handler+0x30> call   00050395 <promedio_digitos_64>
-00050372 <contador_handler+0x35> add    $0x10,%esp
-00050375 <contador_handler+0x38> sub    $0xc,%esp
-00050378 <contador_handler+0x3b> pushl  0xc(%ebp)
-0005037b <contador_handler+0x3e> call   00300000 <__TAREA_1_VMA>
-00050380 <contador_handler+0x43> add    $0x10,%esp
-00050383 <contador_handler+0x46> jmp    00050393 <contador_handler+0x56>
-00050385 <contador_handler+0x48> mov    0x10(%ebp),%eax
-00050388 <contador_handler+0x4b> mov    (%eax),%eax
-0005038a <contador_handler+0x4d> lea    0x1(%eax),%edx
-0005038d <contador_handler+0x50> mov    0x10(%ebp),%eax
-00050390 <contador_handler+0x53> mov    %edx,(%eax)
-00050392 <contador_handler+0x55> nop
-00050393 <contador_handler+0x56> leave  
-00050394 <contador_handler+0x57> ret    
-00050395 <promedio_digitos_64> push   %ebp
-00050396 <promedio_digitos_64+0x1> mov    %esp,%ebp
-00050398 <promedio_digitos_64+0x3> push   %esi
-00050399 <promedio_digitos_64+0x4> push   %ebx
-0005039a <promedio_digitos_64+0x5> sub    $0x18,%esp
-0005039d <promedio_digitos_64+0x8> mov    0x8(%ebp),%eax
-000503a0 <promedio_digitos_64+0xb> mov    0x60(%eax),%edx
-000503a3 <promedio_digitos_64+0xe> mov    0x5c(%eax),%eax
-000503a6 <promedio_digitos_64+0x11> mov    %eax,0x210028
-000503ab <promedio_digitos_64+0x16> mov    %edx,0x21002c
-000503b1 <promedio_digitos_64+0x1c> mov    0x8(%ebp),%eax
-000503b4 <promedio_digitos_64+0x1f> movzbl 0x50(%eax),%ecx
-000503b8 <promedio_digitos_64+0x23> movzbl %cl,%eax
-000503bb <promedio_digitos_64+0x26> mov    $0x0,%edx
-000503c0 <promedio_digitos_64+0x2b> mov    %eax,0x210030
-000503c5 <promedio_digitos_64+0x30> mov    %edx,0x210034
-000503cb <promedio_digitos_64+0x36> movl   $0x0,0x210038
-000503d5 <promedio_digitos_64+0x40> movl   $0x0,0x21003c
-000503df <promedio_digitos_64+0x4a> movl   $0x0,0x210040
-000503e9 <promedio_digitos_64+0x54> movl   $0x0,0x210044
-000503f3 <promedio_digitos_64+0x5e> movb   $0x0,0x210048
-000503fa <promedio_digitos_64+0x65> jmp    0005053a <promedio_digitos_64+0x1a5>
-000503ff <promedio_digitos_64+0x6a> mov    0x210028,%ebx
-00050405 <promedio_digitos_64+0x70> mov    0x21002c,%esi
-0005040b <promedio_digitos_64+0x76> movzbl 0x210048,%eax
-00050412 <promedio_digitos_64+0x7d> movzbl %al,%edx
-00050415 <promedio_digitos_64+0x80> mov    $0x3f,%eax
-0005041a <promedio_digitos_64+0x85> sub    %edx,%eax
-0005041c <promedio_digitos_64+0x87> mov    %eax,%ecx
-0005041e <promedio_digitos_64+0x89> mov    %ebx,%eax
-00050420 <promedio_digitos_64+0x8b> mov    %esi,%edx
-00050422 <promedio_digitos_64+0x8d> shrd   %cl,%edx,%eax
-00050425 <promedio_digitos_64+0x90> shr    %cl,%edx
-00050427 <promedio_digitos_64+0x92> test   $0x20,%cl
-0005042a <promedio_digitos_64+0x95> je     00050430 <promedio_digitos_64+0x9b>
-0005042c <promedio_digitos_64+0x97> mov    %edx,%eax
-0005042e <promedio_digitos_64+0x99> xor    %edx,%edx
-00050430 <promedio_digitos_64+0x9b> mov    %eax,%esi
-00050432 <promedio_digitos_64+0x9d> and    $0x1,%esi
-00050435 <promedio_digitos_64+0xa0> mov    %esi,-0x10(%ebp)
-00050438 <promedio_digitos_64+0xa3> mov    %edx,%eax
-0005043a <promedio_digitos_64+0xa5> and    $0x0,%eax
-0005043d <promedio_digitos_64+0xa8> mov    %eax,-0xc(%ebp)
-00050440 <promedio_digitos_64+0xab> mov    0x210040,%eax
-00050445 <promedio_digitos_64+0xb0> mov    0x210044,%edx
-0005044b <promedio_digitos_64+0xb6> mov    -0x10(%ebp),%ebx
-0005044e <promedio_digitos_64+0xb9> mov    -0xc(%ebp),%esi
-00050451 <promedio_digitos_64+0xbc> mov    %ebx,%ecx
-00050453 <promedio_digitos_64+0xbe> or     %eax,%ecx
-00050455 <promedio_digitos_64+0xc0> mov    %ecx,-0x18(%ebp)
-00050458 <promedio_digitos_64+0xc3> mov    %edx,%eax
-0005045a <promedio_digitos_64+0xc5> or     %esi,%eax
-0005045c <promedio_digitos_64+0xc7> mov    %eax,-0x14(%ebp)
-0005045f <promedio_digitos_64+0xca> mov    -0x18(%ebp),%eax
-00050462 <promedio_digitos_64+0xcd> mov    -0x14(%ebp),%edx
-00050465 <promedio_digitos_64+0xd0> mov    %eax,0x210040
-0005046a <promedio_digitos_64+0xd5> mov    %edx,0x210044
-00050470 <promedio_digitos_64+0xdb> mov    0x210040,%ecx
-00050476 <promedio_digitos_64+0xe1> mov    0x210044,%ebx
-0005047c <promedio_digitos_64+0xe7> mov    0x210030,%eax
-00050481 <promedio_digitos_64+0xec> mov    0x210034,%edx
-00050487 <promedio_digitos_64+0xf2> cmp    %edx,%ebx
-00050489 <promedio_digitos_64+0xf4> jb     000504e9 <promedio_digitos_64+0x154>
-0005048b <promedio_digitos_64+0xf6> cmp    %edx,%ebx
-0005048d <promedio_digitos_64+0xf8> ja     00050493 <promedio_digitos_64+0xfe>
-0005048f <promedio_digitos_64+0xfa> cmp    %eax,%ecx
-00050491 <promedio_digitos_64+0xfc> jb     000504e9 <promedio_digitos_64+0x154>
-00050493 <promedio_digitos_64+0xfe> mov    0x210038,%eax
-00050498 <promedio_digitos_64+0x103> mov    0x21003c,%edx
-0005049e <promedio_digitos_64+0x109> mov    %eax,%esi
-000504a0 <promedio_digitos_64+0x10b> or     $0x1,%esi
-000504a3 <promedio_digitos_64+0x10e> mov    %esi,-0x20(%ebp)
-000504a6 <promedio_digitos_64+0x111> mov    %edx,%eax
-000504a8 <promedio_digitos_64+0x113> or     $0x0,%ah
-000504ab <promedio_digitos_64+0x116> mov    %eax,-0x1c(%ebp)
-000504ae <promedio_digitos_64+0x119> mov    -0x20(%ebp),%eax
-000504b1 <promedio_digitos_64+0x11c> mov    -0x1c(%ebp),%edx
-000504b4 <promedio_digitos_64+0x11f> mov    %eax,0x210038
-000504b9 <promedio_digitos_64+0x124> mov    %edx,0x21003c
-000504bf <promedio_digitos_64+0x12a> mov    0x210040,%ecx
-000504c5 <promedio_digitos_64+0x130> mov    0x210044,%ebx
-000504cb <promedio_digitos_64+0x136> mov    0x210030,%eax
-000504d0 <promedio_digitos_64+0x13b> mov    0x210034,%edx
-000504d6 <promedio_digitos_64+0x141> sub    %eax,%ecx
-000504d8 <promedio_digitos_64+0x143> sbb    %edx,%ebx
-000504da <promedio_digitos_64+0x145> mov    %ecx,%eax
-000504dc <promedio_digitos_64+0x147> mov    %ebx,%edx
-000504de <promedio_digitos_64+0x149> mov    %eax,0x210040
-000504e3 <promedio_digitos_64+0x14e> mov    %edx,0x210044
-000504e9 <promedio_digitos_64+0x154> mov    0x210038,%ebx
-000504ef <promedio_digitos_64+0x15a> mov    0x21003c,%esi
-000504f5 <promedio_digitos_64+0x160> mov    %ebx,%eax
-000504f7 <promedio_digitos_64+0x162> mov    %esi,%edx
-000504f9 <promedio_digitos_64+0x164> shld   $0x1,%eax,%edx
-000504fd <promedio_digitos_64+0x168> add    %eax,%eax
-000504ff <promedio_digitos_64+0x16a> mov    %eax,0x210038
-00050504 <promedio_digitos_64+0x16f> mov    %edx,0x21003c
-0005050a <promedio_digitos_64+0x175> mov    0x210040,%ebx
-00050510 <promedio_digitos_64+0x17b> mov    0x210044,%esi
-00050516 <promedio_digitos_64+0x181> mov    %ebx,%eax
-00050518 <promedio_digitos_64+0x183> mov    %esi,%edx
-0005051a <promedio_digitos_64+0x185> shld   $0x1,%eax,%edx
-0005051e <promedio_digitos_64+0x189> add    %eax,%eax
-00050520 <promedio_digitos_64+0x18b> mov    %eax,0x210040
-00050525 <promedio_digitos_64+0x190> mov    %edx,0x210044
-0005052b <promedio_digitos_64+0x196> movzbl 0x210048,%eax
-00050532 <promedio_digitos_64+0x19d> add    $0x1,%eax
-00050535 <promedio_digitos_64+0x1a0> mov    %al,0x210048
-0005053a <promedio_digitos_64+0x1a5> movzbl 0x210048,%eax
-00050541 <promedio_digitos_64+0x1ac> cmp    $0x3f,%al
-00050543 <promedio_digitos_64+0x1ae> jbe    000503ff <promedio_digitos_64+0x6a>
-00050549 <promedio_digitos_64+0x1b4> mov    0x210038,%ebx
-0005054f <promedio_digitos_64+0x1ba> mov    0x21003c,%esi
-00050555 <promedio_digitos_64+0x1c0> mov    %ebx,%eax
-00050557 <promedio_digitos_64+0x1c2> mov    %esi,%edx
-00050559 <promedio_digitos_64+0x1c4> shrd   $0x1,%edx,%eax
-0005055d <promedio_digitos_64+0x1c8> shr    %edx
-0005055f <promedio_digitos_64+0x1ca> mov    %eax,0x210038
-00050564 <promedio_digitos_64+0x1cf> mov    %edx,0x21003c
-0005056a <promedio_digitos_64+0x1d5> mov    0x210038,%eax
-0005056f <promedio_digitos_64+0x1da> mov    0x21003c,%edx
-00050575 <promedio_digitos_64+0x1e0> mov    0x8(%ebp),%ecx
-00050578 <promedio_digitos_64+0x1e3> mov    %eax,0x54(%ecx)
-0005057b <promedio_digitos_64+0x1e6> mov    %edx,0x58(%ecx)
-0005057e <promedio_digitos_64+0x1e9> mov    0x210038,%eax
-00050583 <promedio_digitos_64+0x1ee> mov    0x21003c,%edx
-00050589 <promedio_digitos_64+0x1f4> mov    0xc(%ebp),%ecx
-0005058c <promedio_digitos_64+0x1f7> mov    %eax,(%ecx)
-0005058e <promedio_digitos_64+0x1f9> mov    %edx,0x4(%ecx)
-00050591 <promedio_digitos_64+0x1fc> nop
-00050592 <promedio_digitos_64+0x1fd> add    $0x18,%esp
-00050595 <promedio_digitos_64+0x200> pop    %ebx
-00050596 <promedio_digitos_64+0x201> pop    %esi
-00050597 <promedio_digitos_64+0x202> pop    %ebp
-00050598 <promedio_digitos_64+0x203> ret    
-00050599 <sumatoria_digitos_64> push   %ebp
-0005059a <sumatoria_digitos_64+0x1> mov    %esp,%ebp
-0005059c <sumatoria_digitos_64+0x3> sub    $0x10,%esp
-0005059f <sumatoria_digitos_64+0x6> movl   $0x0,-0x8(%ebp)
-000505a6 <sumatoria_digitos_64+0xd> movl   $0x0,-0x4(%ebp)
-000505ad <sumatoria_digitos_64+0x14> movl   $0x0,0x21004c
-000505b7 <sumatoria_digitos_64+0x1e> jmp    000505dd <sumatoria_digitos_64+0x44>
-000505b9 <sumatoria_digitos_64+0x20> mov    0x21004c,%edx
-000505bf <sumatoria_digitos_64+0x26> mov    0x8(%ebp),%eax
-000505c2 <sumatoria_digitos_64+0x29> lea    (%eax,%edx,8),%edx
-000505c5 <sumatoria_digitos_64+0x2c> mov    (%edx),%eax
-000505c7 <sumatoria_digitos_64+0x2e> mov    0x4(%edx),%edx
-000505ca <sumatoria_digitos_64+0x31> add    %eax,-0x8(%ebp)
-000505cd <sumatoria_digitos_64+0x34> adc    %edx,-0x4(%ebp)
-000505d0 <sumatoria_digitos_64+0x37> mov    0x21004c,%eax
-000505d5 <sumatoria_digitos_64+0x3c> add    $0x1,%eax
-000505d8 <sumatoria_digitos_64+0x3f> mov    %eax,0x21004c
-000505dd <sumatoria_digitos_64+0x44> mov    0x8(%ebp),%eax
-000505e0 <sumatoria_digitos_64+0x47> movzbl 0x50(%eax),%eax
-000505e4 <sumatoria_digitos_64+0x4b> movzbl %al,%edx
-000505e7 <sumatoria_digitos_64+0x4e> mov    0x21004c,%eax
-000505ec <sumatoria_digitos_64+0x53> cmp    %eax,%edx
-000505ee <sumatoria_digitos_64+0x55> jg     000505b9 <sumatoria_digitos_64+0x20>
-000505f0 <sumatoria_digitos_64+0x57> mov    0x8(%ebp),%ecx
-000505f3 <sumatoria_digitos_64+0x5a> mov    -0x8(%ebp),%eax
-000505f6 <sumatoria_digitos_64+0x5d> mov    -0x4(%ebp),%edx
-000505f9 <sumatoria_digitos_64+0x60> mov    %eax,0x5c(%ecx)
-000505fc <sumatoria_digitos_64+0x63> mov    %edx,0x60(%ecx)
-000505ff <sumatoria_digitos_64+0x66> nop
-00050600 <sumatoria_digitos_64+0x67> leave  
-00050601 <sumatoria_digitos_64+0x68> ret    
-00050602 <init_pic> mov    $0x11,%al
-00050604 <init_pic+0x2> out    %al,$0x20
-00050606 <init_pic+0x4> mov    $0x20,%al
-00050608 <init_pic+0x6> out    %al,$0x21
-0005060a <init_pic+0x8> mov    $0x4,%al
-0005060c <init_pic+0xa> out    %al,$0x21
-0005060e <init_pic+0xc> mov    $0x1,%al
-00050610 <init_pic+0xe> out    %al,$0x21
-00050612 <init_pic+0x10> mov    $0xfd,%al
-00050614 <init_pic+0x12> out    %al,$0x21
-00050616 <init_pic+0x14> mov    $0x11,%al
-00050618 <init_pic+0x16> out    %al,$0xa0
-0005061a <init_pic+0x18> mov    $0x28,%al
-0005061c <init_pic+0x1a> out    %al,$0xa1
-0005061e <init_pic+0x1c> mov    $0x2,%al
-00050620 <init_pic+0x1e> out    %al,$0xa1
-00050622 <init_pic+0x20> mov    $0x1,%al
-00050624 <init_pic+0x22> out    %al,$0xa1
-00050626 <init_pic+0x24> mov    $0xff,%al
-00050628 <init_pic+0x26> out    %al,$0xa1
-0005062a <init_pic+0x28> mov    $0xfc,%al
-0005062c <init_pic+0x2a> out    %al,$0x21
-0005062e <init_pic+0x2c> ret    
-0005062f <init_timer> mov    $0x36,%al
-00050631 <init_timer+0x2> out    %al,$0x43
-00050633 <init_timer+0x4> mov    $0x2e9c,%ax
-00050637 <init_timer+0x8> out    %al,$0x40
-00050639 <init_timer+0xa> mov    %ah,%al
-0005063b <init_timer+0xc> out    %al,$0x40
-0005063d <init_timer+0xe> ret    
-0005063e <init_teclado> mov    $0xff,%al
-00050640 <init_teclado+0x2> out    %al,$0x64
-00050642 <init_teclado+0x4> mov    $0x100,%ecx
-00050647 <init_teclado+0x9> loop   00050647 <init_teclado+0x9>
-00050649 <init_teclado+0xb> mov    $0x10000,%ecx
-0005064e <ciclo1> in     $0x60,%al
-00050650 <ciclo1+0x2> test   $0x1,%al
-00050652 <ciclo1+0x4> loope  0005064e <ciclo1>
-00050654 <ciclo1+0x6> mov    $0xf4,%al
-00050656 <ciclo1+0x8> out    %al,$0x64
-00050658 <ciclo1+0xa> mov    $0x10000,%ecx
-0005065d <ciclo2> in     $0x60,%al
-0005065f <ciclo2+0x2> test   $0x1,%al
-00050661 <ciclo2+0x4> loope  0005065d <ciclo2>
-00050663 <ciclo2+0x6> in     $0x60,%al
-00050665 <ciclo2+0x8> ret    
+00050356 <contador_handler+0x19> sub    $0x8,%esp
+00050359 <contador_handler+0x1c> pushl  0x8(%ebp)
+0005035c <contador_handler+0x1f> pushl  0xc(%ebp)
+0005035f <contador_handler+0x22> call   00310000 <__TAREA1_TEXT_VMA>
+00050364 <contador_handler+0x27> add    $0x10,%esp
+00050367 <contador_handler+0x2a> jmp    00050377 <contador_handler+0x3a>
+00050369 <contador_handler+0x2c> mov    0x10(%ebp),%eax
+0005036c <contador_handler+0x2f> mov    (%eax),%eax
+0005036e <contador_handler+0x31> lea    0x1(%eax),%edx
+00050371 <contador_handler+0x34> mov    0x10(%ebp),%eax
+00050374 <contador_handler+0x37> mov    %edx,(%eax)
+00050376 <contador_handler+0x39> nop
+00050377 <contador_handler+0x3a> leave  
+00050378 <contador_handler+0x3b> ret    
+00050379 <set_cr3> push   %ebp
+0005037a <set_cr3+0x1> mov    %esp,%ebp
+0005037c <set_cr3+0x3> sub    $0x18,%esp
+0005037f <set_cr3+0x6> mov    0xc(%ebp),%edx
+00050382 <set_cr3+0x9> mov    0x10(%ebp),%eax
+00050385 <set_cr3+0xc> mov    %dl,-0x14(%ebp)
+00050388 <set_cr3+0xf> mov    %al,-0x18(%ebp)
+0005038b <set_cr3+0x12> movl   $0x0,-0x4(%ebp)
+00050392 <set_cr3+0x19> mov    0x8(%ebp),%eax
+00050395 <set_cr3+0x1c> and    $0xfffff000,%eax
+0005039a <set_cr3+0x21> or     %eax,-0x4(%ebp)
+0005039d <set_cr3+0x24> movzbl -0x14(%ebp),%eax
+000503a1 <set_cr3+0x28> shl    $0x4,%eax
+000503a4 <set_cr3+0x2b> or     %eax,-0x4(%ebp)
+000503a7 <set_cr3+0x2e> movzbl -0x18(%ebp),%eax
+000503ab <set_cr3+0x32> shl    $0x3,%eax
+000503ae <set_cr3+0x35> or     %eax,-0x4(%ebp)
+000503b1 <set_cr3+0x38> mov    -0x4(%ebp),%eax
+000503b4 <set_cr3+0x3b> leave  
+000503b5 <set_cr3+0x3c> ret    
+000503b6 <set_dir_page_table_entry> push   %ebp
+000503b7 <set_dir_page_table_entry+0x1> mov    %esp,%ebp
+000503b9 <set_dir_page_table_entry+0x3> push   %edi
+000503ba <set_dir_page_table_entry+0x4> push   %esi
+000503bb <set_dir_page_table_entry+0x5> push   %ebx
+000503bc <set_dir_page_table_entry+0x6> sub    $0x30,%esp
+000503bf <set_dir_page_table_entry+0x9> mov    0x14(%ebp),%eax
+000503c2 <set_dir_page_table_entry+0xc> mov    0x18(%ebp),%ecx
+000503c5 <set_dir_page_table_entry+0xf> mov    %ecx,-0x3c(%ebp)
+000503c8 <set_dir_page_table_entry+0x12> mov    0x1c(%ebp),%edi
+000503cb <set_dir_page_table_entry+0x15> mov    0x20(%ebp),%esi
+000503ce <set_dir_page_table_entry+0x18> mov    0x24(%ebp),%ebx
+000503d1 <set_dir_page_table_entry+0x1b> mov    0x28(%ebp),%ecx
+000503d4 <set_dir_page_table_entry+0x1e> mov    0x2c(%ebp),%edx
+000503d7 <set_dir_page_table_entry+0x21> mov    %al,-0x20(%ebp)
+000503da <set_dir_page_table_entry+0x24> movzbl -0x3c(%ebp),%eax
+000503de <set_dir_page_table_entry+0x28> mov    %al,-0x24(%ebp)
+000503e1 <set_dir_page_table_entry+0x2b> mov    %edi,%eax
+000503e3 <set_dir_page_table_entry+0x2d> mov    %al,-0x28(%ebp)
+000503e6 <set_dir_page_table_entry+0x30> mov    %esi,%eax
+000503e8 <set_dir_page_table_entry+0x32> mov    %al,-0x2c(%ebp)
+000503eb <set_dir_page_table_entry+0x35> mov    %ebx,%eax
+000503ed <set_dir_page_table_entry+0x37> mov    %al,-0x30(%ebp)
+000503f0 <set_dir_page_table_entry+0x3a> mov    %ecx,%eax
+000503f2 <set_dir_page_table_entry+0x3c> mov    %al,-0x34(%ebp)
+000503f5 <set_dir_page_table_entry+0x3f> mov    %edx,%eax
+000503f7 <set_dir_page_table_entry+0x41> mov    %al,-0x38(%ebp)
+000503fa <set_dir_page_table_entry+0x44> movl   $0x0,-0x10(%ebp)
+00050401 <set_dir_page_table_entry+0x4b> mov    0x8(%ebp),%eax
+00050404 <set_dir_page_table_entry+0x4e> mov    %eax,-0x14(%ebp)
+00050407 <set_dir_page_table_entry+0x51> mov    0x10(%ebp),%eax
+0005040a <set_dir_page_table_entry+0x54> and    $0xfffff000,%eax
+0005040f <set_dir_page_table_entry+0x59> or     %eax,-0x10(%ebp)
+00050412 <set_dir_page_table_entry+0x5c> movzbl -0x20(%ebp),%eax
+00050416 <set_dir_page_table_entry+0x60> shl    $0x7,%eax
+00050419 <set_dir_page_table_entry+0x63> or     %eax,-0x10(%ebp)
+0005041c <set_dir_page_table_entry+0x66> movzbl -0x24(%ebp),%eax
+00050420 <set_dir_page_table_entry+0x6a> shl    $0x5,%eax
+00050423 <set_dir_page_table_entry+0x6d> or     %eax,-0x10(%ebp)
+00050426 <set_dir_page_table_entry+0x70> movzbl -0x28(%ebp),%eax
+0005042a <set_dir_page_table_entry+0x74> shl    $0x4,%eax
+0005042d <set_dir_page_table_entry+0x77> or     %eax,-0x10(%ebp)
+00050430 <set_dir_page_table_entry+0x7a> movzbl -0x2c(%ebp),%eax
+00050434 <set_dir_page_table_entry+0x7e> shl    $0x3,%eax
+00050437 <set_dir_page_table_entry+0x81> or     %eax,-0x10(%ebp)
+0005043a <set_dir_page_table_entry+0x84> movzbl -0x30(%ebp),%eax
+0005043e <set_dir_page_table_entry+0x88> shl    $0x2,%eax
+00050441 <set_dir_page_table_entry+0x8b> or     %eax,-0x10(%ebp)
+00050444 <set_dir_page_table_entry+0x8e> movzbl -0x34(%ebp),%eax
+00050448 <set_dir_page_table_entry+0x92> add    %eax,%eax
+0005044a <set_dir_page_table_entry+0x94> or     %eax,-0x10(%ebp)
+0005044d <set_dir_page_table_entry+0x97> movzbl -0x38(%ebp),%eax
+00050451 <set_dir_page_table_entry+0x9b> or     %eax,-0x10(%ebp)
+00050454 <set_dir_page_table_entry+0x9e> mov    0xc(%ebp),%eax
+00050457 <set_dir_page_table_entry+0xa1> lea    0x0(,%eax,4),%edx
+0005045e <set_dir_page_table_entry+0xa8> mov    -0x14(%ebp),%eax
+00050461 <set_dir_page_table_entry+0xab> add    %eax,%edx
+00050463 <set_dir_page_table_entry+0xad> mov    -0x10(%ebp),%eax
+00050466 <set_dir_page_table_entry+0xb0> mov    %eax,(%edx)
+00050468 <set_dir_page_table_entry+0xb2> nop
+00050469 <set_dir_page_table_entry+0xb3> add    $0x30,%esp
+0005046c <set_dir_page_table_entry+0xb6> pop    %ebx
+0005046d <set_dir_page_table_entry+0xb7> pop    %esi
+0005046e <set_dir_page_table_entry+0xb8> pop    %edi
+0005046f <set_dir_page_table_entry+0xb9> pop    %ebp
+00050470 <set_dir_page_table_entry+0xba> ret    
+00050471 <set_page_table_entry> push   %ebp
+00050472 <set_page_table_entry+0x1> mov    %esp,%ebp
+00050474 <set_page_table_entry+0x3> push   %edi
+00050475 <set_page_table_entry+0x4> push   %esi
+00050476 <set_page_table_entry+0x5> push   %ebx
+00050477 <set_page_table_entry+0x6> sub    $0x40,%esp
+0005047a <set_page_table_entry+0x9> mov    0x14(%ebp),%eax
+0005047d <set_page_table_entry+0xc> mov    0x18(%ebp),%edx
+00050480 <set_page_table_entry+0xf> mov    0x1c(%ebp),%esi
+00050483 <set_page_table_entry+0x12> mov    0x20(%ebp),%ecx
+00050486 <set_page_table_entry+0x15> mov    %ecx,-0x44(%ebp)
+00050489 <set_page_table_entry+0x18> mov    0x24(%ebp),%ebx
+0005048c <set_page_table_entry+0x1b> mov    %ebx,-0x48(%ebp)
+0005048f <set_page_table_entry+0x1e> mov    0x28(%ebp),%edi
+00050492 <set_page_table_entry+0x21> mov    %edi,-0x4c(%ebp)
+00050495 <set_page_table_entry+0x24> mov    0x2c(%ebp),%edi
+00050498 <set_page_table_entry+0x27> mov    0x30(%ebp),%ebx
+0005049b <set_page_table_entry+0x2a> mov    0x34(%ebp),%ecx
+0005049e <set_page_table_entry+0x2d> mov    %al,-0x20(%ebp)
+000504a1 <set_page_table_entry+0x30> mov    %edx,%eax
+000504a3 <set_page_table_entry+0x32> mov    %al,-0x24(%ebp)
+000504a6 <set_page_table_entry+0x35> mov    %esi,%eax
+000504a8 <set_page_table_entry+0x37> mov    %al,-0x28(%ebp)
+000504ab <set_page_table_entry+0x3a> movzbl -0x44(%ebp),%eax
+000504af <set_page_table_entry+0x3e> mov    %al,-0x2c(%ebp)
+000504b2 <set_page_table_entry+0x41> movzbl -0x48(%ebp),%eax
+000504b6 <set_page_table_entry+0x45> mov    %al,-0x30(%ebp)
+000504b9 <set_page_table_entry+0x48> movzbl -0x4c(%ebp),%eax
+000504bd <set_page_table_entry+0x4c> mov    %al,-0x34(%ebp)
+000504c0 <set_page_table_entry+0x4f> mov    %edi,%eax
+000504c2 <set_page_table_entry+0x51> mov    %al,-0x38(%ebp)
+000504c5 <set_page_table_entry+0x54> mov    %ebx,%eax
+000504c7 <set_page_table_entry+0x56> mov    %al,-0x3c(%ebp)
+000504ca <set_page_table_entry+0x59> mov    %ecx,%eax
+000504cc <set_page_table_entry+0x5b> mov    %al,-0x40(%ebp)
+000504cf <set_page_table_entry+0x5e> movl   $0x0,-0x10(%ebp)
+000504d6 <set_page_table_entry+0x65> mov    0x8(%ebp),%eax
+000504d9 <set_page_table_entry+0x68> mov    %eax,-0x14(%ebp)
+000504dc <set_page_table_entry+0x6b> mov    0x10(%ebp),%eax
+000504df <set_page_table_entry+0x6e> and    $0xfffff000,%eax
+000504e4 <set_page_table_entry+0x73> or     %eax,-0x10(%ebp)
+000504e7 <set_page_table_entry+0x76> movzbl -0x20(%ebp),%eax
+000504eb <set_page_table_entry+0x7a> shl    $0x8,%eax
+000504ee <set_page_table_entry+0x7d> or     %eax,-0x10(%ebp)
+000504f1 <set_page_table_entry+0x80> movzbl -0x24(%ebp),%eax
+000504f5 <set_page_table_entry+0x84> shl    $0x7,%eax
+000504f8 <set_page_table_entry+0x87> or     %eax,-0x10(%ebp)
+000504fb <set_page_table_entry+0x8a> movzbl -0x28(%ebp),%eax
+000504ff <set_page_table_entry+0x8e> shl    $0x6,%eax
+00050502 <set_page_table_entry+0x91> or     %eax,-0x10(%ebp)
+00050505 <set_page_table_entry+0x94> movzbl -0x2c(%ebp),%eax
+00050509 <set_page_table_entry+0x98> shl    $0x5,%eax
+0005050c <set_page_table_entry+0x9b> or     %eax,-0x10(%ebp)
+0005050f <set_page_table_entry+0x9e> movzbl -0x30(%ebp),%eax
+00050513 <set_page_table_entry+0xa2> shl    $0x4,%eax
+00050516 <set_page_table_entry+0xa5> or     %eax,-0x10(%ebp)
+00050519 <set_page_table_entry+0xa8> movzbl -0x34(%ebp),%eax
+0005051d <set_page_table_entry+0xac> shl    $0x3,%eax
+00050520 <set_page_table_entry+0xaf> or     %eax,-0x10(%ebp)
+00050523 <set_page_table_entry+0xb2> movzbl -0x38(%ebp),%eax
+00050527 <set_page_table_entry+0xb6> shl    $0x2,%eax
+0005052a <set_page_table_entry+0xb9> or     %eax,-0x10(%ebp)
+0005052d <set_page_table_entry+0xbc> movzbl -0x3c(%ebp),%eax
+00050531 <set_page_table_entry+0xc0> add    %eax,%eax
+00050533 <set_page_table_entry+0xc2> or     %eax,-0x10(%ebp)
+00050536 <set_page_table_entry+0xc5> movzbl -0x40(%ebp),%eax
+0005053a <set_page_table_entry+0xc9> or     %eax,-0x10(%ebp)
+0005053d <set_page_table_entry+0xcc> mov    0xc(%ebp),%eax
+00050540 <set_page_table_entry+0xcf> lea    0x0(,%eax,4),%edx
+00050547 <set_page_table_entry+0xd6> mov    -0x14(%ebp),%eax
+0005054a <set_page_table_entry+0xd9> add    %eax,%edx
+0005054c <set_page_table_entry+0xdb> mov    -0x10(%ebp),%eax
+0005054f <set_page_table_entry+0xde> mov    %eax,(%edx)
+00050551 <set_page_table_entry+0xe0> nop
+00050552 <set_page_table_entry+0xe1> add    $0x40,%esp
+00050555 <set_page_table_entry+0xe4> pop    %ebx
+00050556 <set_page_table_entry+0xe5> pop    %esi
+00050557 <set_page_table_entry+0xe6> pop    %edi
+00050558 <set_page_table_entry+0xe7> pop    %ebp
+00050559 <set_page_table_entry+0xe8> ret    
+0005055a <escribir_caracter_VGA> push   %ebp
+0005055b <escribir_caracter_VGA+0x1> mov    %esp,%ebp
+0005055d <escribir_caracter_VGA+0x3> push   %esi
+0005055e <escribir_caracter_VGA+0x4> push   %ebx
+0005055f <escribir_caracter_VGA+0x5> sub    $0x20,%esp
+00050562 <escribir_caracter_VGA+0x8> mov    0x8(%ebp),%ebx
+00050565 <escribir_caracter_VGA+0xb> mov    0xc(%ebp),%ecx
+00050568 <escribir_caracter_VGA+0xe> mov    0x10(%ebp),%edx
+0005056b <escribir_caracter_VGA+0x11> mov    0x14(%ebp),%eax
+0005056e <escribir_caracter_VGA+0x14> mov    %bl,-0x1c(%ebp)
+00050571 <escribir_caracter_VGA+0x17> mov    %cl,-0x20(%ebp)
+00050574 <escribir_caracter_VGA+0x1a> mov    %dl,-0x24(%ebp)
+00050577 <escribir_caracter_VGA+0x1d> mov    %al,-0x28(%ebp)
+0005057a <escribir_caracter_VGA+0x20> movl   $0xb8000,-0xc(%ebp)
+00050581 <escribir_caracter_VGA+0x27> movb   $0x7,-0xd(%ebp)
+00050585 <escribir_caracter_VGA+0x2b> cmpb   $0x0,-0x28(%ebp)
+00050589 <escribir_caracter_VGA+0x2f> jne    000505a1 <escribir_caracter_VGA+0x47>
+0005058b <escribir_caracter_VGA+0x31> movzbl -0x1c(%ebp),%eax
+0005058f <escribir_caracter_VGA+0x35> movzbl %al,%eax
+00050592 <escribir_caracter_VGA+0x38> sub    $0xc,%esp
+00050595 <escribir_caracter_VGA+0x3b> push   %eax
+00050596 <escribir_caracter_VGA+0x3c> call   0005070a <convertir_ASCII>
+0005059b <escribir_caracter_VGA+0x41> add    $0x10,%esp
+0005059e <escribir_caracter_VGA+0x44> mov    %al,-0x1c(%ebp)
+000505a1 <escribir_caracter_VGA+0x47> movzbl -0x20(%ebp),%eax
+000505a5 <escribir_caracter_VGA+0x4b> lea    (%eax,%eax,1),%edx
+000505a8 <escribir_caracter_VGA+0x4e> movzbl -0x24(%ebp),%ecx
+000505ac <escribir_caracter_VGA+0x52> mov    0x507d0,%eax
+000505b1 <escribir_caracter_VGA+0x57> add    %ecx,%eax
+000505b3 <escribir_caracter_VGA+0x59> lea    (%eax,%eax,1),%esi
+000505b6 <escribir_caracter_VGA+0x5c> movzbl -0x1c(%ebp),%ecx
+000505ba <escribir_caracter_VGA+0x60> mov    -0xc(%ebp),%ebx
+000505bd <escribir_caracter_VGA+0x63> mov    %edx,%eax
+000505bf <escribir_caracter_VGA+0x65> shl    $0x2,%eax
+000505c2 <escribir_caracter_VGA+0x68> add    %edx,%eax
+000505c4 <escribir_caracter_VGA+0x6a> shl    $0x4,%eax
+000505c7 <escribir_caracter_VGA+0x6d> add    %ebx,%eax
+000505c9 <escribir_caracter_VGA+0x6f> add    %esi,%eax
+000505cb <escribir_caracter_VGA+0x71> mov    %cl,(%eax)
+000505cd <escribir_caracter_VGA+0x73> movzbl -0x20(%ebp),%eax
+000505d1 <escribir_caracter_VGA+0x77> lea    (%eax,%eax,1),%edx
+000505d4 <escribir_caracter_VGA+0x7a> movzbl -0x24(%ebp),%eax
+000505d8 <escribir_caracter_VGA+0x7e> lea    (%eax,%eax,1),%ecx
+000505db <escribir_caracter_VGA+0x81> mov    0x507d0,%eax
+000505e0 <escribir_caracter_VGA+0x86> add    %eax,%eax
+000505e2 <escribir_caracter_VGA+0x88> add    $0x1,%eax
+000505e5 <escribir_caracter_VGA+0x8b> lea    (%ecx,%eax,1),%ebx
+000505e8 <escribir_caracter_VGA+0x8e> mov    -0xc(%ebp),%ecx
+000505eb <escribir_caracter_VGA+0x91> mov    %edx,%eax
+000505ed <escribir_caracter_VGA+0x93> shl    $0x2,%eax
+000505f0 <escribir_caracter_VGA+0x96> add    %edx,%eax
+000505f2 <escribir_caracter_VGA+0x98> shl    $0x4,%eax
+000505f5 <escribir_caracter_VGA+0x9b> add    %ecx,%eax
+000505f7 <escribir_caracter_VGA+0x9d> lea    (%eax,%ebx,1),%edx
+000505fa <escribir_caracter_VGA+0xa0> movzbl -0xd(%ebp),%eax
+000505fe <escribir_caracter_VGA+0xa4> mov    %al,(%edx)
+00050600 <escribir_caracter_VGA+0xa6> nop
+00050601 <escribir_caracter_VGA+0xa7> lea    -0x8(%ebp),%esp
+00050604 <escribir_caracter_VGA+0xaa> pop    %ebx
+00050605 <escribir_caracter_VGA+0xab> pop    %esi
+00050606 <escribir_caracter_VGA+0xac> pop    %ebp
+00050607 <escribir_caracter_VGA+0xad> ret    
+00050608 <escribir_mensaje_VGA> push   %ebp
+00050609 <escribir_mensaje_VGA+0x1> mov    %esp,%ebp
+0005060b <escribir_mensaje_VGA+0x3> push   %ebx
+0005060c <escribir_mensaje_VGA+0x4> sub    $0x24,%esp
+0005060f <escribir_mensaje_VGA+0x7> mov    0xc(%ebp),%ecx
+00050612 <escribir_mensaje_VGA+0xa> mov    0x10(%ebp),%edx
+00050615 <escribir_mensaje_VGA+0xd> mov    0x14(%ebp),%eax
+00050618 <escribir_mensaje_VGA+0x10> mov    %cl,-0x1c(%ebp)
+0005061b <escribir_mensaje_VGA+0x13> mov    %dl,-0x20(%ebp)
+0005061e <escribir_mensaje_VGA+0x16> mov    %al,-0x24(%ebp)
+00050621 <escribir_mensaje_VGA+0x19> movl   $0xb8000,-0xc(%ebp)
+00050628 <escribir_mensaje_VGA+0x20> movb   $0x7,-0xd(%ebp)
+0005062c <escribir_mensaje_VGA+0x24> movl   $0x0,0x507d4
+00050636 <escribir_mensaje_VGA+0x2e> jmp    000506ed <escribir_mensaje_VGA+0xe5>
+0005063b <escribir_mensaje_VGA+0x33> cmpb   $0x0,-0x24(%ebp)
+0005063f <escribir_mensaje_VGA+0x37> jne    0005066f <escribir_mensaje_VGA+0x67>
+00050641 <escribir_mensaje_VGA+0x39> mov    0x507d4,%eax
+00050646 <escribir_mensaje_VGA+0x3e> mov    %eax,%edx
+00050648 <escribir_mensaje_VGA+0x40> mov    0x8(%ebp),%eax
+0005064b <escribir_mensaje_VGA+0x43> add    %edx,%eax
+0005064d <escribir_mensaje_VGA+0x45> movzbl (%eax),%eax
+00050650 <escribir_mensaje_VGA+0x48> movzbl %al,%eax
+00050653 <escribir_mensaje_VGA+0x4b> sub    $0xc,%esp
+00050656 <escribir_mensaje_VGA+0x4e> push   %eax
+00050657 <escribir_mensaje_VGA+0x4f> call   0005070a <convertir_ASCII>
+0005065c <escribir_mensaje_VGA+0x54> add    $0x10,%esp
+0005065f <escribir_mensaje_VGA+0x57> mov    %eax,%edx
+00050661 <escribir_mensaje_VGA+0x59> mov    0x507d4,%eax
+00050666 <escribir_mensaje_VGA+0x5e> mov    %eax,%ecx
+00050668 <escribir_mensaje_VGA+0x60> mov    0x8(%ebp),%eax
+0005066b <escribir_mensaje_VGA+0x63> add    %ecx,%eax
+0005066d <escribir_mensaje_VGA+0x65> mov    %dl,(%eax)
+0005066f <escribir_mensaje_VGA+0x67> mov    0x507d4,%eax
+00050674 <escribir_mensaje_VGA+0x6c> mov    %eax,%edx
+00050676 <escribir_mensaje_VGA+0x6e> mov    0x8(%ebp),%eax
+00050679 <escribir_mensaje_VGA+0x71> add    %edx,%eax
+0005067b <escribir_mensaje_VGA+0x73> movzbl (%eax),%eax
+0005067e <escribir_mensaje_VGA+0x76> movzbl -0x1c(%ebp),%edx
+00050682 <escribir_mensaje_VGA+0x7a> add    %edx,%edx
+00050684 <escribir_mensaje_VGA+0x7c> movzbl -0x20(%ebp),%ebx
+00050688 <escribir_mensaje_VGA+0x80> mov    0x507d4,%ecx
+0005068e <escribir_mensaje_VGA+0x86> add    %ebx,%ecx
+00050690 <escribir_mensaje_VGA+0x88> lea    (%ecx,%ecx,1),%ebx
+00050693 <escribir_mensaje_VGA+0x8b> mov    %al,-0x25(%ebp)
+00050696 <escribir_mensaje_VGA+0x8e> mov    -0xc(%ebp),%ecx
+00050699 <escribir_mensaje_VGA+0x91> mov    %edx,%eax
+0005069b <escribir_mensaje_VGA+0x93> shl    $0x2,%eax
+0005069e <escribir_mensaje_VGA+0x96> add    %edx,%eax
+000506a0 <escribir_mensaje_VGA+0x98> shl    $0x4,%eax
+000506a3 <escribir_mensaje_VGA+0x9b> add    %ecx,%eax
+000506a5 <escribir_mensaje_VGA+0x9d> add    %ebx,%eax
+000506a7 <escribir_mensaje_VGA+0x9f> movzbl -0x25(%ebp),%ebx
+000506ab <escribir_mensaje_VGA+0xa3> mov    %bl,(%eax)
+000506ad <escribir_mensaje_VGA+0xa5> movzbl -0x1c(%ebp),%eax
+000506b1 <escribir_mensaje_VGA+0xa9> lea    (%eax,%eax,1),%edx
+000506b4 <escribir_mensaje_VGA+0xac> movzbl -0x20(%ebp),%eax
+000506b8 <escribir_mensaje_VGA+0xb0> lea    (%eax,%eax,1),%ecx
+000506bb <escribir_mensaje_VGA+0xb3> mov    0x507d4,%eax
+000506c0 <escribir_mensaje_VGA+0xb8> add    %eax,%eax
+000506c2 <escribir_mensaje_VGA+0xba> add    $0x1,%eax
+000506c5 <escribir_mensaje_VGA+0xbd> lea    (%ecx,%eax,1),%ebx
+000506c8 <escribir_mensaje_VGA+0xc0> mov    -0xc(%ebp),%ecx
+000506cb <escribir_mensaje_VGA+0xc3> mov    %edx,%eax
+000506cd <escribir_mensaje_VGA+0xc5> shl    $0x2,%eax
+000506d0 <escribir_mensaje_VGA+0xc8> add    %edx,%eax
+000506d2 <escribir_mensaje_VGA+0xca> shl    $0x4,%eax
+000506d5 <escribir_mensaje_VGA+0xcd> add    %ecx,%eax
+000506d7 <escribir_mensaje_VGA+0xcf> lea    (%eax,%ebx,1),%edx
+000506da <escribir_mensaje_VGA+0xd2> movzbl -0xd(%ebp),%eax
+000506de <escribir_mensaje_VGA+0xd6> mov    %al,(%edx)
+000506e0 <escribir_mensaje_VGA+0xd8> mov    0x507d4,%eax
+000506e5 <escribir_mensaje_VGA+0xdd> add    $0x1,%eax
+000506e8 <escribir_mensaje_VGA+0xe0> mov    %eax,0x507d4
+000506ed <escribir_mensaje_VGA+0xe5> mov    0x507d4,%eax
+000506f2 <escribir_mensaje_VGA+0xea> mov    %eax,%edx
+000506f4 <escribir_mensaje_VGA+0xec> mov    0x8(%ebp),%eax
+000506f7 <escribir_mensaje_VGA+0xef> add    %edx,%eax
+000506f9 <escribir_mensaje_VGA+0xf1> movzbl (%eax),%eax
+000506fc <escribir_mensaje_VGA+0xf4> test   %al,%al
+000506fe <escribir_mensaje_VGA+0xf6> jne    0005063b <escribir_mensaje_VGA+0x33>
+00050704 <escribir_mensaje_VGA+0xfc> nop
+00050705 <escribir_mensaje_VGA+0xfd> mov    -0x4(%ebp),%ebx
+00050708 <escribir_mensaje_VGA+0x100> leave  
+00050709 <escribir_mensaje_VGA+0x101> ret    
+0005070a <convertir_ASCII> push   %ebp
+0005070b <convertir_ASCII+0x1> mov    %esp,%ebp
+0005070d <convertir_ASCII+0x3> sub    $0x4,%esp
+00050710 <convertir_ASCII+0x6> mov    0x8(%ebp),%eax
+00050713 <convertir_ASCII+0x9> mov    %al,-0x4(%ebp)
+00050716 <convertir_ASCII+0xc> cmpb   $0x9,-0x4(%ebp)
+0005071a <convertir_ASCII+0x10> ja     00050722 <convertir_ASCII+0x18>
+0005071c <convertir_ASCII+0x12> addb   $0x30,-0x4(%ebp)
+00050720 <convertir_ASCII+0x16> jmp    00050732 <convertir_ASCII+0x28>
+00050722 <convertir_ASCII+0x18> cmpb   $0x9,-0x4(%ebp)
+00050726 <convertir_ASCII+0x1c> jbe    00050732 <convertir_ASCII+0x28>
+00050728 <convertir_ASCII+0x1e> cmpb   $0x5a,-0x4(%ebp)
+0005072c <convertir_ASCII+0x22> ja     00050732 <convertir_ASCII+0x28>
+0005072e <convertir_ASCII+0x24> addb   $0x41,-0x4(%ebp)
+00050732 <convertir_ASCII+0x28> movzbl -0x4(%ebp),%eax
+00050736 <convertir_ASCII+0x2c> leave  
+00050737 <convertir_ASCII+0x2d> ret    
+00050738 <limpiar_VGA> push   %ebp
+00050739 <limpiar_VGA+0x1> mov    %esp,%ebp
+0005073b <limpiar_VGA+0x3> sub    $0x8,%esp
+0005073e <limpiar_VGA+0x6> push   $0x1
+00050740 <limpiar_VGA+0x8> push   $0xa
+00050742 <limpiar_VGA+0xa> push   $0x0
+00050744 <limpiar_VGA+0xc> push   $0x507d8
+00050749 <limpiar_VGA+0x11> call   00050608 <escribir_mensaje_VGA>
+0005074e <limpiar_VGA+0x16> add    $0x10,%esp
+00050751 <limpiar_VGA+0x19> push   $0x1
+00050753 <limpiar_VGA+0x1b> push   $0xa
+00050755 <limpiar_VGA+0x1d> push   $0x1
+00050757 <limpiar_VGA+0x1f> push   $0x50800
+0005075c <limpiar_VGA+0x24> call   00050608 <escribir_mensaje_VGA>
+00050761 <limpiar_VGA+0x29> add    $0x10,%esp
+00050764 <limpiar_VGA+0x2c> push   $0x1
+00050766 <limpiar_VGA+0x2e> push   $0xa
+00050768 <limpiar_VGA+0x30> push   $0x2
+0005076a <limpiar_VGA+0x32> push   $0x507d8
+0005076f <limpiar_VGA+0x37> call   00050608 <escribir_mensaje_VGA>
+00050774 <limpiar_VGA+0x3c> add    $0x10,%esp
+00050777 <limpiar_VGA+0x3f> push   $0x1
+00050779 <limpiar_VGA+0x41> push   $0xa
+0005077b <limpiar_VGA+0x43> push   $0x3
+0005077d <limpiar_VGA+0x45> push   $0x50828
+00050782 <limpiar_VGA+0x4a> call   00050608 <escribir_mensaje_VGA>
+00050787 <limpiar_VGA+0x4f> add    $0x10,%esp
+0005078a <limpiar_VGA+0x52> push   $0x1
+0005078c <limpiar_VGA+0x54> push   $0x0
+0005078e <limpiar_VGA+0x56> push   $0x15
+00050790 <limpiar_VGA+0x58> push   $0x507d8
+00050795 <limpiar_VGA+0x5d> call   00050608 <escribir_mensaje_VGA>
+0005079a <limpiar_VGA+0x62> add    $0x10,%esp
+0005079d <limpiar_VGA+0x65> push   $0x1
+0005079f <limpiar_VGA+0x67> push   $0x0
+000507a1 <limpiar_VGA+0x69> push   $0x16
+000507a3 <limpiar_VGA+0x6b> push   $0x50850
+000507a8 <limpiar_VGA+0x70> call   00050608 <escribir_mensaje_VGA>
+000507ad <limpiar_VGA+0x75> add    $0x10,%esp
+000507b0 <limpiar_VGA+0x78> push   $0x1
+000507b2 <limpiar_VGA+0x7a> push   $0x0
+000507b4 <limpiar_VGA+0x7c> push   $0x17
+000507b6 <limpiar_VGA+0x7e> push   $0x507d8
+000507bb <limpiar_VGA+0x83> call   00050608 <escribir_mensaje_VGA>
+000507c0 <limpiar_VGA+0x88> add    $0x10,%esp
+000507c3 <limpiar_VGA+0x8b> nop
+000507c4 <limpiar_VGA+0x8c> leave  
+000507c5 <limpiar_VGA+0x8d> ret    
+000507c6 <limpiar_VGA+0x8e> xchg   %ax,%ax
+000507c8 <i.1510> ....
+000507cc <i.1529> ....
+000507d0 <pos_msg.1588> ....
+000507d4 <pos_msg.1597> ....------------
+000507e4 <pos_msg.1597+0x10> ----------------
+000507f4 <pos_msg.1597+0x20> --------....Bien
+00050804 <pos_msg.1597+0x30> venido a x86-OS 
+00050814 <pos_msg.1597+0x40> - CPU: Intel 386
+00050824 <pos_msg.1597+0x50> ....Ingrese digi
+00050834 <pos_msg.1597+0x60> tos de hasta 10 
+00050844 <pos_msg.1597+0x70> numeros.....Ej.8
+00050854 <pos_msg.1597+0x80>  - Paginacion Ba
+00050864 <pos_msg.1597+0x90> sica - TD3 2021 
+	...
 
-Disassembly of section .tarea_1:
-00300000 <ejecutar_tarea_1> push   %ebp
-00300001 <ejecutar_tarea_1+0x1> mov    %esp,%ebp
-00300003 <ejecutar_tarea_1+0x3> push   %esi
-00300004 <ejecutar_tarea_1+0x4> push   %ebx
-00300005 <ejecutar_tarea_1+0x5> sub    $0x20,%esp
-00300008 <ejecutar_tarea_1+0x8> mov    0x8(%ebp),%eax
-0030000b <ejecutar_tarea_1+0xb> mov    0x58(%eax),%edx
-0030000e <ejecutar_tarea_1+0xe> mov    0x54(%eax),%eax
-00300011 <ejecutar_tarea_1+0x11> mov    %eax,-0x18(%ebp)
-00300014 <ejecutar_tarea_1+0x14> mov    %edx,-0x14(%ebp)
-00300017 <ejecutar_tarea_1+0x17> movb   $0x0,-0x9(%ebp)
-0030001b <ejecutar_tarea_1+0x1b> movb   $0x7,-0x19(%ebp)
-0030001f <ejecutar_tarea_1+0x1f> movl   $0xb8000,-0x20(%ebp)
-00300026 <ejecutar_tarea_1+0x26> movb   $0x7e,-0x21(%ebp)
-0030002a <ejecutar_tarea_1+0x2a> mov    0x8(%ebp),%eax
-0030002d <ejecutar_tarea_1+0x2d> movzbl 0x50(%eax),%eax
-00300031 <ejecutar_tarea_1+0x31> test   %al,%al
-00300033 <ejecutar_tarea_1+0x33> je     003000e7 <ejecutar_tarea_1+0xe7>
-00300039 <ejecutar_tarea_1+0x39> movl   $0x0,0x210050
-00300043 <ejecutar_tarea_1+0x43> jmp    003000d8 <ejecutar_tarea_1+0xd8>
-00300048 <ejecutar_tarea_1+0x48> mov    0x210050,%eax
-0030004d <ejecutar_tarea_1+0x4d> lea    0x0(,%eax,4),%ecx
-00300054 <ejecutar_tarea_1+0x54> mov    -0x18(%ebp),%eax
-00300057 <ejecutar_tarea_1+0x57> mov    -0x14(%ebp),%edx
-0030005a <ejecutar_tarea_1+0x5a> shrd   %cl,%edx,%eax
-0030005d <ejecutar_tarea_1+0x5d> shr    %cl,%edx
-0030005f <ejecutar_tarea_1+0x5f> test   $0x20,%cl
-00300062 <ejecutar_tarea_1+0x62> je     00300068 <ejecutar_tarea_1+0x68>
-00300064 <ejecutar_tarea_1+0x64> mov    %edx,%eax
-00300066 <ejecutar_tarea_1+0x66> xor    %edx,%edx
-00300068 <ejecutar_tarea_1+0x68> mov    %eax,%ebx
-0030006a <ejecutar_tarea_1+0x6a> mov    %edx,%esi
-0030006c <ejecutar_tarea_1+0x6c> mov    %ebx,%eax
-0030006e <ejecutar_tarea_1+0x6e> and    $0xf,%eax
-00300071 <ejecutar_tarea_1+0x71> mov    %al,-0x9(%ebp)
-00300074 <ejecutar_tarea_1+0x74> cmpb   $0x9,-0x9(%ebp)
-00300078 <ejecutar_tarea_1+0x78> ja     00300080 <ejecutar_tarea_1+0x80>
-0030007a <ejecutar_tarea_1+0x7a> addb   $0x30,-0x9(%ebp)
-0030007e <ejecutar_tarea_1+0x7e> jmp    00300090 <ejecutar_tarea_1+0x90>
-00300080 <ejecutar_tarea_1+0x80> cmpb   $0x9,-0x9(%ebp)
-00300084 <ejecutar_tarea_1+0x84> jbe    00300090 <ejecutar_tarea_1+0x90>
-00300086 <ejecutar_tarea_1+0x86> cmpb   $0xf,-0x9(%ebp)
-0030008a <ejecutar_tarea_1+0x8a> ja     00300090 <ejecutar_tarea_1+0x90>
-0030008c <ejecutar_tarea_1+0x8c> addb   $0x37,-0x9(%ebp)
-00300090 <ejecutar_tarea_1+0x90> movzbl -0x21(%ebp),%eax
-00300094 <ejecutar_tarea_1+0x94> lea    0x20(%eax),%edx
-00300097 <ejecutar_tarea_1+0x97> mov    0x210050,%eax
-0030009c <ejecutar_tarea_1+0x9c> add    %eax,%eax
-0030009e <ejecutar_tarea_1+0x9e> sub    %eax,%edx
-003000a0 <ejecutar_tarea_1+0xa0> mov    %edx,%ecx
-003000a2 <ejecutar_tarea_1+0xa2> mov    -0x20(%ebp),%eax
-003000a5 <ejecutar_tarea_1+0xa5> movzbl -0x9(%ebp),%edx
-003000a9 <ejecutar_tarea_1+0xa9> mov    %dl,(%eax,%ecx,1)
-003000ac <ejecutar_tarea_1+0xac> movzbl -0x21(%ebp),%eax
-003000b0 <ejecutar_tarea_1+0xb0> lea    0x20(%eax),%edx
-003000b3 <ejecutar_tarea_1+0xb3> mov    0x210050,%eax
-003000b8 <ejecutar_tarea_1+0xb8> add    %eax,%eax
-003000ba <ejecutar_tarea_1+0xba> sub    $0x1,%eax
-003000bd <ejecutar_tarea_1+0xbd> mov    %edx,%ecx
-003000bf <ejecutar_tarea_1+0xbf> sub    %eax,%ecx
-003000c1 <ejecutar_tarea_1+0xc1> mov    -0x20(%ebp),%eax
-003000c4 <ejecutar_tarea_1+0xc4> movzbl -0x19(%ebp),%edx
-003000c8 <ejecutar_tarea_1+0xc8> mov    %dl,(%eax,%ecx,1)
-003000cb <ejecutar_tarea_1+0xcb> mov    0x210050,%eax
-003000d0 <ejecutar_tarea_1+0xd0> add    $0x1,%eax
-003000d3 <ejecutar_tarea_1+0xd3> mov    %eax,0x210050
-003000d8 <ejecutar_tarea_1+0xd8> mov    0x210050,%eax
-003000dd <ejecutar_tarea_1+0xdd> cmp    $0xf,%eax
-003000e0 <ejecutar_tarea_1+0xe0> jle    00300048 <ejecutar_tarea_1+0x48>
-003000e6 <ejecutar_tarea_1+0xe6> nop
-003000e7 <ejecutar_tarea_1+0xe7> nop
-003000e8 <ejecutar_tarea_1+0xe8> add    $0x20,%esp
-003000eb <ejecutar_tarea_1+0xeb> pop    %ebx
-003000ec <ejecutar_tarea_1+0xec> pop    %esi
-003000ed <ejecutar_tarea_1+0xed> pop    %ebp
-003000ee <ejecutar_tarea_1+0xee> ret    
+Disassembly of section .tarea_1_text:
+00310000 <ejecutar_tarea_1> push   %ebp
+00310001 <ejecutar_tarea_1+0x1> mov    %esp,%ebp
+00310003 <ejecutar_tarea_1+0x3> push   %esi
+00310004 <ejecutar_tarea_1+0x4> push   %ebx
+00310005 <ejecutar_tarea_1+0x5> sub    $0x10,%esp
+00310008 <ejecutar_tarea_1+0x8> mov    0x8(%ebp),%eax
+0031000b <ejecutar_tarea_1+0xb> mov    0x58(%eax),%edx
+0031000e <ejecutar_tarea_1+0xe> mov    0x54(%eax),%eax
+00310011 <ejecutar_tarea_1+0x11> mov    %eax,-0x18(%ebp)
+00310014 <ejecutar_tarea_1+0x14> mov    %edx,-0x14(%ebp)
+00310017 <ejecutar_tarea_1+0x17> movb   $0x0,-0x9(%ebp)
+0031001b <ejecutar_tarea_1+0x1b> mov    0x8(%ebp),%eax
+0031001e <ejecutar_tarea_1+0x1e> movzbl 0x50(%eax),%eax
+00310022 <ejecutar_tarea_1+0x22> test   %al,%al
+00310024 <ejecutar_tarea_1+0x24> je     003100e8 <ejecutar_tarea_1+0xe8>
+0031002a <ejecutar_tarea_1+0x2a> sub    $0xc,%esp
+0031002d <ejecutar_tarea_1+0x2d> pushl  0x8(%ebp)
+00310030 <ejecutar_tarea_1+0x30> call   003102f4 <sumatoria_digitos_64>
+00310035 <ejecutar_tarea_1+0x35> add    $0x10,%esp
+00310038 <ejecutar_tarea_1+0x38> sub    $0x8,%esp
+0031003b <ejecutar_tarea_1+0x3b> pushl  0xc(%ebp)
+0031003e <ejecutar_tarea_1+0x3e> pushl  0x8(%ebp)
+00310041 <ejecutar_tarea_1+0x41> call   003100f0 <promedio_digitos_64>
+00310046 <ejecutar_tarea_1+0x46> add    $0x10,%esp
+00310049 <ejecutar_tarea_1+0x49> push   $0x1
+0031004b <ejecutar_tarea_1+0x4b> push   $0x31
+0031004d <ejecutar_tarea_1+0x4d> push   $0x0
+0031004f <ejecutar_tarea_1+0x4f> push   $0x340004
+00310054 <ejecutar_tarea_1+0x54> call   00050608 <escribir_mensaje_VGA>
+00310059 <ejecutar_tarea_1+0x59> add    $0x10,%esp
+0031005c <ejecutar_tarea_1+0x5c> movl   $0x0,0x320000
+00310066 <ejecutar_tarea_1+0x66> jmp    003100dd <ejecutar_tarea_1+0xdd>
+00310068 <ejecutar_tarea_1+0x68> mov    0x320000,%eax
+0031006d <ejecutar_tarea_1+0x6d> lea    0x0(,%eax,4),%ecx
+00310074 <ejecutar_tarea_1+0x74> mov    -0x18(%ebp),%eax
+00310077 <ejecutar_tarea_1+0x77> mov    -0x14(%ebp),%edx
+0031007a <ejecutar_tarea_1+0x7a> shrd   %cl,%edx,%eax
+0031007d <ejecutar_tarea_1+0x7d> shr    %cl,%edx
+0031007f <ejecutar_tarea_1+0x7f> test   $0x20,%cl
+00310082 <ejecutar_tarea_1+0x82> je     00310088 <ejecutar_tarea_1+0x88>
+00310084 <ejecutar_tarea_1+0x84> mov    %edx,%eax
+00310086 <ejecutar_tarea_1+0x86> xor    %edx,%edx
+00310088 <ejecutar_tarea_1+0x88> mov    %eax,%ebx
+0031008a <ejecutar_tarea_1+0x8a> mov    %edx,%esi
+0031008c <ejecutar_tarea_1+0x8c> mov    %ebx,%eax
+0031008e <ejecutar_tarea_1+0x8e> and    $0xf,%eax
+00310091 <ejecutar_tarea_1+0x91> mov    %al,-0x9(%ebp)
+00310094 <ejecutar_tarea_1+0x94> cmpb   $0x9,-0x9(%ebp)
+00310098 <ejecutar_tarea_1+0x98> ja     003100a0 <ejecutar_tarea_1+0xa0>
+0031009a <ejecutar_tarea_1+0x9a> addb   $0x30,-0x9(%ebp)
+0031009e <ejecutar_tarea_1+0x9e> jmp    003100b0 <ejecutar_tarea_1+0xb0>
+003100a0 <ejecutar_tarea_1+0xa0> cmpb   $0x9,-0x9(%ebp)
+003100a4 <ejecutar_tarea_1+0xa4> jbe    003100b0 <ejecutar_tarea_1+0xb0>
+003100a6 <ejecutar_tarea_1+0xa6> cmpb   $0xf,-0x9(%ebp)
+003100aa <ejecutar_tarea_1+0xaa> ja     003100b0 <ejecutar_tarea_1+0xb0>
+003100ac <ejecutar_tarea_1+0xac> addb   $0x37,-0x9(%ebp)
+003100b0 <ejecutar_tarea_1+0xb0> mov    0x320000,%eax
+003100b5 <ejecutar_tarea_1+0xb5> add    $0x32,%eax
+003100b8 <ejecutar_tarea_1+0xb8> movzbl %al,%edx
+003100bb <ejecutar_tarea_1+0xbb> movzbl -0x9(%ebp),%eax
+003100bf <ejecutar_tarea_1+0xbf> movsbl %al,%eax
+003100c2 <ejecutar_tarea_1+0xc2> push   $0x1
+003100c4 <ejecutar_tarea_1+0xc4> push   %edx
+003100c5 <ejecutar_tarea_1+0xc5> push   $0x1
+003100c7 <ejecutar_tarea_1+0xc7> push   %eax
+003100c8 <ejecutar_tarea_1+0xc8> call   0005055a <escribir_caracter_VGA>
+003100cd <ejecutar_tarea_1+0xcd> add    $0x10,%esp
+003100d0 <ejecutar_tarea_1+0xd0> mov    0x320000,%eax
+003100d5 <ejecutar_tarea_1+0xd5> add    $0x1,%eax
+003100d8 <ejecutar_tarea_1+0xd8> mov    %eax,0x320000
+003100dd <ejecutar_tarea_1+0xdd> mov    0x320000,%eax
+003100e2 <ejecutar_tarea_1+0xe2> cmp    $0xf,%eax
+003100e5 <ejecutar_tarea_1+0xe5> jle    00310068 <ejecutar_tarea_1+0x68>
+003100e7 <ejecutar_tarea_1+0xe7> nop
+003100e8 <ejecutar_tarea_1+0xe8> nop
+003100e9 <ejecutar_tarea_1+0xe9> lea    -0x8(%ebp),%esp
+003100ec <ejecutar_tarea_1+0xec> pop    %ebx
+003100ed <ejecutar_tarea_1+0xed> pop    %esi
+003100ee <ejecutar_tarea_1+0xee> pop    %ebp
+003100ef <ejecutar_tarea_1+0xef> ret    
+003100f0 <promedio_digitos_64> push   %ebp
+003100f1 <promedio_digitos_64+0x1> mov    %esp,%ebp
+003100f3 <promedio_digitos_64+0x3> push   %esi
+003100f4 <promedio_digitos_64+0x4> push   %ebx
+003100f5 <promedio_digitos_64+0x5> sub    $0x18,%esp
+003100f8 <promedio_digitos_64+0x8> mov    0x8(%ebp),%eax
+003100fb <promedio_digitos_64+0xb> mov    0x60(%eax),%edx
+003100fe <promedio_digitos_64+0xe> mov    0x5c(%eax),%eax
+00310101 <promedio_digitos_64+0x11> mov    %eax,0x320008
+00310106 <promedio_digitos_64+0x16> mov    %edx,0x32000c
+0031010c <promedio_digitos_64+0x1c> mov    0x8(%ebp),%eax
+0031010f <promedio_digitos_64+0x1f> movzbl 0x50(%eax),%ecx
+00310113 <promedio_digitos_64+0x23> movzbl %cl,%eax
+00310116 <promedio_digitos_64+0x26> mov    $0x0,%edx
+0031011b <promedio_digitos_64+0x2b> mov    %eax,0x320010
+00310120 <promedio_digitos_64+0x30> mov    %edx,0x320014
+00310126 <promedio_digitos_64+0x36> movl   $0x0,0x320018
+00310130 <promedio_digitos_64+0x40> movl   $0x0,0x32001c
+0031013a <promedio_digitos_64+0x4a> movl   $0x0,0x320020
+00310144 <promedio_digitos_64+0x54> movl   $0x0,0x320024
+0031014e <promedio_digitos_64+0x5e> movb   $0x0,0x320028
+00310155 <promedio_digitos_64+0x65> jmp    00310295 <promedio_digitos_64+0x1a5>
+0031015a <promedio_digitos_64+0x6a> mov    0x320008,%ebx
+00310160 <promedio_digitos_64+0x70> mov    0x32000c,%esi
+00310166 <promedio_digitos_64+0x76> movzbl 0x320028,%eax
+0031016d <promedio_digitos_64+0x7d> movzbl %al,%edx
+00310170 <promedio_digitos_64+0x80> mov    $0x3f,%eax
+00310175 <promedio_digitos_64+0x85> sub    %edx,%eax
+00310177 <promedio_digitos_64+0x87> mov    %eax,%ecx
+00310179 <promedio_digitos_64+0x89> mov    %ebx,%eax
+0031017b <promedio_digitos_64+0x8b> mov    %esi,%edx
+0031017d <promedio_digitos_64+0x8d> shrd   %cl,%edx,%eax
+00310180 <promedio_digitos_64+0x90> shr    %cl,%edx
+00310182 <promedio_digitos_64+0x92> test   $0x20,%cl
+00310185 <promedio_digitos_64+0x95> je     0031018b <promedio_digitos_64+0x9b>
+00310187 <promedio_digitos_64+0x97> mov    %edx,%eax
+00310189 <promedio_digitos_64+0x99> xor    %edx,%edx
+0031018b <promedio_digitos_64+0x9b> mov    %eax,%esi
+0031018d <promedio_digitos_64+0x9d> and    $0x1,%esi
+00310190 <promedio_digitos_64+0xa0> mov    %esi,-0x10(%ebp)
+00310193 <promedio_digitos_64+0xa3> mov    %edx,%eax
+00310195 <promedio_digitos_64+0xa5> and    $0x0,%eax
+00310198 <promedio_digitos_64+0xa8> mov    %eax,-0xc(%ebp)
+0031019b <promedio_digitos_64+0xab> mov    0x320020,%eax
+003101a0 <promedio_digitos_64+0xb0> mov    0x320024,%edx
+003101a6 <promedio_digitos_64+0xb6> mov    -0x10(%ebp),%ebx
+003101a9 <promedio_digitos_64+0xb9> mov    -0xc(%ebp),%esi
+003101ac <promedio_digitos_64+0xbc> mov    %ebx,%ecx
+003101ae <promedio_digitos_64+0xbe> or     %eax,%ecx
+003101b0 <promedio_digitos_64+0xc0> mov    %ecx,-0x18(%ebp)
+003101b3 <promedio_digitos_64+0xc3> mov    %edx,%eax
+003101b5 <promedio_digitos_64+0xc5> or     %esi,%eax
+003101b7 <promedio_digitos_64+0xc7> mov    %eax,-0x14(%ebp)
+003101ba <promedio_digitos_64+0xca> mov    -0x18(%ebp),%eax
+003101bd <promedio_digitos_64+0xcd> mov    -0x14(%ebp),%edx
+003101c0 <promedio_digitos_64+0xd0> mov    %eax,0x320020
+003101c5 <promedio_digitos_64+0xd5> mov    %edx,0x320024
+003101cb <promedio_digitos_64+0xdb> mov    0x320020,%ecx
+003101d1 <promedio_digitos_64+0xe1> mov    0x320024,%ebx
+003101d7 <promedio_digitos_64+0xe7> mov    0x320010,%eax
+003101dc <promedio_digitos_64+0xec> mov    0x320014,%edx
+003101e2 <promedio_digitos_64+0xf2> cmp    %edx,%ebx
+003101e4 <promedio_digitos_64+0xf4> jb     00310244 <promedio_digitos_64+0x154>
+003101e6 <promedio_digitos_64+0xf6> cmp    %edx,%ebx
+003101e8 <promedio_digitos_64+0xf8> ja     003101ee <promedio_digitos_64+0xfe>
+003101ea <promedio_digitos_64+0xfa> cmp    %eax,%ecx
+003101ec <promedio_digitos_64+0xfc> jb     00310244 <promedio_digitos_64+0x154>
+003101ee <promedio_digitos_64+0xfe> mov    0x320018,%eax
+003101f3 <promedio_digitos_64+0x103> mov    0x32001c,%edx
+003101f9 <promedio_digitos_64+0x109> mov    %eax,%esi
+003101fb <promedio_digitos_64+0x10b> or     $0x1,%esi
+003101fe <promedio_digitos_64+0x10e> mov    %esi,-0x20(%ebp)
+00310201 <promedio_digitos_64+0x111> mov    %edx,%eax
+00310203 <promedio_digitos_64+0x113> or     $0x0,%ah
+00310206 <promedio_digitos_64+0x116> mov    %eax,-0x1c(%ebp)
+00310209 <promedio_digitos_64+0x119> mov    -0x20(%ebp),%eax
+0031020c <promedio_digitos_64+0x11c> mov    -0x1c(%ebp),%edx
+0031020f <promedio_digitos_64+0x11f> mov    %eax,0x320018
+00310214 <promedio_digitos_64+0x124> mov    %edx,0x32001c
+0031021a <promedio_digitos_64+0x12a> mov    0x320020,%ecx
+00310220 <promedio_digitos_64+0x130> mov    0x320024,%ebx
+00310226 <promedio_digitos_64+0x136> mov    0x320010,%eax
+0031022b <promedio_digitos_64+0x13b> mov    0x320014,%edx
+00310231 <promedio_digitos_64+0x141> sub    %eax,%ecx
+00310233 <promedio_digitos_64+0x143> sbb    %edx,%ebx
+00310235 <promedio_digitos_64+0x145> mov    %ecx,%eax
+00310237 <promedio_digitos_64+0x147> mov    %ebx,%edx
+00310239 <promedio_digitos_64+0x149> mov    %eax,0x320020
+0031023e <promedio_digitos_64+0x14e> mov    %edx,0x320024
+00310244 <promedio_digitos_64+0x154> mov    0x320018,%ebx
+0031024a <promedio_digitos_64+0x15a> mov    0x32001c,%esi
+00310250 <promedio_digitos_64+0x160> mov    %ebx,%eax
+00310252 <promedio_digitos_64+0x162> mov    %esi,%edx
+00310254 <promedio_digitos_64+0x164> shld   $0x1,%eax,%edx
+00310258 <promedio_digitos_64+0x168> add    %eax,%eax
+0031025a <promedio_digitos_64+0x16a> mov    %eax,0x320018
+0031025f <promedio_digitos_64+0x16f> mov    %edx,0x32001c
+00310265 <promedio_digitos_64+0x175> mov    0x320020,%ebx
+0031026b <promedio_digitos_64+0x17b> mov    0x320024,%esi
+00310271 <promedio_digitos_64+0x181> mov    %ebx,%eax
+00310273 <promedio_digitos_64+0x183> mov    %esi,%edx
+00310275 <promedio_digitos_64+0x185> shld   $0x1,%eax,%edx
+00310279 <promedio_digitos_64+0x189> add    %eax,%eax
+0031027b <promedio_digitos_64+0x18b> mov    %eax,0x320020
+00310280 <promedio_digitos_64+0x190> mov    %edx,0x320024
+00310286 <promedio_digitos_64+0x196> movzbl 0x320028,%eax
+0031028d <promedio_digitos_64+0x19d> add    $0x1,%eax
+00310290 <promedio_digitos_64+0x1a0> mov    %al,0x320028
+00310295 <promedio_digitos_64+0x1a5> movzbl 0x320028,%eax
+0031029c <promedio_digitos_64+0x1ac> cmp    $0x3f,%al
+0031029e <promedio_digitos_64+0x1ae> jbe    0031015a <promedio_digitos_64+0x6a>
+003102a4 <promedio_digitos_64+0x1b4> mov    0x320018,%ebx
+003102aa <promedio_digitos_64+0x1ba> mov    0x32001c,%esi
+003102b0 <promedio_digitos_64+0x1c0> mov    %ebx,%eax
+003102b2 <promedio_digitos_64+0x1c2> mov    %esi,%edx
+003102b4 <promedio_digitos_64+0x1c4> shrd   $0x1,%edx,%eax
+003102b8 <promedio_digitos_64+0x1c8> shr    %edx
+003102ba <promedio_digitos_64+0x1ca> mov    %eax,0x320018
+003102bf <promedio_digitos_64+0x1cf> mov    %edx,0x32001c
+003102c5 <promedio_digitos_64+0x1d5> mov    0x320018,%eax
+003102ca <promedio_digitos_64+0x1da> mov    0x32001c,%edx
+003102d0 <promedio_digitos_64+0x1e0> mov    0x8(%ebp),%ecx
+003102d3 <promedio_digitos_64+0x1e3> mov    %eax,0x54(%ecx)
+003102d6 <promedio_digitos_64+0x1e6> mov    %edx,0x58(%ecx)
+003102d9 <promedio_digitos_64+0x1e9> mov    0x320018,%eax
+003102de <promedio_digitos_64+0x1ee> mov    0x32001c,%edx
+003102e4 <promedio_digitos_64+0x1f4> mov    0xc(%ebp),%ecx
+003102e7 <promedio_digitos_64+0x1f7> mov    %eax,(%ecx)
+003102e9 <promedio_digitos_64+0x1f9> mov    %edx,0x4(%ecx)
+003102ec <promedio_digitos_64+0x1fc> nop
+003102ed <promedio_digitos_64+0x1fd> add    $0x18,%esp
+003102f0 <promedio_digitos_64+0x200> pop    %ebx
+003102f1 <promedio_digitos_64+0x201> pop    %esi
+003102f2 <promedio_digitos_64+0x202> pop    %ebp
+003102f3 <promedio_digitos_64+0x203> ret    
+003102f4 <sumatoria_digitos_64> push   %ebp
+003102f5 <sumatoria_digitos_64+0x1> mov    %esp,%ebp
+003102f7 <sumatoria_digitos_64+0x3> sub    $0x10,%esp
+003102fa <sumatoria_digitos_64+0x6> movl   $0x0,-0x8(%ebp)
+00310301 <sumatoria_digitos_64+0xd> movl   $0x0,-0x4(%ebp)
+00310308 <sumatoria_digitos_64+0x14> movl   $0x0,0x32002c
+00310312 <sumatoria_digitos_64+0x1e> jmp    00310338 <sumatoria_digitos_64+0x44>
+00310314 <sumatoria_digitos_64+0x20> mov    0x32002c,%edx
+0031031a <sumatoria_digitos_64+0x26> mov    0x8(%ebp),%eax
+0031031d <sumatoria_digitos_64+0x29> lea    (%eax,%edx,8),%edx
+00310320 <sumatoria_digitos_64+0x2c> mov    (%edx),%eax
+00310322 <sumatoria_digitos_64+0x2e> mov    0x4(%edx),%edx
+00310325 <sumatoria_digitos_64+0x31> add    %eax,-0x8(%ebp)
+00310328 <sumatoria_digitos_64+0x34> adc    %edx,-0x4(%ebp)
+0031032b <sumatoria_digitos_64+0x37> mov    0x32002c,%eax
+00310330 <sumatoria_digitos_64+0x3c> add    $0x1,%eax
+00310333 <sumatoria_digitos_64+0x3f> mov    %eax,0x32002c
+00310338 <sumatoria_digitos_64+0x44> mov    0x8(%ebp),%eax
+0031033b <sumatoria_digitos_64+0x47> movzbl 0x50(%eax),%eax
+0031033f <sumatoria_digitos_64+0x4b> movzbl %al,%edx
+00310342 <sumatoria_digitos_64+0x4e> mov    0x32002c,%eax
+00310347 <sumatoria_digitos_64+0x53> cmp    %eax,%edx
+00310349 <sumatoria_digitos_64+0x55> jg     00310314 <sumatoria_digitos_64+0x20>
+0031034b <sumatoria_digitos_64+0x57> mov    0x8(%ebp),%ecx
+0031034e <sumatoria_digitos_64+0x5a> mov    -0x8(%ebp),%eax
+00310351 <sumatoria_digitos_64+0x5d> mov    -0x4(%ebp),%edx
+00310354 <sumatoria_digitos_64+0x60> mov    %eax,0x5c(%ecx)
+00310357 <sumatoria_digitos_64+0x63> mov    %edx,0x60(%ecx)
+0031035a <sumatoria_digitos_64+0x66> nop
+0031035b <sumatoria_digitos_64+0x67> leave  
+0031035c <sumatoria_digitos_64+0x68> ret    
 
 Disassembly of section .functions_rom:
-fffffc00 <__fast_memcpy_rom> push   %ebp
-fffffc01 <__fast_memcpy_rom+0x1> mov    %esp,%ebp
-fffffc03 <__fast_memcpy_rom+0x3> sub    $0x10,%esp
-fffffc06 <__fast_memcpy_rom+0x6> movb   $0x0,-0x1(%ebp)
-fffffc0a <__fast_memcpy_rom+0xa> cmpl   $0x0,0x10(%ebp)
-fffffc0e <__fast_memcpy_rom+0xe> je     fffffc36 <__fast_memcpy_rom+0x36>
-fffffc10 <__fast_memcpy_rom+0x10> jmp    fffffc2c <__fast_memcpy_rom+0x2c>
-fffffc12 <__fast_memcpy_rom+0x12> subl   $0x1,0x10(%ebp)
-fffffc16 <__fast_memcpy_rom+0x16> mov    0x8(%ebp),%edx
-fffffc19 <__fast_memcpy_rom+0x19> lea    0x4(%edx),%eax
-fffffc1c <__fast_memcpy_rom+0x1c> mov    %eax,0x8(%ebp)
-fffffc1f <__fast_memcpy_rom+0x1f> mov    0xc(%ebp),%eax
-fffffc22 <__fast_memcpy_rom+0x22> lea    0x4(%eax),%ecx
-fffffc25 <__fast_memcpy_rom+0x25> mov    %ecx,0xc(%ebp)
-fffffc28 <__fast_memcpy_rom+0x28> mov    (%edx),%edx
-fffffc2a <__fast_memcpy_rom+0x2a> mov    %edx,(%eax)
-fffffc2c <__fast_memcpy_rom+0x2c> cmpl   $0x0,0x10(%ebp)
-fffffc30 <__fast_memcpy_rom+0x30> jne    fffffc12 <__fast_memcpy_rom+0x12>
-fffffc32 <__fast_memcpy_rom+0x32> movb   $0x1,-0x1(%ebp)
-fffffc36 <__fast_memcpy_rom+0x36> movzbl -0x1(%ebp),%eax
-fffffc3a <__fast_memcpy_rom+0x3a> leave  
-fffffc3b <__fast_memcpy_rom+0x3b> ret    
+ffff97f7 <__fast_memcpy_rom> push   %ebp
+ffff97f8 <__fast_memcpy_rom+0x1> mov    %esp,%ebp
+ffff97fa <__fast_memcpy_rom+0x3> sub    $0x10,%esp
+ffff97fd <__fast_memcpy_rom+0x6> movb   $0x0,-0x1(%ebp)
+ffff9801 <__fast_memcpy_rom+0xa> cmpl   $0x0,0x10(%ebp)
+ffff9805 <__fast_memcpy_rom+0xe> je     ffff982d <__fast_memcpy_rom+0x36>
+ffff9807 <__fast_memcpy_rom+0x10> jmp    ffff9823 <__fast_memcpy_rom+0x2c>
+ffff9809 <__fast_memcpy_rom+0x12> subl   $0x1,0x10(%ebp)
+ffff980d <__fast_memcpy_rom+0x16> mov    0x8(%ebp),%edx
+ffff9810 <__fast_memcpy_rom+0x19> lea    0x4(%edx),%eax
+ffff9813 <__fast_memcpy_rom+0x1c> mov    %eax,0x8(%ebp)
+ffff9816 <__fast_memcpy_rom+0x1f> mov    0xc(%ebp),%eax
+ffff9819 <__fast_memcpy_rom+0x22> lea    0x4(%eax),%ecx
+ffff981c <__fast_memcpy_rom+0x25> mov    %ecx,0xc(%ebp)
+ffff981f <__fast_memcpy_rom+0x28> mov    (%edx),%edx
+ffff9821 <__fast_memcpy_rom+0x2a> mov    %edx,(%eax)
+ffff9823 <__fast_memcpy_rom+0x2c> cmpl   $0x0,0x10(%ebp)
+ffff9827 <__fast_memcpy_rom+0x30> jne    ffff9809 <__fast_memcpy_rom+0x12>
+ffff9829 <__fast_memcpy_rom+0x32> movb   $0x1,-0x1(%ebp)
+ffff982d <__fast_memcpy_rom+0x36> movzbl -0x1(%ebp),%eax
+ffff9831 <__fast_memcpy_rom+0x3a> leave  
+ffff9832 <__fast_memcpy_rom+0x3b> ret    
+ffff9833 <init_pic> mov    $0x11,%al
+ffff9835 <init_pic+0x2> out    %al,$0x20
+ffff9837 <init_pic+0x4> mov    $0x20,%al
+ffff9839 <init_pic+0x6> out    %al,$0x21
+ffff983b <init_pic+0x8> mov    $0x4,%al
+ffff983d <init_pic+0xa> out    %al,$0x21
+ffff983f <init_pic+0xc> mov    $0x1,%al
+ffff9841 <init_pic+0xe> out    %al,$0x21
+ffff9843 <init_pic+0x10> mov    $0xfd,%al
+ffff9845 <init_pic+0x12> out    %al,$0x21
+ffff9847 <init_pic+0x14> mov    $0x11,%al
+ffff9849 <init_pic+0x16> out    %al,$0xa0
+ffff984b <init_pic+0x18> mov    $0x28,%al
+ffff984d <init_pic+0x1a> out    %al,$0xa1
+ffff984f <init_pic+0x1c> mov    $0x2,%al
+ffff9851 <init_pic+0x1e> out    %al,$0xa1
+ffff9853 <init_pic+0x20> mov    $0x1,%al
+ffff9855 <init_pic+0x22> out    %al,$0xa1
+ffff9857 <init_pic+0x24> mov    $0xff,%al
+ffff9859 <init_pic+0x26> out    %al,$0xa1
+ffff985b <init_pic+0x28> mov    $0xfc,%al
+ffff985d <init_pic+0x2a> out    %al,$0x21
+ffff985f <init_pic+0x2c> ret    
+ffff9860 <init_timer> mov    $0x36,%al
+ffff9862 <init_timer+0x2> out    %al,$0x43
+ffff9864 <init_timer+0x4> mov    $0x2e9c,%ax
+ffff9868 <init_timer+0x8> out    %al,$0x40
+ffff986a <init_timer+0xa> mov    %ah,%al
+ffff986c <init_timer+0xc> out    %al,$0x40
+ffff986e <init_timer+0xe> ret    
+ffff986f <init_teclado> mov    $0xff,%al
+ffff9871 <init_teclado+0x2> out    %al,$0x64
+ffff9873 <init_teclado+0x4> mov    $0x100,%ecx
+ffff9878 <init_teclado+0x9> loop   ffff9878 <init_teclado+0x9>
+ffff987a <init_teclado+0xb> mov    $0x10000,%ecx
+ffff987f <ciclo1> in     $0x60,%al
+ffff9881 <ciclo1+0x2> test   $0x1,%al
+ffff9883 <ciclo1+0x4> loope  ffff987f <ciclo1>
+ffff9885 <ciclo1+0x6> mov    $0xf4,%al
+ffff9887 <ciclo1+0x8> out    %al,$0x64
+ffff9889 <ciclo1+0xa> mov    $0x10000,%ecx
+ffff988e <ciclo2> in     $0x60,%al
+ffff9890 <ciclo2+0x2> test   $0x1,%al
+ffff9892 <ciclo2+0x4> loope  ffff988e <ciclo2>
+ffff9894 <ciclo2+0x6> in     $0x60,%al
+ffff9896 <ciclo2+0x8> ret    

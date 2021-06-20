@@ -17,7 +17,7 @@ LDFLAGS = -z max-page-size=0x01000 --oformat=binary -m elf_i386
 LDSCRIPT = linker.ld
 ODFLAGS = -CprsSx --prefix-addresses
 #en objs guardo todos mis objetos elf
-OBJS = $(BINPATH)init32.elf $(BINPATH)reset.elf $(BINPATH)init16.elf $(BINPATH)main.elf  $(BINPATH)functions_asm.elf $(BINPATH)functions_rom.elf $(BINPATH)handlers_32.elf $(BINPATH)functions.elf $(BINPATH)sys_tables.elf $(BINPATH)init_screen.elf
+OBJS = $(BINPATH)init32.elf $(BINPATH)reset.elf $(BINPATH)init16.elf $(BINPATH)main.elf  $(BINPATH)functions_asm.elf $(BINPATH)functions_rom.elf $(BINPATH)handlers_32.elf $(BINPATH)functions.elf $(BINPATH)sys_tables.elf $(BINPATH)init_screen.elf $(BINPATH)tarea_1.elf 
 
 SRC_NAME = mibios
 
@@ -68,6 +68,12 @@ $(BINPATH)functions.elf: $(SRCPATH)functions.c
 	@echo Generando $@
 	mkdir -p bin
 	$(CC) $(CFLAGS) $< -o $@
+
+$(BINPATH)tarea_1.elf: $(SRCPATH)tarea_1.c
+	@echo Generando $@
+	mkdir -p bin
+	$(CC) $(CFLAGS) $< -o $@
+
 
 $(BINPATH)handlers_32.elf: $(SRCPATH)handlers_32.s
 	@echo Generando $@

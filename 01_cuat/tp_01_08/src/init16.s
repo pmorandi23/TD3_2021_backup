@@ -40,6 +40,7 @@ start16:
     jmp init_screen
 return_init_screen:
 
+
     ; -> Establecer el uP en MP (Modo Protegido) <-
     smsw    ax ; Stores the machine status word (bits 0 through 15 of control register CR0) into the destination operand. The destination operand can be a general-purpose register or a memory location.
     or      ax, X86_CR0_PE

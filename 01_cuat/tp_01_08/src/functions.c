@@ -139,18 +139,6 @@ void escribir_tabla_digitos(buffer_t* buffer_vma, tabla_t* tabla_digitos_vma, by
     limpiar_buffer(buffer_vma);                 //Limpio el buffer para la próxima entrada de datos.
     //asm("xchg %bx,%bx");
 
-
-    /*  Si tengo mas 3 elementos, hago un promedio. 
-    if (tabla_digitos_vma->indice_tabla > 2)
-    {
-        for(i=0;i<3;i++)
-        { 
-            tabla_digitos_vma->sumatoria_dig += tabla_digitos_vma->tabla[i];
-        }
-
-        asm("xchg %bx,%bx");
-    } */
-
     return;    
 }
 /* Función que lee el buffer de teclado. */
@@ -181,41 +169,13 @@ byte leer_buffer (buffer_t*buffer_vma)
 __attribute__(( section(".functions_c"))) 
 void contador_handler (qword* promedio_vma, tabla_t*tabla_digitos, dword* contador)
 { 
-
-    /* PRUEBAS DE QWORD DE 64 BITS
-    static int i = 0;
-    qword digitos[4] = { 0x1234567812345678,0x1234567812345678,0x1234567812345678,0x1234567812345678 };
-    qword digito_64_prom    = 0;
-    qword digito_64_aux     = 0;
-    qword digito_64_aux2    = 0;
-    byte cantidad_digitos   = 2;
-
-
-    dword digito_1_L = 0x12345678;
-    dword digito_1_H = 0x12345678;
-
-    dword digito_2_L = 0x87654321;
-    dword digito_2_H = 0x87654321;
-
-    digito_64_aux = (digito_1_H << 32) | digito_1_L;
-    digito_64_aux2 = (digito_2_H << 32) | digito_2_L;
-
-    for (i=0;i<4;i++)
-    {
-        digito_64_prom = (digito_64_prom | digitos[i]);  
-    }
-    digito_64_prom = digito_64_prom << 3; // 2= div 4 3 = div /
-
-    asm("xchg %bx,%bx"); */
-
-    /* Si entra 50 veces ejecuto hago el promedio y ejecuto Tarea 1. */
+    /* Si entra 50 (500ms) veces ejecuto hago el promedio y ejecuto Tarea 1. */
     if ( *contador > 49)
     { 
         //asm("xchg %bx,%bx");
         *contador = 0;
-        sumatoria_digitos_64(tabla_digitos);
-        promedio_digitos_64(tabla_digitos, (qword*)promedio_vma);
-        ejecutar_tarea_1(tabla_digitos);    //Muestra en pantalla el promedio.
+        
+        ejecutar_tarea_1(tabla_digitos, (qword*)promedio_vma);    //Muestra en pantalla el promedio de los dígitos de 64b de la tabla ingresados por teclado
     }
     else
     { 
@@ -224,103 +184,6 @@ void contador_handler (qword* promedio_vma, tabla_t*tabla_digitos, dword* contad
 
     return;
 }
-/* Función que promedia los dígitos almacenados en tabla. */
-__attribute__(( section(".functions_c")))
-void promedio_digitos_64(tabla_t* tabla_digitos, qword* promedio_vma)
-{
-    static byte i=0;
-    static qword a64,b64,r64aux,a64aux;         //     Divido sumatoria de dígitos / cantidad de dígitos
-    a64=tabla_digitos->sumatoria_dig;   
-    b64=tabla_digitos->indice_tabla;
-    r64aux=0x0000000000000000;
-    a64aux=0x0000000000000000;
-
-    for(i=0;i<64;i++)
-    {
-        //if
-        a64aux=a64aux | ( ( a64>>(64-1-i) ) & ( 0x01 ) );
-        if(a64aux>=b64)
-        {
-        r64aux=r64aux|0x1;            
-        a64aux=a64aux-b64;
-        }
-        r64aux=r64aux<<1;
-        a64aux=a64aux<<1;
-    }
-    r64aux=r64aux>>1;
-    /* Guardo el promedio en la struct de la tabla. */
-    tabla_digitos->promedio_dig=r64aux;
-    /* Almaceno el promedio en una posicion en la seccion DATA. */
-    *promedio_vma = r64aux;
-}
-/* Función que promedia los dígitos almacenados en tabla. */
-__attribute__(( section(".functions_c")))
-void sumatoria_digitos_64(tabla_t* tabla_digitos)
-{
-    static int i = 0;
-    qword sumatoria = 0;
-
-    for (i=0;i<tabla_digitos->indice_tabla;i++)
-    {
-        sumatoria = sumatoria + tabla_digitos->tabla[i];
-    }
-    tabla_digitos->sumatoria_dig = sumatoria;
-
-}
-/* Tarea cada 500ms que muestra el promedio en pantalla de digitos almacenados en memoria. */
-__attribute__(( section(".tarea_1")))
-void ejecutar_tarea_1 (tabla_t* tabla_digitos)
-{
-     /* ESCRITURA EN PANTALLA
-
-    80 caracteres por linea. Cada caracter tiene 2 bytes. 
-    24 filas.
-    Entonces cada 160 bytes tengo una linea nueva. 
-    mov eax, 0xB8000                       ; Buffer de video pos 0 en memoria
-    mov byte [eax], 'H'                    ; Le cago el caractér
-    inc eax                                ; Incremento eax
-    mov byte [eax], 0x07                   ; Seteo Fondo negro y letra blanca */
-    static int pos_caracter=0;
-    qword promedio = tabla_digitos->promedio_dig;
-    byte caracter = 0;
-    byte atributos = 0x07; //Fondo negro y letra blanca.
-    buff_screen_t* buffer_vga = &__VGA_VMA;
-    byte offset_pantalla = 0x7E; //Offset para tener 16 caracteres en el borde superior derecho.
-
-
-    /* Si tengo digitos, empiezo a escribir. Sino no. */
-    if (tabla_digitos->indice_tabla > 0)
-    {
-        for (pos_caracter=0;pos_caracter<16;pos_caracter++)
-        {
-            caracter = ((promedio >> 4*pos_caracter) & MASK_PROMEDIO) ; //Voy obteniendo caracteres del prom de 64 bits.
-
-            //Tengo del 0 al 9         
-             if (caracter > -1 && caracter < 10)
-            {
-                caracter = caracter + 48; //Convierto a ASCII (el cero es 48)
-            }
-            else
-            {
-                //Si tengo A, B, C, D, E
-                if ( caracter > 9 && caracter < 16)
-                {
-                    caracter = caracter + 55 ; // Convierto a ASCII (la A es 65)
-                } 
-            }
-        
-           buffer_vga->buffer[offset_pantalla + BUFFER_MAX_VIDEO - 2*pos_caracter ] = caracter;
-           buffer_vga->buffer[offset_pantalla + BUFFER_MAX_VIDEO - (2*pos_caracter - 1) ] = atributos;
-                      
-            //escribir_caracter_pantalla((buff_screen_t*)&__VGA_VMA, caracter, atributos);
-        }
-    }
-    
-    return;
-
-}
-
-
 /* Función que setea el Control Register 3 */
 __attribute__(( section(".functions_c")))
 dword set_cr3 (dword init_dpt, byte _pcd, byte _pwt)
@@ -334,7 +197,7 @@ dword set_cr3 (dword init_dpt, byte _pcd, byte _pwt)
     return cr3;
 
 }
-/* Función que setea el DTP. */
+/* Función que setea una DPTE. */
 __attribute__(( section(".functions_c")))
 void set_dir_page_table_entry (dword init_dpt, word entry, dword init_pt, byte _ps, byte _a, byte _pcd, byte _pwt, byte _us, byte _rw, byte _p)
 {
@@ -342,7 +205,7 @@ void set_dir_page_table_entry (dword init_dpt, word entry, dword init_pt, byte _
 
     dword* dst = (dword*) init_dpt;
 
-    dpte |= (init_dpt & 0xFFFFF000);
+    dpte |= (init_pt & 0xFFFFF000);
     dpte |= (_ps << 7);
     dpte |= (_a << 5);
     dpte |= (_pcd << 4);
@@ -355,8 +218,7 @@ void set_dir_page_table_entry (dword init_dpt, word entry, dword init_pt, byte _
     *(dst + entry) = dpte;
 
 }
-
-/* Función que setea una PT */
+/* Función que setea una PTE */
 __attribute__(( section(".functions_c")))
 void set_page_table_entry (dword init_pt,word entry,dword init_pag,byte _g,byte _pat,byte _d,byte _a,byte _pcd,byte _pwt,byte _us,byte _rw,byte _p)
 {
@@ -379,3 +241,96 @@ void set_page_table_entry (dword init_pt,word entry,dword init_pag,byte _g,byte 
     *(dst + entry) = pte;
 
 }
+/* Función que escribe un caracter en una posición determinada de la pantalla. */
+__attribute__(( section(".functions_c")))
+void escribir_caracter_VGA (char caracter, byte fila, byte columna, byte flag_ASCII)
+{
+    static int pos_msg = 0;
+    buff_screen_t* VGA = (buff_screen_t*)&__VGA_VMA;    // Dirección base de la pantalla en el borde superior izquierdo.
+    byte atributos = 0x07;              // Fondo negro y letra blanca.
+
+    /* Filas = 24 (y)
+       Columnas = 80 (x) */
+    
+    /* Si no es ASCII, lo convierto. */
+    if (!flag_ASCII)
+    {
+        caracter= convertir_ASCII (caracter);
+    }
+
+    VGA->buffer_screen[2*fila][2*columna + 2*pos_msg ] = caracter;
+    VGA->buffer_screen[2*fila][2*columna +(2*pos_msg + 1) ] = atributos;
+
+    
+
+}
+/* Función que escribe un mensaje en el borde superior izquierdo de la pantalla */
+__attribute__(( section(".functions_c")))
+void escribir_mensaje_VGA (char* msg, byte fila, byte columna, byte flag_ASCII)
+{
+    static int pos_msg = 0;
+    buff_screen_t* VGA = (buff_screen_t*)&__VGA_VMA;    // Dirección base de la pantalla en el borde superior izquierdo.
+    byte atributos = 0x07;              // Fondo negro y letra blanca.
+
+    /* Filas = 24 (y)
+       Columnas = 80 (x) */
+
+    /* Escribe el mensaje en pantalla en la pos. deseada hasta encontrar el NULL del vector. */
+    for (pos_msg = 0; *(msg + pos_msg) != 0; pos_msg++)
+    {
+        /* Si no es ASCII, lo convierto. */
+        if (!flag_ASCII)
+        {
+            *(msg + pos_msg) = convertir_ASCII (*(msg + pos_msg));
+        }
+
+        VGA->buffer_screen[2*fila][2*columna + 2*pos_msg ] = *(msg + pos_msg);
+        VGA->buffer_screen[2*fila][2*columna +(2*pos_msg + 1) ] = atributos;
+
+    }
+
+}
+/* Función que convierte un byte en ASCII */
+__attribute__(( section(".functions_c")))
+byte convertir_ASCII (byte caracter)
+{
+    //Si es un número:       
+    if (caracter > -1 && caracter < 10)
+    {
+    caracter = caracter + 48; //Convierto a ASCII (el cero es 48)
+    }
+    else
+    {
+        //Si es una letra:
+        if ( caracter > 9 && caracter < 91)
+        {
+            caracter = caracter + 65 ; // Convierto a ASCII (la A es 65)
+        } 
+
+    }
+    return caracter;
+
+}
+/* Función que limpia inicializa o reinicia la pantalla con un mensaje fijo.  */
+ __attribute__(( section(".functions_c")))
+void limpiar_VGA (buff_screen_t* VGA)
+{
+
+    //static int i = 0;
+    //static int j = 0;
+    /* for (i = 0; i < 25; i++) 
+    {
+        for (j = 0; j < 80; j++) 
+        {
+            VGA->buffer_screen[i][j] = 0x1E00; //inicializo todo en caracteres blanco
+        }
+    } */
+    escribir_mensaje_VGA("------------------------------------", 0, 0, ASCII_TRUE);
+    escribir_mensaje_VGA("Bienvenido a x86-OS - CPU: Intel 386", 1, 0, ASCII_TRUE);
+    escribir_mensaje_VGA("------------------------------------", 2, 0, ASCII_TRUE);
+    escribir_mensaje_VGA("Ingrese digitos de hasta 10 numeros.", 3, 0, ASCII_TRUE);
+    escribir_mensaje_VGA("------------------------------------", 22, 0, ASCII_TRUE);
+    escribir_mensaje_VGA("Ej.8 - Paginacion Basica - TD3 2021 ", 23, 0, ASCII_TRUE);
+    escribir_mensaje_VGA("------------------------------------", 24, 0, ASCII_TRUE);
+
+} 

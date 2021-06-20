@@ -2,7 +2,7 @@ USE32
 
 %include "inc/functions_asm.h" 
 
-;----------------GLOBAL--------------------
+;----------------EXTERN--------------------
 EXTERN DS_SEL_32
 EXTERN CS_SEL_32
 EXTERN __TECLADO_ISR_VMA
@@ -11,9 +11,13 @@ EXTERN determinar_tecla_presionada
 EXTERN memoria_buffer_reservada
 EXTERN contador_handler
 EXTERN contador_timer
+EXTERN dir_lineal_page_fault
 EXTERN resultado_promedio
 EXTERN __DIGITS_TABLE
-;----------------EXTERN--------------------
+EXTERN error_code_PF
+EXTERN page_fault_msg
+EXTERN escribir_mensaje_VGA
+;----------------GLOBAL--------------------
 GLOBAL L_ISR00_Handler_DE
 GLOBAL L_ISR02_Handler_NMI
 GLOBAL L_ISR03_Handler_BP
@@ -57,6 +61,7 @@ L_ISR19_Handler_XM  EQU ISR19_Handler_XM    - VMA_ISR_TECLADO
 L_IRQ00_Handler     EQU IRQ00_Handler       - VMA_ISR_TECLADO
 L_IRQ01_Handler     EQU IRQ01_Handler       - VMA_ISR_TECLADO
 
+
 ;----------------SECTION-----------------------
 SECTION .teclado_and_ISR
 ;------------ HANDLER IRQ TIMER---------------------
@@ -67,10 +72,6 @@ IRQ00_Handler:
     ;mov eax , [contador_timer]                  ; Si lo quiero hacer en asm... pero sin resetear variable. 
     ;inc eax
     ;mov [contador_timer], eax
-    ;mov eax, 0xB8000                       ; Buffer de video pos 0 en memoria. 80 letras por fila.
-    ;mov byte [eax], 'H'                    ; Le cago el caractér
-    ;inc eax                                ; Incremento eax
-    ;mov byte [eax], 0x07                   ; Seteo Fondo negro y letra blanca
 
     push    ebp
     mov     ebp, esp 
@@ -102,10 +103,10 @@ IRQ01_Handler:
     add     esp, 8
 end_handler_teclado:
     ;xchg    bx, bx                              ; Breakpoint
-    mov     al, 0x20                            ; ACK de la IRQ para el PIC 
+    mov     al, 0x20                             ; ACK de la IRQ para el PIC 
     out     0x20, al
-    popad                                       ; Recupero registros
-    iret                                        ; Retorno de la IRQ
+    popad                                        ; Recupero registros
+    iret                                         ; Retorno de la IRQ
 
 ;-----------HANDLERs DE EXCEPTIONS-------------
 ;#DE (Divide Error)
@@ -162,10 +163,43 @@ ISR12_Handler_SS:
 ISR13_Handler_GP:
     mov dl,0x0D
     hlt
-    iret
+;-----------------------------------
+;----------Page Fault (#PF)---------
+;-----------------------------------
 
+;Error code
+;The Page Fault sets an error code:
+;
+; 31              4               0
+;+---+--  --+---+---+---+---+---+---+
+;|   Reserved   | I | R | U | W | P |
+;+---+--  --+---+---+---+---+---+---+
+;Length	Name	Description
+;P	1 bit	Present	When set, the page fault was caused by a page-protection violation. When not set, it was caused by a non-present page.
+;W	1 bit	Write	When set, the page fault was caused by a write access. When not set, it was caused by a read access.
+;U	1 bit	User	When set, the page fault was caused while CPL = 3. This does not necessarily mean that the page fault was a privilege violation.
+;R	1 bit	Reserved write	When set, one or more page directory entries contain reserved bits which are set to 1. This only applies when the PSE or PAE flags in CR4 are set to 1.
+;I	1 bit	Instruction Fetch	When set, the page fault was caused by an instruction fetch. This only applies when the No-Execute bit is supported and enabled.
 ISR14_Handler_PF:
-    mov dl,0x0E
+    ;xchg    bx, bx
+
+    mov     ebx, [esp]
+    mov     [error_code_PF], ebx
+
+    mov     eax, cr2
+    mov     [dir_lineal_page_fault], eax
+
+    push    10      ; Columna VGA
+    push    0       ; Fila    VGA
+    push    page_fault_msg
+    call    escribir_mensaje_VGA
+    add     esp, 12
+
+    xchg    bx, bx
+
+
+    ;call page_fault_handler
+
     hlt
 
 ISR15_Handler_RES:

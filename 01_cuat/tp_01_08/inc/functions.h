@@ -61,8 +61,10 @@ extern long unsigned __VGA_VMA;
 //#define LONG_TABLA  BUFFER_MAX*CANTIDAD_DATOS   //10 datos de 16 bytes cada uno.
 /* -------------DEFINES BUFFER PANTALLA------------- */
 #define FILAS_PANTALLA      24   //24 filas de 160 bytes cada una
-#define COLUMNAS_PANTALLA   160  //80 columnas de 2 bytes cada una
+#define COLUMNAS_PANTALLA   80   //80 columnas de 2 bytes cada una
 #define BUFFER_MAX_VIDEO    32   //16 caracteres con sus 16 atributos cada uno
+#define ASCII_TRUE          1
+#define ASCII_FALSE         0
 
 /* -----------------TYPEDEF-------------------- */
 typedef unsigned char byte;
@@ -91,8 +93,9 @@ typedef struct tabla_digitos
 
 typedef struct buffer_screen
 {
-    byte buffer[FILAS_PANTALLA*COLUMNAS_PANTALLA]; // Buffer para toda la pantalla 
-    byte posicion; 
+    byte buffer_screen[FILAS_PANTALLA][COLUMNAS_PANTALLA];   // Buffer para toda la pantalla.
+    //byte mensaje[FILAS_PANTALLA*COLUMNAS_PANTALLA];         // Mensaje de tamaño máximo toda la pantalla.
+    byte long_mensaje;                                      // Longitud en bytes del mensaje.
 }buff_screen_t;
 
 
@@ -104,10 +107,11 @@ void escribir_buffer (byte , buffer_t* );
 byte leer_buffer (buffer_t*);
 void escribir_tabla_digitos(buffer_t* , tabla_t*,byte );
 void contador_handler (qword* , tabla_t*, dword* );
-void promedio_digitos_64(tabla_t* , qword* );
-void sumatoria_digitos_64(tabla_t* );
-void ejecutar_tarea_1 (tabla_t* );
 dword set_cr3 (dword , byte , byte );
 void set_dir_page_table_entry (dword , word , dword , byte , byte , byte , byte , byte , byte , byte );
 void set_page_table_entry (dword ,word ,dword ,byte ,byte ,byte ,byte ,byte ,byte ,byte ,byte ,byte );
-
+void escribir_mensaje_VGA (char* , byte , byte , byte );
+void escribir_caracter_VGA (char , byte , byte , byte );
+byte convertir_ASCII (byte );
+void limpiar_VGA (buff_screen_t* );
+void ejecutar_tarea_1 (tabla_t* , qword*);

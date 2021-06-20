@@ -1,4 +1,4 @@
-     1                                  SECTION .functions_asm
+     1                                  SECTION .functions_asm_rom
      2                                  ;---------------INCLUDES-----------------
      3                                  %include "inc/functions_asm.h"
      1                              <1> ;----------------PIC----------------------------
