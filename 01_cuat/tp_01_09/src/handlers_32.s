@@ -6,6 +6,7 @@ USE32
 EXTERN DS_SEL_32
 EXTERN CS_SEL_32
 EXTERN __TECLADO_ISR_VMA
+EXTERN __VGA_VMA
 EXTERN __DIGITS_TABLE_INIT
 EXTERN determinar_tecla_presionada
 EXTERN memoria_buffer_reservada
@@ -17,6 +18,7 @@ EXTERN __DIGITS_TABLE_VMA
 EXTERN error_code_PF
 EXTERN page_fault_msg
 EXTERN escribir_mensaje_VGA
+EXTERN limpiar_VGA
 ;----------------GLOBAL--------------------
 GLOBAL L_ISR00_Handler_DE
 GLOBAL L_ISR02_Handler_NMI
@@ -101,6 +103,7 @@ IRQ01_Handler:
     push    eax                                 ; Tecla presionada.
     call determinar_tecla_presionada
     add     esp, 8
+
 end_handler_teclado:
     ;xchg    bx, bx                              ; Breakpoint
     mov     al, 0x20                             ; ACK de la IRQ para el PIC 

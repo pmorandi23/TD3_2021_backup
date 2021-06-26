@@ -53,10 +53,13 @@
 /* ---------------EXTERN---------------------------- */
 extern long unsigned __DIGITS_TABLE_VMA;
 extern long unsigned __VGA_VMA;
-extern long unsigned __VGA_PHY;
+extern long unsigned __PAGE_TABLES_PHY;
+extern long unsigned __PAG_DINAMICA_INIT_VMA;
+extern long unsigned __PAG_DINAMICA_INIT_PHY;
 
 /* ----------------DEFINES GENERALES---------------- */
-#define MASK_PROMEDIO   0x000000000000000F
+#define MASK_PROMEDIO           0x000000000000000F
+#define MASK_MEDIO_BYTE_32B     0x0000000F
 /* -------------DEFINES BUFFER TECLADO-------------- */
 #define BUFFER_MAX        16
 #define CANTIDAD_DIGITOS  10  
@@ -114,11 +117,12 @@ void set_dir_page_table_entry (dword , dword , byte , byte , byte , byte , byte 
 void set_page_table_entry (dword , dword , dword  ,  byte ,byte ,byte ,byte ,byte ,byte ,byte ,byte ,byte );
 void escribir_mensaje_VGA (char* , byte , byte , byte );
 void escribir_caracter_VGA (char , byte , byte , byte );
-void limpiar_VGA (buff_screen_t*);
+void mostrar_numero32_VGA(dword , byte , byte );
 byte convertir_ASCII (byte );
-void msg_bienvenida_VGA (buff_screen_t* );
+void limpiar_VGA (buff_screen_t* );
 void ejecutar_tarea_1 (tabla_t* , qword*);
 dword get_entry_DTP(dword ) ;
 dword get_entry_TP(dword );  
+void carga_tp_dinamica_1024_pte (void);
 
 

@@ -16,7 +16,13 @@ GLOBAL contador_timer
 GLOBAL resultado_promedio
 GLOBAL dir_lineal_page_fault
 GLOBAL error_code_PF
+GLOBAL dir_phy_dinamica
 GLOBAL page_fault_msg
+GLOBAL page_fault_msg_2
+GLOBAL page_fault_msg_3
+GLOBAL page_fault_msg_4
+GLOBAL page_fault_msg_5
+GLOBAL page_fault_msg_6
 kernel21_code_size EQU kernel32_end-kernel32_init
 ;---------EQU-----------------------------
 CANTIDAD_DATOS  EQU 10
@@ -55,7 +61,7 @@ kernel32_end:
 ;-------- VARIABLES DE DATOS PARA PROPOSITO GENERAL----
 SECTION .data
 variables_globales:
-    memoria_buffer_reservada    resb 19             ;Reservo para buffer[0-16] + head[17] + tail[18] + cantidad[19] 
+    memoria_buffer_reservada    resb 19             ; Reservo para buffer[0-16] + head[17] + tail[18] + cantidad[19] 
 
     contador_timer              resw 1              ; Contador del timer
 
@@ -63,6 +69,13 @@ variables_globales:
 
     dir_lineal_page_fault       resd 1              ; Dir. Lineal que produjo una Page Fault Exception.
 
-    error_code_PF               resd 1
+    error_code_PF               resd 1              ; Código de error del #PF
+
+    dir_phy_dinamica            dd 0x0A000000       ; Dir. Phy. dinámica para salvar el #PF
 mensajes_error:
     page_fault_msg              db "-----PAGE FAULT-----",0
+    page_fault_msg_2            db "Dir. VMA = 0x",0
+    page_fault_msg_3            db "Error Code: ",0
+    page_fault_msg_4            db "Paginacion OFF. Se puede paginar con VMA del CR2",0
+    page_fault_msg_5            db "DPT escrito exitosamente con VMA del CR2. Si no existia, se creo una nueva PT.",0
+    page_fault_msg_6            db "PTE y PDE (Si no existia, se creo una nueva PT.) escritos exitosamente con VMA del CR2 y +4K de la dir_phy_dinamica.",0

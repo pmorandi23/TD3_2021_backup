@@ -14,213 +14,216 @@
      6                                  EXTERN DS_SEL_32
      7                                  EXTERN CS_SEL_32
      8                                  EXTERN __TECLADO_ISR_VMA
-     9                                  EXTERN __DIGITS_TABLE_INIT
-    10                                  EXTERN determinar_tecla_presionada
-    11                                  EXTERN memoria_buffer_reservada
-    12                                  EXTERN contador_handler
-    13                                  EXTERN contador_timer
-    14                                  EXTERN dir_lineal_page_fault
-    15                                  EXTERN resultado_promedio
-    16                                  EXTERN __DIGITS_TABLE_VMA
-    17                                  EXTERN error_code_PF
-    18                                  EXTERN page_fault_msg
-    19                                  EXTERN escribir_mensaje_VGA
-    20                                  ;----------------GLOBAL--------------------
-    21                                  GLOBAL L_ISR00_Handler_DE
-    22                                  GLOBAL L_ISR02_Handler_NMI
-    23                                  GLOBAL L_ISR03_Handler_BP
-    24                                  GLOBAL L_ISR04_Handler_OF
-    25                                  GLOBAL L_ISR05_Handler_BR
-    26                                  GLOBAL L_ISR06_Handler_UD
-    27                                  GLOBAL L_ISR07_Handler_NM
-    28                                  GLOBAL L_ISR08_Handler_DF
-    29                                  GLOBAL L_ISR10_Handler_TS
-    30                                  GLOBAL L_ISR11_Handler_NP
-    31                                  GLOBAL L_ISR12_Handler_SS
-    32                                  GLOBAL L_ISR13_Handler_GP
-    33                                  GLOBAL L_ISR14_Handler_PF
-    34                                  GLOBAL L_ISR16_Handler_MF
-    35                                  GLOBAL L_ISR17_Handler_AC
-    36                                  GLOBAL L_ISR18_Handler_MC
-    37                                  GLOBAL L_ISR19_Handler_XM
-    38                                  GLOBAL L_IRQ00_Handler
-    39                                  GLOBAL L_IRQ01_Handler
-    40                                  ;----------------EQU--------------------
-    41                                  VMA_ISR_TECLADO     EQU 0x00100000
-    42                                  ; Parte baja de las direcciones de los Handlers 
-    43                                  L_ISR00_Handler_DE  EQU ISR00_Handler_DE    - VMA_ISR_TECLADO 
-    44                                  L_ISR01_Handler_DB  EQU ISR01_Handler_DB    - VMA_ISR_TECLADO 
-    45                                  L_ISR02_Handler_NMI EQU ISR02_Handler_NMI   - VMA_ISR_TECLADO 
-    46                                  L_ISR03_Handler_BP  EQU ISR03_Handler_BP    - VMA_ISR_TECLADO 
-    47                                  L_ISR04_Handler_OF  EQU ISR04_Handler_OF    - VMA_ISR_TECLADO 
-    48                                  L_ISR05_Handler_BR  EQU ISR05_Handler_BR    - VMA_ISR_TECLADO 
-    49                                  L_ISR06_Handler_UD  EQU ISR06_Handler_UD    - VMA_ISR_TECLADO 
-    50                                  L_ISR07_Handler_NM  EQU ISR07_Handler_NM    - VMA_ISR_TECLADO 
-    51                                  L_ISR08_Handler_DF  EQU ISR08_Handler_DF    - VMA_ISR_TECLADO   
-    52                                  L_ISR10_Handler_TS  EQU ISR10_Handler_TS    - VMA_ISR_TECLADO 
-    53                                  L_ISR11_Handler_NP  EQU ISR11_Handler_NP    - VMA_ISR_TECLADO 
-    54                                  L_ISR12_Handler_SS  EQU ISR12_Handler_SS    - VMA_ISR_TECLADO 
-    55                                  L_ISR13_Handler_GP  EQU ISR13_Handler_GP    - VMA_ISR_TECLADO 
-    56                                  L_ISR14_Handler_PF  EQU ISR14_Handler_PF    - VMA_ISR_TECLADO 
-    57                                  L_ISR16_Handler_MF  EQU ISR16_Handler_MF    - VMA_ISR_TECLADO 
-    58                                  L_ISR17_Handler_AC  EQU ISR17_Handler_AC    - VMA_ISR_TECLADO 
-    59                                  L_ISR18_Handler_MC  EQU ISR18_Handler_MC    - VMA_ISR_TECLADO 
-    60                                  L_ISR19_Handler_XM  EQU ISR19_Handler_XM    - VMA_ISR_TECLADO 
-    61                                  L_IRQ00_Handler     EQU IRQ00_Handler       - VMA_ISR_TECLADO
-    62                                  L_IRQ01_Handler     EQU IRQ01_Handler       - VMA_ISR_TECLADO
-    63                                  
-    64                                  
-    65                                  ;----------------SECTION-----------------------
-    66                                  SECTION .teclado_and_ISR
-    67                                  ;------------ HANDLER IRQ TIMER---------------------
-    68                                  IRQ00_Handler:
-    69 00000000 60                          pushad                                      ;Salvo los registros de uso general.
-    70                                  
-    71                                      ;xchg    bx, bx                              ; Breakpoint
-    72                                      ;mov eax , [contador_timer]                  ; Si lo quiero hacer en asm... pero sin resetear variable. 
-    73                                      ;inc eax
-    74                                      ;mov [contador_timer], eax
-    75                                  
-    76 00000001 55                          push    ebp
-    77 00000002 89E5                        mov     ebp, esp 
-    78 00000004 68[00000000]                push contador_timer                         ; Contador del Timer actual              
-    79 00000009 68[00000000]                push __DIGITS_TABLE_VMA                     ; Dir. de tabla de dígitos
-    80 0000000E 68[00000000]                push resultado_promedio                     ; Resultado del prom. cada 500ms
-    81 00000013 E8(00000000)                call contador_handler                       ; Cada 50 ticks (500ms) ejecuto la tarea 1.
-    82 00000018 C9                          leave
-    83                                  end_handler_timer:
-    84 00000019 B020                        mov al, 0x20                                ; ACK de la IRQ para el PIC 
-    85 0000001B E620                        out 0x20, al
-    86 0000001D 61                          popad                                       ;Recupero registros
-    87 0000001E CF                          iret                                        ;Retorno de la IRQ
-    88                                  
-    89                                  ;----------HANDLER IRQ TECLADO-----------------
-    90                                  IRQ01_Handler:
-    91 0000001F 60                          pushad                                      ; Guardo todos los registros  para asegurarme que no se rompa el estado actual.
-    92 00000020 B221                        mov     dl,0x21                             ; Guardo la interrupcion en el registro DX
-    93 00000022 31C0                        xor     eax, eax
-    94                                      ; ->Leo el puerto
-    95 00000024 E460                        in      al, PORT_A_8042                     ; Leo el puerto 0x60 (Keyboard Output Buffer Register)
-    96 00000026 88C3                        mov     bl, al                              ; Copio lo leído en otro registro
-    97 00000028 80E380                      and     bl, 0x80                            ; Hago un AND para obtener el bit 7 (BRK)
-    98 0000002B 80FB80                      cmp     bl, 0x80                            ; Si el bit vale 0 la tecla fue presionada (Make), si es 1 se dejó de presionar (Break)
-    99 0000002E 740E                        jz      end_handler_teclado                 ; Si se dejo de presionar, no la leo. Solo leo cuando se presionada (Make)
-   100 00000030 68[00000000]                push    dword memoria_buffer_reservada      ; Buffer en VMA
-   101 00000035 50                          push    eax                                 ; Tecla presionada.
-   102 00000036 E8(00000000)                call determinar_tecla_presionada
-   103 0000003B 83C408                      add     esp, 8
-   104                                  end_handler_teclado:
-   105                                      ;xchg    bx, bx                              ; Breakpoint
-   106 0000003E B020                        mov     al, 0x20                             ; ACK de la IRQ para el PIC 
-   107 00000040 E620                        out     0x20, al
-   108 00000042 61                          popad                                        ; Recupero registros
-   109 00000043 CF                          iret                                         ; Retorno de la IRQ
-   110                                  
-   111                                  ;-----------HANDLERs DE EXCEPTIONS-------------
-   112                                  ;#DE (Divide Error)
-   113                                  ISR00_Handler_DE:
-   114 00000044 6687DB                      xchg    bx,bx
-   115 00000047 B200                        mov     dl,0x00
-   116 00000049 F4                          hlt
-   117                                  
-   118                                  ISR01_Handler_DB:
-   119 0000004A B201                        mov dl,0x01
-   120 0000004C F4                          hlt
-   121                                  
-   122                                  ISR02_Handler_NMI:
-   123 0000004D B202                        mov dl,0x02
-   124 0000004F F4                          hlt
-   125                                  
-   126                                  ISR03_Handler_BP:
-   127 00000050 B203                        mov dl,0x03
-   128 00000052 F4                          hlt
-   129                                  
-   130                                  ISR04_Handler_OF:
-   131 00000053 B204                        mov dl,0x04
-   132 00000055 F4                          hlt
-   133                                  
-   134                                  ISR05_Handler_BR:
-   135 00000056 B205                        mov dl,0x05
-   136 00000058 F4                          hlt
-   137                                  ;#UD (Invalid Opcode Fetch) 
-   138                                  ISR06_Handler_UD:
-   139 00000059 6687DB                      xchg    bx,bx
-   140 0000005C B206                        mov     dl,0x06
-   141 0000005E F4                          hlt
-   142                                  
-   143                                  ISR07_Handler_NM:
-   144 0000005F B207                        mov dl,0x07
-   145 00000061 F4                          hlt
-   146                                  
-   147                                  ISR08_Handler_DF:
-   148 00000062 B208                        mov dl,0x08
-   149 00000064 F4                          hlt
-   150                                  
-   151                                  ISR10_Handler_TS:
-   152 00000065 B20A                        mov dl,0x0A
-   153 00000067 F4                          hlt
-   154                                  
-   155                                  ISR11_Handler_NP:
-   156 00000068 B20B                        mov dl,0x0B
-   157 0000006A F4                          hlt
-   158                                  
-   159                                  ISR12_Handler_SS:
-   160 0000006B B20C                        mov dl,0x0C
-   161 0000006D F4                          hlt
-   162                                  ; Funciono al no tener el CS al retornar de un call
-   163                                  ISR13_Handler_GP:
-   164 0000006E B20D                        mov dl,0x0D
-   165 00000070 F4                          hlt
-   166                                  ;-----------------------------------
-   167                                  ;----------Page Fault (#PF)---------
-   168                                  ;-----------------------------------
-   169                                  
-   170                                  ;Error code
-   171                                  ;The Page Fault sets an error code:
-   172                                  ;
-   173                                  ; 31              4               0
-   174                                  ;+---+--  --+---+---+---+---+---+---+
-   175                                  ;|   Reserved   | I | R | U | W | P |
-   176                                  ;+---+--  --+---+---+---+---+---+---+
-   177                                  ;Length	Name	Description
-   178                                  ;P	1 bit	Present	When set, the page fault was caused by a page-protection violation. When not set, it was caused by a non-present page.
-   179                                  ;W	1 bit	Write	When set, the page fault was caused by a write access. When not set, it was caused by a read access.
-   180                                  ;U	1 bit	User	When set, the page fault was caused while CPL = 3. This does not necessarily mean that the page fault was a privilege violation.
-   181                                  ;R	1 bit	Reserved write	When set, one or more page directory entries contain reserved bits which are set to 1. This only applies when the PSE or PAE flags in CR4 are set to 1.
-   182                                  ;I	1 bit	Instruction Fetch	When set, the page fault was caused by an instruction fetch. This only applies when the No-Execute bit is supported and enabled.
-   183                                  ISR14_Handler_PF:
-   184 00000071 6687DB                      xchg    bx, bx
-   185                                  
-   186 00000074 8B1C24                      mov     ebx, [esp]
-   187 00000077 891D[00000000]              mov     [error_code_PF], ebx
+     9                                  EXTERN __VGA_VMA
+    10                                  EXTERN __DIGITS_TABLE_INIT
+    11                                  EXTERN determinar_tecla_presionada
+    12                                  EXTERN memoria_buffer_reservada
+    13                                  EXTERN contador_handler
+    14                                  EXTERN contador_timer
+    15                                  EXTERN dir_lineal_page_fault
+    16                                  EXTERN resultado_promedio
+    17                                  EXTERN __DIGITS_TABLE_VMA
+    18                                  EXTERN error_code_PF
+    19                                  EXTERN page_fault_msg
+    20                                  EXTERN escribir_mensaje_VGA
+    21                                  EXTERN limpiar_VGA
+    22                                  ;----------------GLOBAL--------------------
+    23                                  GLOBAL L_ISR00_Handler_DE
+    24                                  GLOBAL L_ISR02_Handler_NMI
+    25                                  GLOBAL L_ISR03_Handler_BP
+    26                                  GLOBAL L_ISR04_Handler_OF
+    27                                  GLOBAL L_ISR05_Handler_BR
+    28                                  GLOBAL L_ISR06_Handler_UD
+    29                                  GLOBAL L_ISR07_Handler_NM
+    30                                  GLOBAL L_ISR08_Handler_DF
+    31                                  GLOBAL L_ISR10_Handler_TS
+    32                                  GLOBAL L_ISR11_Handler_NP
+    33                                  GLOBAL L_ISR12_Handler_SS
+    34                                  GLOBAL L_ISR13_Handler_GP
+    35                                  GLOBAL L_ISR14_Handler_PF
+    36                                  GLOBAL L_ISR16_Handler_MF
+    37                                  GLOBAL L_ISR17_Handler_AC
+    38                                  GLOBAL L_ISR18_Handler_MC
+    39                                  GLOBAL L_ISR19_Handler_XM
+    40                                  GLOBAL L_IRQ00_Handler
+    41                                  GLOBAL L_IRQ01_Handler
+    42                                  ;----------------EQU--------------------
+    43                                  VMA_ISR_TECLADO     EQU 0x00100000
+    44                                  ; Parte baja de las direcciones de los Handlers 
+    45                                  L_ISR00_Handler_DE  EQU ISR00_Handler_DE    - VMA_ISR_TECLADO 
+    46                                  L_ISR01_Handler_DB  EQU ISR01_Handler_DB    - VMA_ISR_TECLADO 
+    47                                  L_ISR02_Handler_NMI EQU ISR02_Handler_NMI   - VMA_ISR_TECLADO 
+    48                                  L_ISR03_Handler_BP  EQU ISR03_Handler_BP    - VMA_ISR_TECLADO 
+    49                                  L_ISR04_Handler_OF  EQU ISR04_Handler_OF    - VMA_ISR_TECLADO 
+    50                                  L_ISR05_Handler_BR  EQU ISR05_Handler_BR    - VMA_ISR_TECLADO 
+    51                                  L_ISR06_Handler_UD  EQU ISR06_Handler_UD    - VMA_ISR_TECLADO 
+    52                                  L_ISR07_Handler_NM  EQU ISR07_Handler_NM    - VMA_ISR_TECLADO 
+    53                                  L_ISR08_Handler_DF  EQU ISR08_Handler_DF    - VMA_ISR_TECLADO   
+    54                                  L_ISR10_Handler_TS  EQU ISR10_Handler_TS    - VMA_ISR_TECLADO 
+    55                                  L_ISR11_Handler_NP  EQU ISR11_Handler_NP    - VMA_ISR_TECLADO 
+    56                                  L_ISR12_Handler_SS  EQU ISR12_Handler_SS    - VMA_ISR_TECLADO 
+    57                                  L_ISR13_Handler_GP  EQU ISR13_Handler_GP    - VMA_ISR_TECLADO 
+    58                                  L_ISR14_Handler_PF  EQU ISR14_Handler_PF    - VMA_ISR_TECLADO 
+    59                                  L_ISR16_Handler_MF  EQU ISR16_Handler_MF    - VMA_ISR_TECLADO 
+    60                                  L_ISR17_Handler_AC  EQU ISR17_Handler_AC    - VMA_ISR_TECLADO 
+    61                                  L_ISR18_Handler_MC  EQU ISR18_Handler_MC    - VMA_ISR_TECLADO 
+    62                                  L_ISR19_Handler_XM  EQU ISR19_Handler_XM    - VMA_ISR_TECLADO 
+    63                                  L_IRQ00_Handler     EQU IRQ00_Handler       - VMA_ISR_TECLADO
+    64                                  L_IRQ01_Handler     EQU IRQ01_Handler       - VMA_ISR_TECLADO
+    65                                  
+    66                                  
+    67                                  ;----------------SECTION-----------------------
+    68                                  SECTION .teclado_and_ISR
+    69                                  ;------------ HANDLER IRQ TIMER---------------------
+    70                                  IRQ00_Handler:
+    71 00000000 60                          pushad                                      ;Salvo los registros de uso general.
+    72                                  
+    73                                      ;xchg    bx, bx                              ; Breakpoint
+    74                                      ;mov eax , [contador_timer]                  ; Si lo quiero hacer en asm... pero sin resetear variable. 
+    75                                      ;inc eax
+    76                                      ;mov [contador_timer], eax
+    77                                  
+    78 00000001 55                          push    ebp
+    79 00000002 89E5                        mov     ebp, esp 
+    80 00000004 68[00000000]                push contador_timer                         ; Contador del Timer actual              
+    81 00000009 68[00000000]                push __DIGITS_TABLE_VMA                     ; Dir. de tabla de dígitos
+    82 0000000E 68[00000000]                push resultado_promedio                     ; Resultado del prom. cada 500ms
+    83 00000013 E8(00000000)                call contador_handler                       ; Cada 50 ticks (500ms) ejecuto la tarea 1.
+    84 00000018 C9                          leave
+    85                                  end_handler_timer:
+    86 00000019 B020                        mov al, 0x20                                ; ACK de la IRQ para el PIC 
+    87 0000001B E620                        out 0x20, al
+    88 0000001D 61                          popad                                       ;Recupero registros
+    89 0000001E CF                          iret                                        ;Retorno de la IRQ
+    90                                  
+    91                                  ;----------HANDLER IRQ TECLADO-----------------
+    92                                  IRQ01_Handler:
+    93 0000001F 60                          pushad                                      ; Guardo todos los registros  para asegurarme que no se rompa el estado actual.
+    94 00000020 B221                        mov     dl,0x21                             ; Guardo la interrupcion en el registro DX
+    95 00000022 31C0                        xor     eax, eax
+    96                                      ; ->Leo el puerto
+    97 00000024 E460                        in      al, PORT_A_8042                     ; Leo el puerto 0x60 (Keyboard Output Buffer Register)
+    98 00000026 88C3                        mov     bl, al                              ; Copio lo leído en otro registro
+    99 00000028 80E380                      and     bl, 0x80                            ; Hago un AND para obtener el bit 7 (BRK)
+   100 0000002B 80FB80                      cmp     bl, 0x80                            ; Si el bit vale 0 la tecla fue presionada (Make), si es 1 se dejó de presionar (Break)
+   101 0000002E 740E                        jz      end_handler_teclado                 ; Si se dejo de presionar, no la leo. Solo leo cuando se presionada (Make)
+   102 00000030 68[00000000]                push    dword memoria_buffer_reservada      ; Buffer en VMA
+   103 00000035 50                          push    eax                                 ; Tecla presionada.
+   104 00000036 E8(00000000)                call determinar_tecla_presionada
+   105 0000003B 83C408                      add     esp, 8
+   106                                  
+   107                                  end_handler_teclado:
+   108                                      ;xchg    bx, bx                              ; Breakpoint
+   109 0000003E B020                        mov     al, 0x20                             ; ACK de la IRQ para el PIC 
+   110 00000040 E620                        out     0x20, al
+   111 00000042 61                          popad                                        ; Recupero registros
+   112 00000043 CF                          iret                                         ; Retorno de la IRQ
+   113                                  
+   114                                  ;-----------HANDLERs DE EXCEPTIONS-------------
+   115                                  ;#DE (Divide Error)
+   116                                  ISR00_Handler_DE:
+   117 00000044 6687DB                      xchg    bx,bx
+   118 00000047 B200                        mov     dl,0x00
+   119 00000049 F4                          hlt
+   120                                  
+   121                                  ISR01_Handler_DB:
+   122 0000004A B201                        mov dl,0x01
+   123 0000004C F4                          hlt
+   124                                  
+   125                                  ISR02_Handler_NMI:
+   126 0000004D B202                        mov dl,0x02
+   127 0000004F F4                          hlt
+   128                                  
+   129                                  ISR03_Handler_BP:
+   130 00000050 B203                        mov dl,0x03
+   131 00000052 F4                          hlt
+   132                                  
+   133                                  ISR04_Handler_OF:
+   134 00000053 B204                        mov dl,0x04
+   135 00000055 F4                          hlt
+   136                                  
+   137                                  ISR05_Handler_BR:
+   138 00000056 B205                        mov dl,0x05
+   139 00000058 F4                          hlt
+   140                                  ;#UD (Invalid Opcode Fetch) 
+   141                                  ISR06_Handler_UD:
+   142 00000059 6687DB                      xchg    bx,bx
+   143 0000005C B206                        mov     dl,0x06
+   144 0000005E F4                          hlt
+   145                                  
+   146                                  ISR07_Handler_NM:
+   147 0000005F B207                        mov dl,0x07
+   148 00000061 F4                          hlt
+   149                                  
+   150                                  ISR08_Handler_DF:
+   151 00000062 B208                        mov dl,0x08
+   152 00000064 F4                          hlt
+   153                                  
+   154                                  ISR10_Handler_TS:
+   155 00000065 B20A                        mov dl,0x0A
+   156 00000067 F4                          hlt
+   157                                  
+   158                                  ISR11_Handler_NP:
+   159 00000068 B20B                        mov dl,0x0B
+   160 0000006A F4                          hlt
+   161                                  
+   162                                  ISR12_Handler_SS:
+   163 0000006B B20C                        mov dl,0x0C
+   164 0000006D F4                          hlt
+   165                                  ; Funciono al no tener el CS al retornar de un call
+   166                                  ISR13_Handler_GP:
+   167 0000006E B20D                        mov dl,0x0D
+   168 00000070 F4                          hlt
+   169                                  ;-----------------------------------
+   170                                  ;----------Page Fault (#PF)---------
+   171                                  ;-----------------------------------
+   172                                  
+   173                                  ;Error code
+   174                                  ;The Page Fault sets an error code:
+   175                                  ;
+   176                                  ; 31              4               0
+   177                                  ;+---+--  --+---+---+---+---+---+---+
+   178                                  ;|   Reserved   | I | R | U | W | P |
+   179                                  ;+---+--  --+---+---+---+---+---+---+
+   180                                  ;Length	Name	Description
+   181                                  ;P	1 bit	Present	When set, the page fault was caused by a page-protection violation. When not set, it was caused by a non-present page.
+   182                                  ;W	1 bit	Write	When set, the page fault was caused by a write access. When not set, it was caused by a read access.
+   183                                  ;U	1 bit	User	When set, the page fault was caused while CPL = 3. This does not necessarily mean that the page fault was a privilege violation.
+   184                                  ;R	1 bit	Reserved write	When set, one or more page directory entries contain reserved bits which are set to 1. This only applies when the PSE or PAE flags in CR4 are set to 1.
+   185                                  ;I	1 bit	Instruction Fetch	When set, the page fault was caused by an instruction fetch. This only applies when the No-Execute bit is supported and enabled.
+   186                                  ISR14_Handler_PF:
+   187 00000071 6687DB                      xchg    bx, bx
    188                                  
-   189 0000007D 0F20D0                      mov     eax, cr2
-   190 00000080 A3[00000000]                mov     [dir_lineal_page_fault], eax
+   189 00000074 8B1C24                      mov     ebx, [esp]
+   190 00000077 891D[00000000]              mov     [error_code_PF], ebx
    191                                  
-   192 00000085 6A0A                        push    10      ; Columna VGA
-   193 00000087 6A00                        push    0       ; Fila    VGA
-   194 00000089 68[00000000]                push    page_fault_msg
-   195 0000008E E8(00000000)                call    escribir_mensaje_VGA
-   196 00000093 83C40C                      add     esp, 12
-   197                                  
-   198 00000096 F4                          hlt
-   199                                  
-   200                                  ISR15_Handler_RES:
-   201 00000097 B20F                        mov dl,0x0F
-   202 00000099 F4                          hlt
-   203                                  
-   204                                  ISR16_Handler_MF:
-   205 0000009A B210                        mov dl,0x10
-   206 0000009C F4                          hlt
-   207                                  
-   208                                  ISR17_Handler_AC:
-   209 0000009D B211                        mov dl,0x11
-   210 0000009F F4                          hlt
-   211                                  
-   212                                  ISR18_Handler_MC:
-   213 000000A0 B212                        mov dl,0x12
-   214 000000A2 F4                          hlt
-   215                                  
-   216                                  ISR19_Handler_XM:
-   217 000000A3 B213                        mov dl,0x13
-   218 000000A5 F4                          hlt
+   192 0000007D 0F20D0                      mov     eax, cr2
+   193 00000080 A3[00000000]                mov     [dir_lineal_page_fault], eax
+   194                                  
+   195 00000085 6A0A                        push    10      ; Columna VGA
+   196 00000087 6A00                        push    0       ; Fila    VGA
+   197 00000089 68[00000000]                push    page_fault_msg
+   198 0000008E E8(00000000)                call    escribir_mensaje_VGA
+   199 00000093 83C40C                      add     esp, 12
+   200                                  
+   201 00000096 F4                          hlt
+   202                                  
+   203                                  ISR15_Handler_RES:
+   204 00000097 B20F                        mov dl,0x0F
+   205 00000099 F4                          hlt
+   206                                  
+   207                                  ISR16_Handler_MF:
+   208 0000009A B210                        mov dl,0x10
+   209 0000009C F4                          hlt
+   210                                  
+   211                                  ISR17_Handler_AC:
+   212 0000009D B211                        mov dl,0x11
+   213 0000009F F4                          hlt
+   214                                  
+   215                                  ISR18_Handler_MC:
+   216 000000A0 B212                        mov dl,0x12
+   217 000000A2 F4                          hlt
+   218                                  
+   219                                  ISR19_Handler_XM:
+   220 000000A3 B213                        mov dl,0x13
+   221 000000A5 F4                          hlt

@@ -25,6 +25,7 @@ Linker script and memory map
                 0x0000000000320000                __TAREA1_BSS_PHY = 0x320000
                 0x0000000000330000                __TAREA1_DATA_PHY = 0x330000
                 0x0000000000340000                __TAREA1_RODATA_PHY = 0x340000
+                0x000000000a000000                __PAG_DINAMICA_INIT_PHY = 0xa000000
                 0x000000001fff8000                __STACK_START_32_PHY = 0x1fff8000
                 0x000000001fff8fff                __STACK_END_32_PHY = 0x1fff8fff
                 0x000000001ffff000                __TAREA1_STACK_START_PHY = 0x1ffff000
@@ -41,6 +42,7 @@ Linker script and memory map
                 0x0000000001320000                __TAREA1_BSS_VMA = 0x1320000
                 0x0000000001330000                __TAREA1_DATA_VMA = 0x1330000
                 0x0000000001340000                __TAREA1_RODATA_VMA = 0x1340000
+                0x000000000a000000                __PAG_DINAMICA_INIT_VMA = 0xa000000
                 0x000000001fff8000                __STACK_START_32_VMA = 0x1fff8000
                 0x000000001fff8fff                __STACK_END_32_VMA = 0x1fff8fff
                 0x000000000078f000                __TAREA1_STACK_START_VMA = 0x78f000
@@ -51,7 +53,7 @@ Linker script and memory map
                 0x00000000ffff8000                __INIT_16_VMA = __INIT_16_LMA
                 0x00000000ffff8069                __VGA_INIT_VMA = __VGA_INIT_LMA
                 0x00000000ffff938b                __INIT_32_VMA = __INIT_32_LMA
-                0x00000000ffff9984                __FUNCTIONS_ROM_VMA = __FUNCTIONS_ROM_LMA
+                0x00000000ffff9986                __FUNCTIONS_ROM_VMA = __FUNCTIONS_ROM_LMA
                 0x00000000fffffff0                __RESET_VMA = __RESET_LMA
                 0x00000000ffff0000                __INIT_ROM_LMA = 0xffff0000
                 0x00000000ffff0000                __SYS_TABLES_LMA = __INIT_ROM_LMA
@@ -66,9 +68,9 @@ Linker script and memory map
                 0x000000000000019c                __sys_tables_size = SIZEOF (.sys_tables_32)
                 0x00000000ffff019c                __FUNCTIONS_LMA = (LOADADDR (.sys_tables_32) + SIZEOF (.sys_tables_32))
 
-.functions      0x0000000000050000      0x990 load address 0x00000000ffff019c
+.functions      0x0000000000050000      0xa64 load address 0x00000000ffff019c
  *(.functions_c)
- .functions_c   0x0000000000050000      0x8d9 ./bin/functions.elf
+ .functions_c   0x0000000000050000      0x9a5 ./bin/functions.elf
                 0x0000000000050000                __fast_memcpy
                 0x000000000005003c                limpiar_buffer
                 0x0000000000050086                determinar_tecla_presionada
@@ -86,98 +88,108 @@ Linker script and memory map
                 0x0000000000050831                limpiar_VGA
                 0x000000000005089e                get_entry_DTP
                 0x00000000000508b9                get_entry_TP
+                0x00000000000508d9                mostrar_numero32_VGA
+                0x0000000000050970                carga_tp_dinamica_1024_pte
  ./bin/functions.elf(.note*)
  .note.GNU-stack
-                0x00000000000508d9        0x0 ./bin/functions.elf
+                0x00000000000509a5        0x0 ./bin/functions.elf
  ./bin/functions.elf(.bss)
- *fill*         0x00000000000508d9        0x3 
- .bss           0x00000000000508dc       0x18 ./bin/functions.elf
+ *fill*         0x00000000000509a5        0x3 
+ .bss           0x00000000000509a8       0x20 ./bin/functions.elf
  ./bin/functions.elf(.data)
- .data          0x00000000000508f4        0x0 ./bin/functions.elf
+ .data          0x00000000000509c8        0x0 ./bin/functions.elf
  ./bin/functions.elf(.rodata)
- .rodata        0x00000000000508f4       0x9c ./bin/functions.elf
-                0x0000000000000990                __functions_size = SIZEOF (.functions)
-                0x00000000ffff0b2c                __TECLADO_ISR_LMA = (LOADADDR (.functions) + SIZEOF (.functions))
+ .rodata        0x00000000000509c8       0x9c ./bin/functions.elf
+                0x0000000000000a64                __functions_size = SIZEOF (.functions)
+                0x00000000ffff0c00                __TECLADO_ISR_LMA = (LOADADDR (.functions) + SIZEOF (.functions))
 
-.handlers_ISR   0x0000000000100000       0xa6 load address 0x00000000ffff0b2c
+.handlers_ISR   0x0000000000100000      0x23c load address 0x00000000ffff0c00
  *(.teclado_and_ISR)
  .teclado_and_ISR
-                0x0000000000100000       0xa6 ./bin/handlers_32.elf
+                0x0000000000100000      0x23c ./bin/handlers_32.elf
                 0x0000000100000000                L_IRQ00_Handler
                 0x000000010000001f                L_IRQ01_Handler
                 0x0000000100000044                L_ISR00_Handler_DE
-                0x000000010000004d                L_ISR02_Handler_NMI
-                0x0000000100000050                L_ISR03_Handler_BP
-                0x0000000100000053                L_ISR04_Handler_OF
-                0x0000000100000056                L_ISR05_Handler_BR
-                0x0000000100000059                L_ISR06_Handler_UD
-                0x000000010000005f                L_ISR07_Handler_NM
-                0x0000000100000062                L_ISR08_Handler_DF
-                0x0000000100000065                L_ISR10_Handler_TS
-                0x0000000100000068                L_ISR11_Handler_NP
-                0x000000010000006b                L_ISR12_Handler_SS
-                0x000000010000006e                L_ISR13_Handler_GP
-                0x0000000100000071                L_ISR14_Handler_PF
-                0x000000010000009a                L_ISR16_Handler_MF
-                0x000000010000009d                L_ISR17_Handler_AC
-                0x00000001000000a0                L_ISR18_Handler_MC
-                0x00000001000000a3                L_ISR19_Handler_XM
-                0x00000000000000a6                __handlers_32_size = SIZEOF (.handlers_ISR)
-                0x00000000ffff0bd2                __DATOS_SYS32_LMA = (LOADADDR (.handlers_ISR) + SIZEOF (.handlers_ISR))
+                0x0000000100000050                L_ISR02_Handler_NMI
+                0x0000000100000056                L_ISR03_Handler_BP
+                0x000000010000005c                L_ISR04_Handler_OF
+                0x0000000100000062                L_ISR05_Handler_BR
+                0x0000000100000068                L_ISR06_Handler_UD
+                0x000000010000006e                L_ISR07_Handler_NM
+                0x0000000100000074                L_ISR08_Handler_DF
+                0x000000010000007a                L_ISR10_Handler_TS
+                0x0000000100000080                L_ISR11_Handler_NP
+                0x0000000100000086                L_ISR12_Handler_SS
+                0x000000010000008c                L_ISR13_Handler_GP
+                0x0000000100000092                L_ISR14_Handler_PF
+                0x0000000100000224                L_ISR16_Handler_MF
+                0x000000010000022a                L_ISR17_Handler_AC
+                0x0000000100000230                L_ISR18_Handler_MC
+                0x0000000100000236                L_ISR19_Handler_XM
+                0x000000000000023c                __handlers_32_size = SIZEOF (.handlers_ISR)
+                0x00000000ffff0e3c                __DATOS_SYS32_LMA = (LOADADDR (.handlers_ISR) + SIZEOF (.handlers_ISR))
 
-.datos_sys32    0x0000000001200000       0x3a load address 0x00000000ffff0bd2
+.datos_sys32    0x0000000001200000      0x14e load address 0x00000000ffff0e3c
  ./bin/main.elf(.data)
- .data          0x0000000001200000       0x3a ./bin/main.elf
+ .data          0x0000000001200000      0x14e ./bin/main.elf
                 0x0000000001200000                memoria_buffer_reservada
                 0x0000000001200013                contador_timer
                 0x0000000001200015                resultado_promedio
                 0x000000000120001d                dir_lineal_page_fault
                 0x0000000001200021                error_code_PF
-                0x0000000001200025                page_fault_msg
-                0x000000000000003a                __data_size = SIZEOF (.datos_sys32)
-                0x00000000ffff0c0c                __KERNEL_32_LMA = (LOADADDR (.datos_sys32) + SIZEOF (.datos_sys32))
+                0x0000000001200025                dir_phy_dinamica
+                0x0000000001200029                page_fault_msg
+                0x000000000120003e                page_fault_msg_2
+                0x000000000120004c                page_fault_msg_3
+                0x0000000001200059                page_fault_msg_4
+                0x000000000120008a                page_fault_msg_5
+                0x00000000012000d9                page_fault_msg_6
+                0x000000000000014e                __data_size = SIZEOF (.datos_sys32)
+                0x00000000ffff0f8a                __KERNEL_32_LMA = (LOADADDR (.datos_sys32) + SIZEOF (.datos_sys32))
 
 .codigo_kernel32
-                0x0000000001220000       0x29 load address 0x00000000ffff0c0c
+                0x0000000001220000       0x29 load address 0x00000000ffff0f8a
  *(.kernel32)
  .kernel32      0x0000000001220000       0x29 ./bin/main.elf
                 0x0000000001220000                kernel32_init
                 0x0000000000000029                __codigo_kernel32_size = SIZEOF (.codigo_kernel32)
-                0x00000000ffff0c35                __TAREA1_TEXT_LMA = (LOADADDR (.codigo_kernel32) + SIZEOF (.codigo_kernel32))
+                0x00000000ffff0fb3                __TAREA1_TEXT_LMA = (LOADADDR (.codigo_kernel32) + SIZEOF (.codigo_kernel32))
 
-.tarea_1_text   0x0000000001310000      0x367 load address 0x00000000ffff0c35
+.tarea_1_text   0x0000000001310000      0x40d load address 0x00000000ffff0fb3
  *(.functions_tarea_1)
  .functions_tarea_1
-                0x0000000001310000      0x367 ./bin/tarea_1.elf
+                0x0000000001310000      0x40d ./bin/tarea_1.elf
                 0x0000000001310000                ejecutar_tarea_1
-                0x00000000013100fa                promedio_digitos_64
-                0x00000000013102fe                sumatoria_digitos_64
+                0x0000000001310079                lectura_promedio64
+                0x00000000013100d9                mostrar_promedio64_VGA
+                0x00000000013101a0                promedio_digitos_64
+                0x00000000013103a4                sumatoria_digitos_64
  ./bin/tarea_1.elf(.note*)
  .note.GNU-stack
-                0x0000000001310367        0x0 ./bin/tarea_1.elf
-                0x0000000000000367                __tarea_01_size = SIZEOF (.tarea_1_text)
-                0x00000000ffff0f9c                __TAREA1_BSS_LMA = (LOADADDR (.tarea_1_text) + SIZEOF (.tarea_1_text))
+                0x000000000131040d        0x0 ./bin/tarea_1.elf
+                0x000000000000040d                __tarea_01_size = SIZEOF (.tarea_1_text)
+                0x00000000ffff13c0                __TAREA1_BSS_LMA = (LOADADDR (.tarea_1_text) + SIZEOF (.tarea_1_text))
 
-.text           0x0000000001310367        0x0 load address 0x00000000ffff0f9c
- .text          0x0000000001310367        0x0 ./bin/functions.elf
- .text          0x0000000001310367        0x0 ./bin/tarea_1.elf
- .text          0x0000000001310367        0x0 ./bin/functions_rom.elf
+.text           0x000000000131040d        0x0 load address 0x00000000ffff13c0
+ .text          0x000000000131040d        0x0 ./bin/functions.elf
+ .text          0x000000000131040d        0x0 ./bin/tarea_1.elf
+ .text          0x000000000131040d        0x0 ./bin/functions_rom.elf
 
-.tarea_1_bss    0x0000000001320000       0x30 load address 0x00000000ffff0f9c
+.tarea_1_bss    0x0000000001320000       0x30 load address 0x00000000ffff13c0
  ./bin/tarea_1.elf(.bss)
  .bss           0x0000000001320000       0x30 ./bin/tarea_1.elf
                 0x0000000000000030                __tarea_1_bss_size = SIZEOF (.tarea_1_bss)
-                0x00000000ffff0fcc                __TAREA1_DATA_LMA = (LOADADDR (.tarea_1_bss) + SIZEOF (.tarea_1_bss))
+                0x00000000ffff13f0                __TAREA1_DATA_LMA = (LOADADDR (.tarea_1_bss) + SIZEOF (.tarea_1_bss))
 
-.tarea_1_data   0x0000000001330000        0x1 load address 0x00000000ffff0fcc
+.tarea_1_data   0x0000000001330000        0x1 load address 0x00000000ffff13f0
  ./bin/tarea_1.elf(.data)
  .data          0x0000000001330000        0x1 ./bin/tarea_1.elf
                 0x0000000001330000                variable_global_inicializada
                 0x0000000000000001                __tarea_1_data_size = SIZEOF (.tarea_1_data)
-                0x00000000ffff0fcd                __TAREA1_RODATA_LMA = (LOADADDR (.tarea_1_data) + SIZEOF (.tarea_1_data))
+                0x00000000ffff13f1                __TAREA1_RODATA_LMA = (LOADADDR (.tarea_1_data) + SIZEOF (.tarea_1_data))
 
 .tarea_1_rodata
-                0x0000000001340000       0x24 load address 0x00000000ffff0fcd
+                0x0000000001340000       0x24 load address 0x00000000ffff13f1
  ./bin/tarea_1.elf(.rodata)
  .rodata        0x0000000001340000       0x24 ./bin/tarea_1.elf
                 0x0000000001340000                var_global_rodata
@@ -196,31 +208,31 @@ Linker script and memory map
                 0x00000000ffff9165                init_screen
                 0x00000000ffff938b                __INIT_32_LMA = (LOADADDR (.video_init) + SIZEOF (.video_init))
 
-.codigo_init32  0x00000000ffff938b      0x5f9
+.codigo_init32  0x00000000ffff938b      0x5fb
  *(.start32)
- .start32       0x00000000ffff938b      0x5f9 ./bin/init32.elf
+ .start32       0x00000000ffff938b      0x5fb ./bin/init32.elf
                 0x00000000ffff938b                start32_launcher
-                0x00000000ffff9984                __FUNCTIONS_ROM_LMA = (LOADADDR (.codigo_init32) + SIZEOF (.codigo_init32))
+                0x00000000ffff9986                __FUNCTIONS_ROM_LMA = (LOADADDR (.codigo_init32) + SIZEOF (.codigo_init32))
 
-.functions_rom  0x00000000ffff9984       0xa0
+.functions_rom  0x00000000ffff9986       0xa0
  *(.functions_rom)
  .functions_rom
-                0x00000000ffff9984       0x3c ./bin/functions_rom.elf
-                0x00000000ffff9984                __fast_memcpy_rom
+                0x00000000ffff9986       0x3c ./bin/functions_rom.elf
+                0x00000000ffff9986                __fast_memcpy_rom
  *(.functions_asm_rom)
  .functions_asm_rom
-                0x00000000ffff99c0       0x64 ./bin/functions_asm.elf
-                0x00000000ffff99c0                init_pic
-                0x00000000ffff99ed                init_timer
-                0x00000000ffff99fc                init_teclado
+                0x00000000ffff99c2       0x64 ./bin/functions_asm.elf
+                0x00000000ffff99c2                init_pic
+                0x00000000ffff99ef                init_timer
+                0x00000000ffff99fe                init_teclado
  *(.note.gnu.property)
  ./bin/functions_rom.elf(.note*)
  .note.GNU-stack
-                0x00000000ffff9a24        0x0 ./bin/functions_rom.elf
+                0x00000000ffff9a26        0x0 ./bin/functions_rom.elf
  ./bin/functions_rom.elf(.data)
- .data          0x00000000ffff9a24        0x0 ./bin/functions_rom.elf
+ .data          0x00000000ffff9a26        0x0 ./bin/functions_rom.elf
  ./bin/functions_rom.elf(.bss)
- .bss           0x00000000ffff9a24        0x0 ./bin/functions_rom.elf
+ .bss           0x00000000ffff9a26        0x0 ./bin/functions_rom.elf
  ./bin/functions_rom.elf(.rodata)
 
 .codigo_reset   0x00000000fffffff0       0x10

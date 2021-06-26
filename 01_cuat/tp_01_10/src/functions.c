@@ -233,12 +233,8 @@ void set_page_table_entry (dword dir_PHY_base_dpt, dword dir_VMA, dword dir_PHY,
 {
 
     dword pte = 0;
-
-    //dword *base_tp = 0;
-
     dword entry_pte , init_pt, entry_dtp = 0;
 
-    
     entry_dtp = get_entry_DTP (dir_VMA); //Bits 31-22 de la VMA (Offset del PDE)
 
 	init_pt = (dir_PHY_base_dpt + 0x1000 ) + (0x1000*entry_dtp); //Base de la PT (Base PDT + 4K) + (4K * PDE) dependiendo del PDE
@@ -263,6 +259,8 @@ void set_page_table_entry (dword dir_PHY_base_dpt, dword dir_VMA, dword dir_PHY,
     *(base_tp + entry_pte) = pte;
 
 }
+
+
 /* Función que escribe un caracter en una posición determinada de la pantalla. */
 __attribute__(( section(".functions_c")))
 void escribir_caracter_VGA (char caracter, byte fila, byte columna, byte flag_ASCII)
@@ -292,7 +290,7 @@ void escribir_mensaje_VGA (char* msg, byte fila, byte columna, byte flag_ASCII)
 {
     static int pos_msg = 0;
     buff_screen_t* VGA = (buff_screen_t*)&__VGA_VMA;    // Dirección base de la pantalla en el borde superior izquierdo.
-    byte atributos = 0x07;              // Fondo negro y letra blanca.
+    byte atributos = 0x07;                              // Fondo negro y letra blanca.
 
     /* Filas = 24 (y)
        Columnas = 80 (x) */
@@ -333,7 +331,7 @@ byte convertir_ASCII (byte caracter)
     return caracter;
 
 }
-/* Función que limpia inicializa o reinicia la pantalla con un mensaje fijo.  */
+/* Función que inicializa o reinicia la pantalla con un mensaje fijo.  */
  __attribute__(( section(".functions_c")))
 void msg_bienvenida_VGA (buff_screen_t* VGA)
 {
@@ -383,3 +381,59 @@ dword get_entry_TP(dword dir_VMA)
 	return PTE;
 
 }
+
+/*Función que muestra un numero de 32 bits en pantalla.*/
+__attribute__(( section(".functions_c")))
+void mostrar_numero32_VGA(dword numero32, byte fila, byte columna)
+{
+    static int pos_caracter=0;
+    byte caracter = 0;
+
+    /* Recorro la palabra de 32 bits (4 bytes = 8 numeros HEX) */
+    for (pos_caracter=0;pos_caracter<8;pos_caracter++)
+    {
+        caracter = ((numero32 >> 4*pos_caracter) & MASK_MEDIO_BYTE_32B) ; //Voy obteniendo caracteres del prom de 64 bits.
+
+        //Tengo del 0 al 9         
+            if (caracter > -1 && caracter < 10)
+        {
+            caracter = caracter + 48; //Convierto a ASCII (el cero es 48)
+        }
+        else
+        {
+            //Si tengo A, B, C, D, E
+            if ( caracter > 9 && caracter < 16)
+            {
+                caracter = caracter + 55 ; // Convierto a ASCII (la A es 65)
+            } 
+        } 
+
+        escribir_caracter_VGA (caracter, fila , columna - pos_caracter , ASCII_TRUE);
+                                
+    }
+
+}
+
+/* Función que pagina 1024 entradas de tabla de páginas. */
+__attribute__(( section(".functions_c")))
+void carga_tp_dinamica_1024_pte (void)
+{
+    static int i = 0;
+    dword PHY_aux = 0x0A000000;
+
+    for (i=0; i<1024 ; i++){
+
+        //asm("xchg %bx,%bx");
+        /* 0x28 es la entry en la DPT de esta tabla de 1024 posiciones para paginar dinamicamente luego. */
+
+
+        //set_page_table_entry(&__PAGE_TABLES_PHY, 0x0A000000 + 0x1000*i , 0x0A000000 + 0x1000*i,  0, 0, 0, 0, 0, 0, 0, 1, 1);
+
+
+        //PHY_aux = PHY_aux + 0x00001000; // Voy sumando bases de paginas (contenido del PTE)
+        
+    }
+    //asm("xchg %bx,%bx");
+
+}
+

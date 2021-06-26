@@ -1,0 +1,894 @@
+     1                                  USE32
+     2                                  
+     3                                  SECTION .start32
+     4                                  
+     5                                  %include "inc/processor-flags.h" 
+     1                              <1> %define X86_CR0_PE      0x00000001 ;/* Protectede mode enable*/
+     2                              <1> %define X86_CR0_MP      0x00000002 ;/* Monitor coProcessor*/
+     3                              <1> %define X86_CR0_EM      0x00000004 ;/* Emulation*/
+     4                              <1> %define X86_CR0_TS      0x00000008 ;/* Task Switched*/
+     5                              <1> %define X86_CR0_ET      0x00000010 ;/* Extension Type*/
+     6                              <1> %define X86_CR0_NE      0x00000020 ;/* Numeric Error*/
+     7                              <1> %define X86_CR0_WP      0x00010000 ;/* Write Protect*/
+     8                              <1> %define X86_CR0_AM      0x00040000 ;/* Alignment Mask*/
+     9                              <1> %define X86_CR0_NW      0x20000000 ;/* Not Write-through*/
+    10                              <1> %define X86_CR0_CD      0x40000000 ;/* Cache Disable*/
+    11                              <1> %define X86_CR0_PG      0x80000000 ;/* PaGine*/
+    12                              <1> 
+    13                              <1> ;------------DTP y TP(Descriptor de Tablas de Páginas y Tabla de Páginas) flags--------------------------
+    14                              <1> PAG_PCD_YES  equ 1       ; cachable                          
+    15                              <1> PAG_PCD_NO  equ 0       ; no cachable
+    16                              <1> PAG_PWT_YES equ 1       ; 1 se escribe en cache y ram       
+    17                              <1> PAG_PWT_NO  equ 0       ; 0 
+    18                              <1> PAG_P_YES   equ 1       ; 1 presente
+    19                              <1> PAG_P_NO    equ 0       ; 0 no presente
+    20                              <1> PAG_RW_W    equ 1       ; 1 lectura y escritura
+    21                              <1> PAG_RW_R    equ 0       ; 0 solo lectura
+    22                              <1> PAG_US_SUP  equ 0       ; 0 supervisor
+    23                              <1> PAG_US_US   equ 1       ; 1 usuario  
+    24                              <1> PAG_D       equ 0       ; modificacion en la pagina
+    25                              <1> PAG_PAT     equ 0       ; PAT                   
+    26                              <1> PAG_G_YES   equ 0       ; Global                 
+    27                              <1> PAG_A       equ 0       ; accedida
+    28                              <1> PAG_PS_4K   equ 0       ; tamaño de pagina de 4KB
+    29                              <1> 
+     6                                  
+     7                                  ; Selectores de segmento
+     8                                  EXTERN CS_SEL_32
+     9                                  EXTERN DS_SEL_32_prim
+    10                                  ; Stack 32 bits
+    11                                  EXTERN __STACK_END_32_VMA
+    12                                  EXTERN __STACK_SIZE_32
+    13                                  ; Etiquetas externas
+    14                                  EXTERN kernel32_init
+    15                                  EXTERN __fast_memcpy
+    16                                  EXTERN __fast_memcpy_rom
+    17                                  EXTERN init_pic
+    18                                  EXTERN _idtr_32
+    19                                  EXTERN _gdtr_32
+    20                                  EXTERN init_timer
+    21                                  EXTERN init_teclado
+    22                                  EXTERN set_cr3
+    23                                  EXTERN set_dir_page_table_entry
+    24                                  EXTERN set_page_table_entry
+    25                                  EXTERN carga_tp_dinamica_1024_pte
+    26                                  ; Direcciones LMA
+    27                                  EXTERN __KERNEL_32_LMA
+    28                                  EXTERN __TECLADO_ISR_LMA
+    29                                  EXTERN __FUNCTIONS_LMA
+    30                                  EXTERN __SYS_TABLES_LMA
+    31                                  EXTERN __DATOS_SYS32_LMA
+    32                                  EXTERN __TAREA1_BSS_LMA
+    33                                  EXTERN __TAREA1_DATA_LMA
+    34                                  EXTERN __TAREA1_TEXT_LMA
+    35                                  EXTERN __TAREA1_RODATA_LMA
+    36                                  ; Direcciones VMA
+    37                                  EXTERN __DIGITS_TABLE_VMA
+    38                                  EXTERN __TAREA1_BSS_VMA
+    39                                  EXTERN __TAREA1_DATA_VMA
+    40                                  EXTERN __TAREA1_TEXT_VMA
+    41                                  EXTERN __TAREA1_RODATA_VMA
+    42                                  EXTERN __STACK_START_32_VMA
+    43                                  EXTERN __TAREA1_STACK_START
+    44                                  EXTERN __INIT_32_VMA
+    45                                  EXTERN __KERNEL_32_VMA
+    46                                  EXTERN __FUNCTIONS_VMA
+    47                                  EXTERN __TECLADO_ISR_VMA
+    48                                  EXTERN __SYS_TABLES_VMA
+    49                                  EXTERN __DATOS_SYS32_VMA
+    50                                  EXTERN __TAREA_1_VMA
+    51                                  EXTERN __PAGE_TABLES_VMA
+    52                                  EXTERN __VGA_VMA
+    53                                  EXTERN __TAREA1_STACK_START_VMA
+    54                                  EXTERN __INIT_16_VMA
+    55                                  EXTERN __PAG_DINAMICA_INIT_VMA
+    56                                  ; Direcciones físicas
+    57                                  EXTERN __SYS_TABLES_PHY        
+    58                                  EXTERN __PAGE_TABLES_PHY       
+    59                                  EXTERN __FUNCTIONS_PHY         
+    60                                  EXTERN __VGA_PHY               
+    61                                  EXTERN __TECLADO_ISR_PHY       
+    62                                  EXTERN __DATOS_SYS32_PHY       
+    63                                  EXTERN __DIGITS_TABLE_PHY      
+    64                                  EXTERN __KERNEL_32_PHY         
+    65                                  EXTERN __TAREA1_TEXT_PHY       
+    66                                  EXTERN __TAREA1_BSS_PHY        
+    67                                  EXTERN __TAREA1_DATA_PHY       
+    68                                  EXTERN __TAREA1_RODATA_PHY     
+    69                                  EXTERN __STACK_START_32_PHY    
+    70                                  EXTERN __TAREA1_STACK_START_PHY
+    71                                  EXTERN __INIT_ROM_PHY          
+    72                                  EXTERN __RESET_PHY             
+    73                                  EXTERN __STACK_END_32_PHY
+    74                                  EXTERN __PAG_DINAMICA_INIT_PHY
+    75                                  ; Tamaños de códigos
+    76                                  EXTERN __codigo_kernel32_size
+    77                                  EXTERN __functions_size
+    78                                  EXTERN __handlers_32_size
+    79                                  EXTERN __sys_tables_size
+    80                                  EXTERN __data_size
+    81                                  EXTERN __tarea_01_size
+    82                                  EXTERN __tarea_1_bss_size
+    83                                  EXTERN __tarea_1_data_size
+    84                                  EXTERN __tarea_1_rodata_size
+    85                                  ; Etiquetas globales
+    86                                  GLOBAL start32_launcher
+    87                                  
+    88                                  start32_launcher:
+    89                                      ;xchg    bx, bx ; Breakpoint. Estoy en 32 bits
+    90                                      ; -> Inicializar los selectores de datos
+    91 00000000 66B8[0000]                  mov     ax, DS_SEL_32_prim ; Selector de la GDT de datos de 32 bits FLAT. Ahora puedo acceder a todos los datos de toda la memoria.
+    92 00000004 8ED8                        mov     ds, ax
+    93 00000006 8EC0                        mov     es, ax
+    94 00000008 8EE8                        mov     gs, ax
+    95 0000000A 8EE0                        mov     fs, ax
+    96                                      ; -> Inicializar la pila en 32 bits
+    97 0000000C 8ED0                        mov     ss, ax
+    98 0000000E BC[00000000]                mov     esp, __STACK_END_32_PHY
+    99 00000013 31C0                        xor     eax, eax
+   100                                      ; -> Limpio la pila
+   101 00000015 B9[00000000]                mov     ecx, __STACK_SIZE_32 ; Cargo el tamaño del stack en el registro counter.
+   102                                  .stack_init:
+   103 0000001A 50                          push    eax ; Pusheo ceros en el stack.
+   104 0000001B E2FD                        loop    .stack_init
+   105 0000001D BC[00000000]                mov     esp, __STACK_END_32_PHY ; Lo apunto al final
+   106                                      ; -> Desempaquetamiento de la ROM (copia de las funciones a RAM)
+   107 00000022 55                          push    ebp
+   108 00000023 89E5                        mov     ebp, esp ; Genero el STACK FRAME
+   109                                      ; -> Paso argumentos y llamo memcopy 
+   110 00000025 68[00000000]                push    __functions_size
+   111 0000002A 68[00000000]                push    __FUNCTIONS_PHY
+   112 0000002F 68[00000000]                push    __FUNCTIONS_LMA
+   113 00000034 E8(00000000)                call    __fast_memcpy_rom
+   114 00000039 C9                          leave
+   115 0000003A 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+   116 0000003D 0F85B5050000                jne     .guard
+   117                                      ; -> Desempaquetamiento de la ROM (copia del kernel a RAM)
+   118 00000043 55                          push    ebp
+   119 00000044 89E5                        mov     ebp, esp 
+   120 00000046 68[00000000]                push    __codigo_kernel32_size
+   121 0000004B 68[00000000]                push    __KERNEL_32_PHY
+   122 00000050 68[00000000]                push    __KERNEL_32_LMA
+   123 00000055 E8(00000000)                call    __fast_memcpy
+   124 0000005A C9                          leave
+   125 0000005B 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+   126 0000005E 0F8594050000                jne     .guard
+   127                                      ; -> Desempaquetamiento de la ROM (copia de los handlers Teclado + ISR a RAM)
+   128 00000064 55                          push    ebp
+   129 00000065 89E5                        mov     ebp, esp 
+   130 00000067 68[00000000]                push    __handlers_32_size
+   131 0000006C 68[00000000]                push    __TECLADO_ISR_PHY
+   132 00000071 68[00000000]                push    __TECLADO_ISR_LMA
+   133 00000076 E8(00000000)                call    __fast_memcpy
+   134 0000007B C9                          leave
+   135 0000007C 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+   136 0000007F 0F8573050000                jne     .guard
+   137                                      ; -> Desempaquetamiento de la ROM (copia de datos de ROM a RAM)
+   138 00000085 55                          push    ebp
+   139 00000086 89E5                        mov     ebp, esp 
+   140 00000088 68[00000000]                push    __data_size
+   141 0000008D 68[00000000]                push    __DATOS_SYS32_PHY
+   142 00000092 68[00000000]                push    __DATOS_SYS32_LMA
+   143 00000097 E8(00000000)                call    __fast_memcpy
+   144 0000009C C9                          leave
+   145 0000009D 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+   146 000000A0 0F8552050000                jne     .guard
+   147                                      ; -> Desempaquetamiento de la ROM (copia de las tablas de sistema (GDT e IDT) a RAM)
+   148 000000A6 55                          push    ebp
+   149 000000A7 89E5                        mov     ebp, esp 
+   150 000000A9 68[00000000]                push    __sys_tables_size
+   151 000000AE 68[00000000]                push    __SYS_TABLES_PHY
+   152 000000B3 68[00000000]                push    __SYS_TABLES_LMA
+   153 000000B8 E8(00000000)                call    __fast_memcpy
+   154 000000BD C9                          leave
+   155 000000BE 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+   156 000000C1 0F8531050000                jne     .guard
+   157                                    ; -> Desempaquetamiento de la ROM (copia del .text de la TAREA_1 a RAM)
+   158 000000C7 55                          push    ebp
+   159 000000C8 89E5                        mov     ebp, esp 
+   160 000000CA 68[00000000]                push    __tarea_01_size
+   161 000000CF 68[00000000]                push    __TAREA1_TEXT_PHY
+   162 000000D4 68[00000000]                push    __TAREA1_TEXT_LMA
+   163 000000D9 E8(00000000)                call    __fast_memcpy
+   164 000000DE C9                          leave
+   165 000000DF 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+   166 000000E2 0F8510050000                jne     .guard
+   167                                   ; -> Desempaquetamiento de la ROM (copia del .bss de la TAREA _1 a RAM)
+   168 000000E8 55                          push    ebp
+   169 000000E9 89E5                        mov     ebp, esp 
+   170 000000EB 68[00000000]                push    __tarea_1_bss_size
+   171 000000F0 68[00000000]                push    __TAREA1_BSS_PHY
+   172 000000F5 68[00000000]                push    __TAREA1_BSS_LMA
+   173 000000FA E8(00000000)                call    __fast_memcpy
+   174 000000FF C9                          leave
+   175 00000100 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+   176 00000103 0F85EF040000                jne     .guard
+   177                                     ; -> Desempaquetamiento de la ROM (copia del .data de la TAREA _1 a RAM)
+   178 00000109 55                          push    ebp
+   179 0000010A 89E5                        mov     ebp, esp 
+   180 0000010C 68[00000000]                push    __tarea_1_data_size
+   181 00000111 68[00000000]                push    __TAREA1_DATA_PHY
+   182 00000116 68[00000000]                push    __TAREA1_DATA_LMA
+   183 0000011B E8(00000000)                call    __fast_memcpy
+   184 00000120 C9                          leave
+   185 00000121 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+   186 00000124 0F85CE040000                jne     .guard
+   187                                      ; -> Desempaquetamiento de la ROM (copia del .rodata de la TAREA _1 a RAM)
+   188 0000012A 55                          push    ebp
+   189 0000012B 89E5                        mov     ebp, esp 
+   190 0000012D 68[00000000]                push    __tarea_1_rodata_size
+   191 00000132 68[00000000]                push    __TAREA1_RODATA_PHY
+   192 00000137 68[00000000]                push    __TAREA1_RODATA_LMA
+   193 0000013C E8(00000000)                call    __fast_memcpy
+   194 00000141 C9                          leave
+   195 00000142 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
+   196 00000145 0F85AD040000                jne     .guard
+   197                                  
+   198                                      ;-> Cargo la IDT y la GDT ya copiada en RAM
+   199 0000014B 0F0115[00000000]            lgdt [_gdtr_32]
+   200 00000152 0F011D[00000000]            lidt [_idtr_32]  
+   201                                  
+   202                                      ; -> Init PIC , IRQ y config. Timer y teclado
+   203 00000159 E8(00000000)                call init_teclado       ; Inicializo controlador de teclado
+   204 0000015E E8(00000000)                call init_timer         ;Configuro Timer tick para 100ms
+   205 00000163 E8(00000000)                call init_pic           ; Inicializo los PICs e interrupciones de Timer y Teclado
+   206                                  
+   207                                      ;;;;;;;;;;;;; PAGINACIÓN;;;;;;;;;;;;;;;;;;;;;;;;;;
+   208                                  
+   209                                  
+   210                                      ; -> Inicializo CR3 con la dirección base de la DPT (Directorio de Tablas de Página).
+   211 00000168 55                          push    ebp
+   212 00000169 89E5                        mov     ebp, esp
+   213 0000016B 6A01                        push    PAG_PWT_YES
+   214 0000016D 6A01                        push    PAG_PCD_YES
+   215 0000016F 68[00000000]                push    dword __PAGE_TABLES_PHY
+   216 00000174 E8(00000000)                call    set_cr3
+   217 00000179 0F22D8                      mov     cr3, eax
+   218 0000017C C9                          leave
+   219                                  
+   220                                      ;xchg    bx, bx
+   221                                  
+   222                                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   223                                      ;;;;;;;;;;;;;;;; MAPEO DE LAS ENTRIES DEL DIRECTORIO DE TABLAS DE PAGINAS (DTP);;;;;;;;;;;;;;;;;;;;;
+   224                                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   225                                      ;;;;;;;;;;;;;;;;; SE VAN A PISAR LAS PDE A MEDIDA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   226                                      ;;;;;;;;;;;;;;;;;QUE SE VAYAN INSERTANDO VMA CON IGUAL DIR. OFFSET;;;;;;;;;;;;;;;
+   227                                      ;
+   228                                  
+   229                                      ;-> Inicializo entrada 0 de la DPT 
+   230 0000017D 55                          push    ebp
+   231 0000017E 89E5                        mov     ebp, esp
+   232 00000180 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
+   233 00000182 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
+   234 00000184 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
+   235 00000186 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
+   236 00000188 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
+   237 0000018A 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
+   238 0000018C 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
+   239 0000018E 68[00000000]                push    dword __SYS_TABLES_VMA                 ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE. 
+   240 00000193 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
+   241 00000198 E8(00000000)                call    set_dir_page_table_entry
+   242 0000019D C9                          leave
+   243                                  
+   244                                     ; -> Inicializo entrada de la DPT 
+   245 0000019E 55                          push    ebp
+   246 0000019F 89E5                        mov     ebp, esp
+   247 000001A1 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
+   248 000001A3 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
+   249 000001A5 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
+   250 000001A7 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
+   251 000001A9 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
+   252 000001AB 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
+   253 000001AD 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
+   254 000001AF 68[00000000]                push    dword __PAGE_TABLES_VMA          ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE.
+   255 000001B4 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
+   256 000001B9 E8(00000000)                call    set_dir_page_table_entry
+   257 000001BE C9                          leave
+   258                                  
+   259                                      ; -> Inicializo entrada de la DPT
+   260                                  
+   261 000001BF 55                          push    ebp
+   262 000001C0 89E5                        mov     ebp, esp
+   263 000001C2 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
+   264 000001C4 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
+   265 000001C6 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
+   266 000001C8 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
+   267 000001CA 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
+   268 000001CC 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
+   269 000001CE 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
+   270 000001D0 68[00000000]                push    dword __FUNCTIONS_VMA                 ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE.  
+   271 000001D5 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
+   272 000001DA E8(00000000)                call    set_dir_page_table_entry      
+   273 000001DF C9                          leave
+   274                                  
+   275                                      ; -> Inicializo entrada de la DPT 
+   276                                  
+   277 000001E0 55                          push    ebp
+   278 000001E1 89E5                        mov     ebp, esp
+   279 000001E3 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
+   280 000001E5 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
+   281 000001E7 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
+   282 000001E9 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
+   283 000001EB 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
+   284 000001ED 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
+   285 000001EF 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
+   286 000001F1 68[00000000]                push    dword __VGA_VMA                     ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE.  
+   287 000001F6 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
+   288 000001FB E8(00000000)                call    set_dir_page_table_entry      
+   289 00000200 C9                          leave
+   290                                  
+   291                                      ; -> Inicializo entrada de la DPT 
+   292                                  
+   293 00000201 55                          push    ebp
+   294 00000202 89E5                        mov     ebp, esp
+   295 00000204 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
+   296 00000206 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
+   297 00000208 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
+   298 0000020A 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
+   299 0000020C 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
+   300 0000020E 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
+   301 00000210 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
+   302 00000212 68[00000000]                push    dword __TECLADO_ISR_VMA             ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE.  
+   303 00000217 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
+   304 0000021C E8(00000000)                call    set_dir_page_table_entry      
+   305 00000221 C9                          leave
+   306                                  
+   307                                      ; -> Inicializo entrada de la DPT 
+   308                                  
+   309 00000222 55                          push    ebp
+   310 00000223 89E5                        mov     ebp, esp
+   311 00000225 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
+   312 00000227 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
+   313 00000229 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
+   314 0000022B 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
+   315 0000022D 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
+   316 0000022F 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
+   317 00000231 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
+   318 00000233 68[00000000]                push    dword __DATOS_SYS32_VMA             ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE.  
+   319 00000238 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
+   320 0000023D E8(00000000)                call    set_dir_page_table_entry      
+   321 00000242 C9                          leave
+   322                                  
+   323                                      ; -> Inicializo entrada de la DPT 
+   324                                  
+   325 00000243 55                          push    ebp
+   326 00000244 89E5                        mov     ebp, esp
+   327 00000246 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
+   328 00000248 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
+   329 0000024A 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
+   330 0000024C 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
+   331 0000024E 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
+   332 00000250 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
+   333 00000252 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
+   334 00000254 68[00000000]                push    dword __DIGITS_TABLE_VMA            ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE.  
+   335 00000259 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
+   336 0000025E E8(00000000)                call    set_dir_page_table_entry      
+   337 00000263 C9                          leave
+   338                                  
+   339                                      ; -> Inicializo entrada de la DPT
+   340                                  
+   341 00000264 55                          push    ebp
+   342 00000265 89E5                        mov     ebp, esp
+   343 00000267 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
+   344 00000269 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
+   345 0000026B 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
+   346 0000026D 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
+   347 0000026F 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
+   348 00000271 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
+   349 00000273 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
+   350 00000275 68[00000000]                push    dword __KERNEL_32_VMA               ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE.  
+   351 0000027A 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
+   352 0000027F E8(00000000)                call    set_dir_page_table_entry      
+   353 00000284 C9                          leave
+   354                                  
+   355                                      ; -> Inicializo entrada de la DPT
+   356                                  
+   357 00000285 55                          push    ebp
+   358 00000286 89E5                        mov     ebp, esp
+   359 00000288 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
+   360 0000028A 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
+   361 0000028C 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
+   362 0000028E 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
+   363 00000290 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
+   364 00000292 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
+   365 00000294 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
+   366 00000296 68[00000000]                push    dword __TAREA1_TEXT_VMA             ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE.  
+   367 0000029B 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
+   368 000002A0 E8(00000000)                call    set_dir_page_table_entry      
+   369 000002A5 C9                          leave
+   370                                  
+   371                                      ; -> Inicializo entrada de la DPT 
+   372                                  
+   373 000002A6 55                          push    ebp
+   374 000002A7 89E5                        mov     ebp, esp
+   375 000002A9 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
+   376 000002AB 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
+   377 000002AD 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
+   378 000002AF 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
+   379 000002B1 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
+   380 000002B3 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
+   381 000002B5 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
+   382 000002B7 68[00000000]                push    dword __TAREA1_BSS_VMA             ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE.  
+   383 000002BC 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
+   384 000002C1 E8(00000000)                call    set_dir_page_table_entry      
+   385 000002C6 C9                          leave
+   386                                  
+   387                                      ; -> Inicializo entrada de la DPT 
+   388                                  
+   389 000002C7 55                          push    ebp
+   390 000002C8 89E5                        mov     ebp, esp
+   391 000002CA 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
+   392 000002CC 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
+   393 000002CE 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
+   394 000002D0 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
+   395 000002D2 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
+   396 000002D4 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
+   397 000002D6 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
+   398 000002D8 68[00000000]                push    dword __TAREA1_DATA_VMA             ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE.  
+   399 000002DD 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
+   400 000002E2 E8(00000000)                call    set_dir_page_table_entry      
+   401 000002E7 C9                          leave
+   402                                  
+   403                                     ; -> Inicializo entrada de la DPT 
+   404                                  
+   405 000002E8 55                          push    ebp
+   406 000002E9 89E5                        mov     ebp, esp
+   407 000002EB 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
+   408 000002ED 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
+   409 000002EF 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
+   410 000002F1 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
+   411 000002F3 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
+   412 000002F5 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
+   413 000002F7 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
+   414 000002F9 68[00000000]                push    dword __TAREA1_RODATA_VMA           ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE.  
+   415 000002FE 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
+   416 00000303 E8(00000000)                call    set_dir_page_table_entry      
+   417 00000308 C9                          leave
+   418                                  
+   419                                     ; -> Inicializo entrada de la DPT 
+   420                                  
+   421 00000309 55                          push    ebp
+   422 0000030A 89E5                        mov     ebp, esp
+   423 0000030C 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
+   424 0000030E 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
+   425 00000310 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
+   426 00000312 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
+   427 00000314 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
+   428 00000316 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
+   429 00000318 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
+   430 0000031A 68[00000000]                push    dword __STACK_START_32_VMA          ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE.  
+   431 0000031F 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
+   432 00000324 E8(00000000)                call    set_dir_page_table_entry      
+   433 00000329 C9                          leave
+   434                                  
+   435                                     ; -> Inicializo entrada de la DPT 
+   436                                  
+   437 0000032A 55                          push    ebp
+   438 0000032B 89E5                        mov     ebp, esp
+   439 0000032D 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
+   440 0000032F 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
+   441 00000331 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
+   442 00000333 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
+   443 00000335 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
+   444 00000337 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
+   445 00000339 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
+   446 0000033B 68[00000000]                push    dword __TAREA1_STACK_START_VMA      ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE.  
+   447 00000340 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
+   448 00000345 E8(00000000)                call    set_dir_page_table_entry      
+   449 0000034A C9                          leave
+   450                                  
+   451                                     ; -> Inicializo entrada de la DPT
+   452                                  
+   453 0000034B 55                          push    ebp
+   454 0000034C 89E5                        mov     ebp, esp
+   455 0000034E 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
+   456 00000350 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
+   457 00000352 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
+   458 00000354 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
+   459 00000356 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
+   460 00000358 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
+   461 0000035A 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
+   462 0000035C 68[00000000]                push    dword __INIT_16_VMA                 ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE.  
+   463 00000361 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
+   464 00000366 E8(00000000)                call    set_dir_page_table_entry      
+   465 0000036B C9                          leave
+   466                                  
+   467                                  
+   468                                     ; -> Inicializo entrada de la DPT para la paginación dinámica. 
+   469                                     ; Entry PDTE = 0x28
+   470                                      ;push    ebp
+   471                                      ;mov     ebp, esp
+   472                                      ;push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un d
+   473                                      ;push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
+   474                                      ;push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
+   475                                      ;push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
+   476                                      ;push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
+   477                                      ;push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
+   478                                      ;push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
+   479                                      ;push    dword __PAG_DINAMICA_INIT_VMA       ; Dir. Lineal(VMA) - Le paso el inicio del NUEVO ESPACIO FISICO porque el PDE que dará como resultado es diferente a todo el resto. 
+   480                                      ;push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
+   481                                      ;call    set_dir_page_table_entry      
+   482                                      ;leave
+   483                                  
+   484                                      
+   485                                  
+   486                                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   487                                      ;;;;;;;;;;;;;;;; MAPEO DE LAS ENTRIES DE LAS TABLAS DE PAGINAS (PT o TP);;;;;;;;;;;;;;;;;;;;;
+   488                                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   489                                  
+   490                                                          ;---------------------------
+   491                                    ;----------------------TABLA DE PAGINAS 0x00 (TP 0x00)----------------
+   492                                                          ;----------------------------
+   493                                    ;-----------------------------------------------------------------
+   494                                      ;1° Pagina de 4K - Sys Tables  0x0000-0000 a 0x0000-0FFF
+   495                                      ; Indice en la TP = 0x00 (bits 21-12 de __SYS_TABLES_VMA = 0x00000000)
+   496                                      ;-----------------------------------------------------------------
+   497 0000036C 55                          push    ebp
+   498 0000036D 89E5                        mov     ebp, esp
+   499 0000036F 6A01                        push PAG_P_YES
+   500 00000371 6A01                        push PAG_RW_W
+   501 00000373 6A00                        push PAG_US_SUP
+   502 00000375 6A00                        push PAG_PWT_NO
+   503 00000377 6A00                        push PAG_PCD_NO
+   504 00000379 6A00                        push PAG_A
+   505 0000037B 6A00                        push PAG_D
+   506 0000037D 6A00                        push PAG_PAT
+   507 0000037F 6A00                        push PAG_G_YES
+   508 00000381 68[00000000]                push dword __SYS_TABLES_PHY
+   509 00000386 68[00000000]                push dword __SYS_TABLES_VMA
+   510 0000038B 68[00000000]                push dword __PAGE_TABLES_PHY
+   511 00000390 E8(00000000)                call set_page_table_entry 
+   512 00000395 C9                          leave
+   513                                  
+   514                                      ;xchg  bx, bx
+   515                                  
+   516                                      ;-----------------------------------------------------------------
+   517                                      ;2° Pagina de 4K - Tablas de Paginacion  0x0001-0000 a 0x0001-0FFF
+   518                                      ; Indice en la TP = 0x10 (bits 21-12 de __PAGE_TABLES_VMA = 0x00010000)
+   519                                      ;-----------------------------------------------------------------
+   520 00000396 55                          push    ebp
+   521 00000397 89E5                        mov     ebp, esp
+   522 00000399 6A01                        push PAG_P_YES
+   523 0000039B 6A00                        push PAG_RW_R
+   524 0000039D 6A00                        push PAG_US_SUP
+   525 0000039F 6A00                        push PAG_PWT_NO
+   526 000003A1 6A00                        push PAG_PCD_NO
+   527 000003A3 6A00                        push PAG_A
+   528 000003A5 6A00                        push PAG_D
+   529 000003A7 6A00                        push PAG_PAT
+   530 000003A9 6A00                        push PAG_G_YES
+   531 000003AB 68[00000000]                push dword __PAGE_TABLES_PHY
+   532 000003B0 68[00000000]                push dword __PAGE_TABLES_VMA
+   533 000003B5 68[00000000]                push dword __PAGE_TABLES_PHY
+   534 000003BA E8(00000000)                call set_page_table_entry 
+   535 000003BF C9                          leave
+   536                                      ;-----------------------------------------------------------------
+   537                                      ;3° Pagina de 4K - Funciones de RAM  0x0005-0000 a 0x0005-0FFF
+   538                                      ; Indice en la TP = 0x50 (bits 21-12 de __FUNCTIONS_VMA = 0x00050000)
+   539                                      ;-----------------------------------------------------------------
+   540 000003C0 55                          push    ebp
+   541 000003C1 89E5                        mov     ebp, esp
+   542 000003C3 6A01                        push PAG_P_YES
+   543 000003C5 6A00                        push PAG_RW_R
+   544 000003C7 6A00                        push PAG_US_SUP
+   545 000003C9 6A00                        push PAG_PWT_NO
+   546 000003CB 6A00                        push PAG_PCD_NO
+   547 000003CD 6A00                        push PAG_A
+   548 000003CF 6A00                        push PAG_D
+   549 000003D1 6A00                        push PAG_PAT
+   550 000003D3 6A00                        push PAG_G_YES
+   551 000003D5 68[00000000]                push dword __FUNCTIONS_PHY
+   552 000003DA 68[00000000]                push dword __FUNCTIONS_VMA
+   553 000003DF 68[00000000]                push dword __PAGE_TABLES_PHY
+   554 000003E4 E8(00000000)                call set_page_table_entry 
+   555 000003E9 C9                          leave
+   556                                  
+   557                                      ;-----------------------------------------------------------------
+   558                                      ;4° Pagina de 4K - RAM de Video  0x000B-8000 a 0x000B-8FFF
+   559                                      ; Indice en la TP = 0xB8 (bits 21-12 de __VGA_VMA = 0x000B8000)
+   560                                      ;-----------------------------------------------------------------
+   561 000003EA 55                          push    ebp
+   562 000003EB 89E5                        mov     ebp, esp
+   563 000003ED 6A01                        push PAG_P_YES
+   564 000003EF 6A01                        push PAG_RW_W
+   565 000003F1 6A00                        push PAG_US_SUP
+   566 000003F3 6A00                        push PAG_PWT_NO
+   567 000003F5 6A00                        push PAG_PCD_NO
+   568 000003F7 6A00                        push PAG_A
+   569 000003F9 6A00                        push PAG_D
+   570 000003FB 6A00                        push PAG_PAT
+   571 000003FD 6A00                        push PAG_G_YES
+   572 000003FF 68[00000000]                push dword __VGA_PHY
+   573 00000404 68[00000000]                push dword __VGA_VMA
+   574 00000409 68[00000000]                push dword __PAGE_TABLES_PHY
+   575 0000040E E8(00000000)                call set_page_table_entry 
+   576 00000413 C9                          leave
+   577                                  
+   578                                      ;-----------------------------------------------------------------
+   579                                      ;5° Pagina de 4K - Teclado + ISR  0x0010-0000 a 0x0010-0FFF
+   580                                      ; Indice en la TP = 0x100 (bits 21-12 de __TECLADO_ISR_VMA = 0x00100000)
+   581                                      ;-----------------------------------------------------------------
+   582 00000414 55                          push    ebp
+   583 00000415 89E5                        mov     ebp, esp
+   584 00000417 6A01                        push PAG_P_YES
+   585 00000419 6A00                        push PAG_RW_R
+   586 0000041B 6A00                        push PAG_US_SUP
+   587 0000041D 6A00                        push PAG_PWT_NO
+   588 0000041F 6A00                        push PAG_PCD_NO
+   589 00000421 6A00                        push PAG_A
+   590 00000423 6A00                        push PAG_D
+   591 00000425 6A00                        push PAG_PAT
+   592 00000427 6A00                        push PAG_G_YES
+   593 00000429 68[00000000]                push dword __TECLADO_ISR_PHY
+   594 0000042E 68[00000000]                push dword __TECLADO_ISR_VMA
+   595 00000433 68[00000000]                push dword __PAGE_TABLES_PHY
+   596 00000438 E8(00000000)                call set_page_table_entry 
+   597 0000043D C9                          leave
+   598                                  
+   599                                      ;-----------------------------------------------------------------
+   600                                      ;6° Pagina de 4K - Datos 0x0020-0000 a 0x0020-0FFF
+   601                                      ; Indice en la TP = 0x200 (bits 21-12 de __DATOS_SYS32_VMA = 0x00200000)
+   602                                      ;-----------------------------------------------------------------
+   603 0000043E 55                          push    ebp
+   604 0000043F 89E5                        mov     ebp, esp
+   605 00000441 6A01                        push PAG_P_YES
+   606 00000443 6A01                        push PAG_RW_W
+   607 00000445 6A00                        push PAG_US_SUP
+   608 00000447 6A00                        push PAG_PWT_NO
+   609 00000449 6A00                        push PAG_PCD_NO
+   610 0000044B 6A00                        push PAG_A
+   611 0000044D 6A00                        push PAG_D
+   612 0000044F 6A00                        push PAG_PAT
+   613 00000451 6A00                        push PAG_G_YES
+   614 00000453 68[00000000]                push dword __DATOS_SYS32_PHY
+   615 00000458 68[00000000]                push dword __DATOS_SYS32_VMA
+   616 0000045D 68[00000000]                push dword __PAGE_TABLES_PHY
+   617 00000462 E8(00000000)                call set_page_table_entry 
+   618 00000467 C9                          leave
+   619                                  
+   620                                      ;-----------------------------------------------------------------
+   621                                      ;7° Pagina de 4K - Digitos 0x0021-0000 a 0x0021-0FFF
+   622                                      ; Indice en la TP = 0x210 (bits 21-12 de __DIGITS_TABLE = 0x00210000)
+   623                                      ;-----------------------------------------------------------------
+   624 00000468 55                          push    ebp
+   625 00000469 89E5                        mov     ebp, esp
+   626 0000046B 6A01                        push PAG_P_YES
+   627 0000046D 6A01                        push PAG_RW_W
+   628 0000046F 6A00                        push PAG_US_SUP
+   629 00000471 6A00                        push PAG_PWT_NO
+   630 00000473 6A00                        push PAG_PCD_NO
+   631 00000475 6A00                        push PAG_A
+   632 00000477 6A00                        push PAG_D
+   633 00000479 6A00                        push PAG_PAT
+   634 0000047B 6A00                        push PAG_G_YES
+   635 0000047D 68[00000000]                push dword __DIGITS_TABLE_PHY
+   636 00000482 68[00000000]                push dword __DIGITS_TABLE_VMA
+   637 00000487 68[00000000]                push dword __PAGE_TABLES_PHY
+   638 0000048C E8(00000000)                call set_page_table_entry 
+   639 00000491 C9                          leave
+   640                                  
+   641                                      ;-----------------------------------------------------------------
+   642                                      ;8° Pagina de 4K - Kernel 0x0022-0000 a 0x0022-0FFF
+   643                                      ; Indice en la TP = 0x220 (bits 21-12 de __KERNEL_32_VMA = 0x00220000;)
+   644                                      ;-----------------------------------------------------------------
+   645 00000492 55                          push    ebp
+   646 00000493 89E5                        mov     ebp, esp
+   647 00000495 6A01                        push PAG_P_YES
+   648 00000497 6A00                        push PAG_RW_R
+   649 00000499 6A00                        push PAG_US_SUP
+   650 0000049B 6A00                        push PAG_PWT_NO
+   651 0000049D 6A00                        push PAG_PCD_NO
+   652 0000049F 6A00                        push PAG_A
+   653 000004A1 6A00                        push PAG_D
+   654 000004A3 6A00                        push PAG_PAT
+   655 000004A5 6A00                        push PAG_G_YES
+   656 000004A7 68[00000000]                push dword __KERNEL_32_PHY
+   657 000004AC 68[00000000]                push dword __KERNEL_32_VMA
+   658 000004B1 68[00000000]                push dword __PAGE_TABLES_PHY
+   659 000004B6 E8(00000000)                call set_page_table_entry 
+   660 000004BB C9                          leave
+   661                                  
+   662                                      ;-----------------------------------------------------------------
+   663                                      ;9° Pagina de 4K - TEXT Tarea 1 0x0031-0000 a 0x0031-0FFF
+   664                                      ; Indice en la TP = 0x310 (bits 21-12 de __TAREA1_TEXT_VMA = 0x00310000;)
+   665                                      ;-----------------------------------------------------------------
+   666 000004BC 55                          push    ebp
+   667 000004BD 89E5                        mov     ebp, esp
+   668 000004BF 6A01                        push PAG_P_YES
+   669 000004C1 6A00                        push PAG_RW_R
+   670 000004C3 6A00                        push PAG_US_SUP
+   671 000004C5 6A00                        push PAG_PWT_NO
+   672 000004C7 6A00                        push PAG_PCD_NO
+   673 000004C9 6A00                        push PAG_A
+   674 000004CB 6A00                        push PAG_D
+   675 000004CD 6A00                        push PAG_PAT
+   676 000004CF 6A00                        push PAG_G_YES
+   677 000004D1 68[00000000]                push dword __TAREA1_TEXT_PHY
+   678 000004D6 68[00000000]                push dword __TAREA1_TEXT_VMA
+   679 000004DB 68[00000000]                push dword __PAGE_TABLES_PHY
+   680 000004E0 E8(00000000)                call set_page_table_entry 
+   681 000004E5 C9                          leave
+   682                                  
+   683                                      ;-----------------------------------------------------------------
+   684                                      ;10° Pagina de 4K - BSS Tarea 1 0x0032-0000 a 0x0032-0FFF
+   685                                      ; Indice en la TP = 0x320 (bits 21-12 de __TAREA1_BSS_VMA = 0x00320000)
+   686                                      ;-----------------------------------------------------------------
+   687 000004E6 55                          push    ebp
+   688 000004E7 89E5                        mov     ebp, esp
+   689 000004E9 6A01                        push PAG_P_YES
+   690 000004EB 6A01                        push PAG_RW_W
+   691 000004ED 6A00                        push PAG_US_SUP
+   692 000004EF 6A00                        push PAG_PWT_NO
+   693 000004F1 6A00                        push PAG_PCD_NO
+   694 000004F3 6A00                        push PAG_A
+   695 000004F5 6A00                        push PAG_D
+   696 000004F7 6A00                        push PAG_PAT
+   697 000004F9 6A00                        push PAG_G_YES
+   698 000004FB 68[00000000]                push dword __TAREA1_BSS_PHY
+   699 00000500 68[00000000]                push dword __TAREA1_BSS_VMA
+   700 00000505 68[00000000]                push dword __PAGE_TABLES_PHY
+   701 0000050A E8(00000000)                call set_page_table_entry 
+   702 0000050F C9                          leave
+   703                                  
+   704                                      ;-----------------------------------------------------------------
+   705                                      ;11° Pagina de 4K - DATA Tarea 1 0x0033-0000 a 0x0033-0FFF
+   706                                      ; Indice en la TP = 0x330 (bits 21-12 de __TAREA1_DATA_VMA = 0x00330000)
+   707                                      ;-----------------------------------------------------------------
+   708 00000510 55                          push    ebp
+   709 00000511 89E5                        mov     ebp, esp
+   710 00000513 6A01                        push PAG_P_YES
+   711 00000515 6A01                        push PAG_RW_W
+   712 00000517 6A00                        push PAG_US_SUP
+   713 00000519 6A00                        push PAG_PWT_NO
+   714 0000051B 6A00                        push PAG_PCD_NO
+   715 0000051D 6A00                        push PAG_A
+   716 0000051F 6A00                        push PAG_D
+   717 00000521 6A00                        push PAG_PAT
+   718 00000523 6A00                        push PAG_G_YES
+   719 00000525 68[00000000]                push dword __TAREA1_DATA_PHY
+   720 0000052A 68[00000000]                push dword __TAREA1_DATA_VMA
+   721 0000052F 68[00000000]                push dword __PAGE_TABLES_PHY
+   722 00000534 E8(00000000)                call set_page_table_entry 
+   723 00000539 C9                          leave
+   724                                  
+   725                                      ;-----------------------------------------------------------------
+   726                                      ;12° Pagina de 4K - RODATA Tarea 1 0x0034-0000 a 0x0034-0FFF
+   727                                      ; Indice en la TP = 0x340 (bits 21-12 de __TAREA1_RODATA_VMA = 0x00340000)
+   728                                      ;-----------------------------------------------------------------
+   729 0000053A 55                          push    ebp
+   730 0000053B 89E5                        mov     ebp, esp
+   731 0000053D 6A01                        push PAG_P_YES
+   732 0000053F 6A00                        push PAG_RW_R
+   733 00000541 6A00                        push PAG_US_SUP
+   734 00000543 6A00                        push PAG_PWT_NO
+   735 00000545 6A00                        push PAG_PCD_NO
+   736 00000547 6A00                        push PAG_A
+   737 00000549 6A00                        push PAG_D
+   738 0000054B 6A00                        push PAG_PAT
+   739 0000054D 6A00                        push PAG_G_YES
+   740 0000054F 68[00000000]                push dword __TAREA1_RODATA_PHY
+   741 00000554 68[00000000]                push dword __TAREA1_RODATA_VMA
+   742 00000559 68[00000000]                push dword __PAGE_TABLES_PHY
+   743 0000055E E8(00000000)                call set_page_table_entry 
+   744 00000563 C9                          leave
+   745                                  
+   746                                                         ;---------------------------
+   747                                    ;----------------------TABLA DE PAGINAS 0x7F (TP 0x7F)----------------
+   748                                                          ;----------------------------
+   749                                      ;-----------------------------------------------------------------
+   750                                      ;13° Pagina de 4K - Stack de Sistema 0x1FFF-8000 a 0x1FFF-8FFF
+   751                                      ; Indice en la TP = 0x3F8 (bits 21-12 de __STACK_START_32 = 0x1FFF8000)
+   752                                      ;-----------------------------------------------------------------
+   753 00000564 55                          push    ebp
+   754 00000565 89E5                        mov     ebp, esp
+   755 00000567 6A01                        push PAG_P_YES
+   756 00000569 6A01                        push PAG_RW_W
+   757 0000056B 6A00                        push PAG_US_SUP
+   758 0000056D 6A00                        push PAG_PWT_NO
+   759 0000056F 6A00                        push PAG_PCD_NO
+   760 00000571 6A00                        push PAG_A
+   761 00000573 6A00                        push PAG_D
+   762 00000575 6A00                        push PAG_PAT
+   763 00000577 6A00                        push PAG_G_YES
+   764 00000579 68[00000000]                push dword __STACK_START_32_PHY
+   765 0000057E 68[00000000]                push dword __STACK_START_32_VMA
+   766 00000583 68[00000000]                push dword __PAGE_TABLES_PHY
+   767 00000588 E8(00000000)                call set_page_table_entry 
+   768 0000058D C9                          leave
+   769                                  
+   770                                      ;-----------------------------------------------------------------
+   771                                      ;14° Pagina de 4K - Stack de TAREA 01 0x1FFF-F000 a 0x1FFF-FFFF
+   772                                      ; Indice en la TP = 0x3FF (bits 21-12 de __TAREA1_STACK_START = 0x1FFFF000)
+   773                                      ;-----------------------------------------------------------------
+   774 0000058E 55                          push    ebp
+   775 0000058F 89E5                        mov     ebp, esp
+   776 00000591 6A01                        push PAG_P_YES
+   777 00000593 6A01                        push PAG_RW_W
+   778 00000595 6A00                        push PAG_US_SUP
+   779 00000597 6A00                        push PAG_PWT_NO
+   780 00000599 6A00                        push PAG_PCD_NO
+   781 0000059B 6A00                        push PAG_A
+   782 0000059D 6A00                        push PAG_D
+   783 0000059F 6A00                        push PAG_PAT
+   784 000005A1 6A00                        push PAG_G_YES
+   785 000005A3 68[00000000]                push dword __TAREA1_STACK_START_PHY
+   786 000005A8 68[00000000]                push dword __TAREA1_STACK_START_VMA
+   787 000005AD 68[00000000]                push dword __PAGE_TABLES_PHY
+   788 000005B2 E8(00000000)                call set_page_table_entry 
+   789 000005B7 C9                          leave
+   790                                  
+   791                                                            ;---------------------------
+   792                                      ;----------------------TABLA DE PAGINAS 0x3FF (TP 0x3FF)----------------
+   793                                                            ;----------------------------
+   794                                                            ;PAGINACION DE LA ROM DE 64 KB;
+   795                                      ;-----------------------------------------------------------------
+   796                                      ;15° Pagina de 4K - Stack de INIT_32_VMA 
+   797                                      ; Indice en la TP = 0x3F9 (bits 21-12 de __INIT_32_VMA = 0xFFFF938E que sale del .map)
+   798                                      ;-----------------------------------------------------------------
+   799 000005B8 55                          push    ebp
+   800 000005B9 89E5                        mov     ebp, esp
+   801 000005BB 6A01                        push PAG_P_YES
+   802 000005BD 6A01                        push PAG_RW_W
+   803 000005BF 6A00                        push PAG_US_SUP
+   804 000005C1 6A00                        push PAG_PWT_NO
+   805 000005C3 6A00                        push PAG_PCD_NO
+   806 000005C5 6A00                        push PAG_A
+   807 000005C7 6A00                        push PAG_D
+   808 000005C9 6A00                        push PAG_PAT
+   809 000005CB 6A00                        push PAG_G_YES
+   810 000005CD 68[00000000]                push dword __INIT_32_VMA
+   811 000005D2 68[00000000]                push dword __INIT_32_VMA
+   812 000005D7 68[00000000]                push dword __PAGE_TABLES_PHY
+   813 000005DC E8(00000000)                call set_page_table_entry 
+   814 000005E1 C9                          leave
+   815                                  
+   816                                                            ;---------------------------
+   817                                      ;----------------------TABLA DE PAGINAS 0x28 (TP 0x28)----------------
+   818                                                            ;----------------------------
+   819                                      ;-----------------------------------------------------------------
+   820                                      ; cargo una PTE para tener inicializada la PT - Inicio de paginacion dinámica 
+   821                                      ; Primer índice en la TP = 0x00 (bits 21-12 de __PAG_DINAMICA_INIT_PHY = 0x0A000000 )
+   822                                      ;-----------------------------------------------------------------
+   823                                  
+   824                                    
+   825                                      ;push    ebp
+   826                                      ;mov     ebp, esp
+   827                                      ;push PAG_P_YES
+   828                                      ;push PAG_RW_W
+   829                                      ;push PAG_US_SUP
+   830                                      ;push PAG_PWT_NO
+   831                                      ;push PAG_PCD_NO
+   832                                      ;push PAG_A
+   833                                      ;push PAG_D
+   834                                      ;push PAG_PAT
+   835                                      ;push PAG_G_YES
+   836                                      ;push dword __PAG_DINAMICA_INIT_PHY
+   837                                      ;push dword __PAG_DINAMICA_INIT_VMA
+   838                                      ;push dword __PAGE_TABLES_PHY
+   839                                      ;call set_page_table_entry 
+   840                                      ;leave
+   841                                  
+   842                                  
+   843                                  
+   844                                      ;call carga_tp_dinamica_1024_pte  
+   845                                  
+   846 000005E2 6687DB                      xchg  bx, bx
+   847                                      ; -> Habilito la paginación
+   848 000005E5 0F20C0                      mov   eax, cr0 
+   849 000005E8 0D00000080                  or    eax, X86_CR0_PG
+   850 000005ED 0F22C0                      mov   cr0, eax
+   851                                  
+   852 000005F0 FB                          sti                     ; Habilitación de las Interrupciones
+   853                                  
+   854 000005F1 EA[00000000][0000]          jmp CS_SEL_32:kernel32_init ; Salto en memoria a la sección del núcleo
+   855                                  
+   856                                  .guard:
+   857 000005F8 F4                          hlt
+   858 000005F9 EBFD                        jmp .guard
+   859                                  
+   860                                  
+   861                                  
+   862                                  ;SECTION .tablas_paginacion
+   863                                  ;  directory_page_table        resd 1024         ; Reservo los 1024 bytes del directorio
+   864                                  ;  page_tables                 resd 1024*504     ; Tengo 4 tablas estaticas + 500 dinamicas
+   865                                     
