@@ -21,6 +21,7 @@ EXTERN __DIGITS_TABLE_VMA
 EXTERN __PAG_DINAMICA_INIT_VMA
 EXTERN __PAGE_TABLES_PHY
 EXTERN error_code_PF
+EXTERN paginas_creadas
 EXTERN page_fault_msg
 EXTERN page_fault_msg_2
 EXTERN page_fault_msg_3
@@ -275,28 +276,9 @@ ISR14_Handler_PF:
 pag_no_presente:
 write_access:
     ;xchg  bx, bx
-    
-    ; -> Limpio pantalla.
-    push    ebp
-    mov     ebp, esp
-    push    __VGA_VMA
-    call    limpiar_VGA                     
-    leave
-    ; -> Escribo mensaje "Apago paginacion (bit 8 CR0)"
-    push    ebp
-    mov     ebp, esp
-    push    1       ; Es ASCII
-    push    10      ; Columna VGA
-    push    1       ; Fila    VGA
-    push    page_fault_msg_4
-    call    escribir_mensaje_VGA
-    leave
-
-    ;xchg  bx, bx
-
 
     ;---------------------------------------------------
-    ; -> -----------Guardo VMA de falla y Dir. Fisica en acumuladores
+    ; -> -----------Guardo VMA de falla y Dir. Fisica en GPRs
     ;----------para poder re-paginar con la paginacion apagada-----------------
     ;---------------------------------------------------
     ; ->Guardo en edx la VMA de falla del CR2
@@ -314,10 +296,9 @@ write_access:
     mov   cr0, eax
     ; -> Debo realizar la paginación para la VMA que falló y 
     ; para la PHY 0x0A000000
-    ; -> Cargo el PDE (Page Directory Entry)
-
-    push    edx
-    push    ecx
+    ; -> Cargo el PDE (Page Directory Entry) - De no existir, lo crea.
+    push    edx                                 ; Guardo edx (VMA de falla del CR2)
+    push    ecx                                 ; Guardo ecx (Dir. Fisica dinamica)
 
     push    ebp
     mov     ebp, esp
@@ -328,19 +309,15 @@ write_access:
     push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
     push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
     push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
-    push    edx                                 ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE. 
+    push    edx                                 ; Dir. Lineal VMA que produjo el #PF y traje del CR2. 
     push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
     call    set_dir_page_table_entry
     leave
 
-
-
-    pop    ecx
-    pop    edx
-
+    pop    ecx                                  ; Leo ecx
+    pop    edx                                  ; Leo edx
 
     ; -> Cargo la PTE (Page Table Entry)
-    ; Ya tengo cargada la PT antes de arrancar la paginación en init32
     push    ebp
     mov     ebp, esp
     push    PAG_P_YES
@@ -352,11 +329,8 @@ write_access:
     push    PAG_D
     push    PAG_PAT
     push    PAG_G_YES
-    ;push    dword 0x0A000000           ; ARREGLAR COMENTARIOS. ACOMODARLOS EN ORDEN.
-    ;push    dword 0x2345        ; Esta debe variar +4KB a medida que se van creando paginas.
-    push    ecx
-    push    edx                   ; Offset de 2*4 = 8 (en la pos 0x11008 de la tabla 0)
-    ;push    dword [dir_lineal_page_fault]   ; Dir. Lineal VMA que trajo el CR2.
+    push    ecx                             ; Dir física dinámica ( se va sumando de a 4K para nuevas páginas)
+    push    edx                             ; Dir. Lineal VMA que produjo el #PF y traje del CR2.
     push    dword __PAGE_TABLES_PHY         ; PT inicializada antes de activar paginación.
     call    set_page_table_entry 
     leave
@@ -370,27 +344,8 @@ write_access:
     mov   cr0, eax
 
     ;xchg    bx, bx 
-
-    ; -> Limpio pantalla.
-    push    ebp
-    mov     ebp, esp
-    push    __VGA_VMA
-    call    limpiar_VGA                     
-    leave
-    ; -> Escribo mensaje "PTE y PDE paginado OK."
-    push    ebp
-    mov     ebp, esp
-    push    1       ; Es ASCII
-    push    0      ; Columna VGA
-    push    1       ; Fila    VGA
-    push    page_fault_msg_6
-    call    escribir_mensaje_VGA
-    leave
-
-    ;xchg    bx, bx  ; BREAK LUEGO DE PAGINAR EL DPT
-
     
-; -> Analizo valor de la Dir. Fisica.
+    ; -> Analizo valor de la Dir. Fisica.
     ;xor     eax, eax
     ;mov     eax,[dir_phy_dinamica]
     ;and     eax, 0xFFFFF000                 ; 20 bits mas sig. poseen DIR_BASE_PAGE.
@@ -403,8 +358,35 @@ write_access:
     ; -> Sumo 4K para mapear la próx. dir física.
     xor     ebx, ebx
     mov     ebx, [dir_phy_dinamica]
-    add     ebx, 0x1000         ; Sumo 4k a la dir fisica
+    add     ebx, 0x1000                     ; Sumo 4k a la dir fisica
     mov     [dir_phy_dinamica], ebx
+    ; -> Sumo al contador de páginas de 4K creadas
+    xor     ebx, ebx
+    mov     ebx, [paginas_creadas]
+    add     ebx, 0x01
+    mov     [paginas_creadas], ebx
+    ; -> Limpio pantalla.
+    push    ebp
+    mov     ebp, esp
+    push    __VGA_VMA
+    call    limpiar_VGA                     
+    leave
+    ; -> Muestro el mensaje "Cantidad de paginas de 4k creadas: ."
+    push    ebp
+    mov     ebp, esp
+    push    44      ; Columna VGA
+    push    12       ; Fila VGA
+    push    page_fault_msg_6
+    call    escribir_mensaje_VGA
+    leave
+     ; -> Muestro el valor de la cantidad de págs. creadas
+    push    ebp
+    mov     ebp, esp
+    push    79      ; Columna VGA
+    push    13       ; Fila VGA
+    push    dword[paginas_creadas]
+    call    mostrar_numero32_VGA
+    leave
 
     jmp     end_handler_PF                  ; Finalizo el handler #PF
 
@@ -413,30 +395,10 @@ resetear_dir_phy_dinamica:
     mov     dword[dir_phy_dinamica], 0x0A000000
 end_handler_PF:
    
-    ; -> Limpio pantalla.
-    push    ebp
-    mov     ebp, esp
-    push    __VGA_VMA
-    call    limpiar_VGA                     
-    leave
-    ; -> Muestro el mensaje "Paginación exitosa."
-    push    ebp
-    mov     ebp, esp
-    push    10      ; Columna VGA
-    push    2       ; Fila VGA
-    push    page_fault_msg_5
-    call    escribir_mensaje_VGA
-    leave
-
     ;xchg    bx, bx                          ; BREAK LUEGO DE PAGINAR.
 
-
-    ; -> Finalizo la rutina del #PF
-    ;mov al, 0x20                
-    ;out 0x20, al                ; ACK al PIC
-    ;mov edx,0x0E                ; Guardo en edx el valor de la excep. #PF
     popad                       ; Tomo valores de registros guardados.
-    pop eax
+    pop eax                     ; Porque me queda un valor para ser popeado y poder retornar con CS:DIR LINEAL al punto donde se produjo el #PF
     sti                         ; Habilito interrupciones.
     iret
 

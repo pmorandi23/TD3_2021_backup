@@ -842,53 +842,18 @@
    813 000005DC E8(00000000)                call set_page_table_entry 
    814 000005E1 C9                          leave
    815                                  
-   816                                                            ;---------------------------
-   817                                      ;----------------------TABLA DE PAGINAS 0x28 (TP 0x28)----------------
-   818                                                            ;----------------------------
-   819                                      ;-----------------------------------------------------------------
-   820                                      ; cargo una PTE para tener inicializada la PT - Inicio de paginacion dinámica 
-   821                                      ; Primer índice en la TP = 0x00 (bits 21-12 de __PAG_DINAMICA_INIT_PHY = 0x0A000000 )
-   822                                      ;-----------------------------------------------------------------
+   816                                      ;xchg  bx, bx
+   817                                      ; -> Habilito la paginación
+   818 000005E2 0F20C0                      mov   eax, cr0 
+   819 000005E5 0D00000080                  or    eax, X86_CR0_PG
+   820 000005EA 0F22C0                      mov   cr0, eax
+   821                                  
+   822 000005ED FB                          sti                     ; Habilitación de las Interrupciones
    823                                  
-   824                                    
-   825                                      ;push    ebp
-   826                                      ;mov     ebp, esp
-   827                                      ;push PAG_P_YES
-   828                                      ;push PAG_RW_W
-   829                                      ;push PAG_US_SUP
-   830                                      ;push PAG_PWT_NO
-   831                                      ;push PAG_PCD_NO
-   832                                      ;push PAG_A
-   833                                      ;push PAG_D
-   834                                      ;push PAG_PAT
-   835                                      ;push PAG_G_YES
-   836                                      ;push dword __PAG_DINAMICA_INIT_PHY
-   837                                      ;push dword __PAG_DINAMICA_INIT_VMA
-   838                                      ;push dword __PAGE_TABLES_PHY
-   839                                      ;call set_page_table_entry 
-   840                                      ;leave
-   841                                  
-   842                                  
-   843                                  
-   844                                      ;call carga_tp_dinamica_1024_pte  
-   845                                  
-   846                                      ;xchg  bx, bx
-   847                                      ; -> Habilito la paginación
-   848 000005E2 0F20C0                      mov   eax, cr0 
-   849 000005E5 0D00000080                  or    eax, X86_CR0_PG
-   850 000005EA 0F22C0                      mov   cr0, eax
-   851                                  
-   852 000005ED FB                          sti                     ; Habilitación de las Interrupciones
-   853                                  
-   854 000005EE EA[00000000][0000]          jmp CS_SEL_32:kernel32_init ; Salto en memoria a la sección del núcleo
-   855                                  
-   856                                  .guard:
-   857 000005F5 F4                          hlt
-   858 000005F6 EBFD                        jmp .guard
-   859                                  
-   860                                  
-   861                                  
-   862                                  ;SECTION .tablas_paginacion
-   863                                  ;  directory_page_table        resd 1024         ; Reservo los 1024 bytes del directorio
-   864                                  ;  page_tables                 resd 1024*504     ; Tengo 4 tablas estaticas + 500 dinamicas
-   865                                     
+   824 000005EE EA[00000000][0000]          jmp CS_SEL_32:kernel32_init ; Salto en memoria a la sección del núcleo
+   825                                  
+   826                                  .guard:
+   827 000005F5 F4                          hlt
+   828 000005F6 EBFD                        jmp .guard
+   829                                  
+   830                                  

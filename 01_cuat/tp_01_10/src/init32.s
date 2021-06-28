@@ -813,36 +813,6 @@ start32_launcher:
     call set_page_table_entry 
     leave
 
-                          ;---------------------------
-    ;----------------------TABLA DE PAGINAS 0x28 (TP 0x28)----------------
-                          ;----------------------------
-    ;-----------------------------------------------------------------
-    ; cargo una PTE para tener inicializada la PT - Inicio de paginacion dinámica 
-    ; Primer índice en la TP = 0x00 (bits 21-12 de __PAG_DINAMICA_INIT_PHY = 0x0A000000 )
-    ;-----------------------------------------------------------------
-
-  
-    ;push    ebp
-    ;mov     ebp, esp
-    ;push PAG_P_YES
-    ;push PAG_RW_W
-    ;push PAG_US_SUP
-    ;push PAG_PWT_NO
-    ;push PAG_PCD_NO
-    ;push PAG_A
-    ;push PAG_D
-    ;push PAG_PAT
-    ;push PAG_G_YES
-    ;push dword __PAG_DINAMICA_INIT_PHY
-    ;push dword __PAG_DINAMICA_INIT_VMA
-    ;push dword __PAGE_TABLES_PHY
-    ;call set_page_table_entry 
-    ;leave
-
-
-
-    ;call carga_tp_dinamica_1024_pte  
-
     ;xchg  bx, bx
     ; -> Habilito la paginación
     mov   eax, cr0 
@@ -858,8 +828,3 @@ start32_launcher:
     jmp .guard
 
 
-
-;SECTION .tablas_paginacion
-;  directory_page_table        resd 1024         ; Reservo los 1024 bytes del directorio
-;  page_tables                 resd 1024*504     ; Tengo 4 tablas estaticas + 500 dinamicas
-   

@@ -23,6 +23,7 @@ GLOBAL page_fault_msg_3
 GLOBAL page_fault_msg_4
 GLOBAL page_fault_msg_5
 GLOBAL page_fault_msg_6
+GLOBAL paginas_creadas
 kernel21_code_size EQU kernel32_end-kernel32_init
 ;---------EQU-----------------------------
 CANTIDAD_DATOS  EQU 10
@@ -72,10 +73,12 @@ variables_globales:
     error_code_PF               resd 1              ; Código de error del #PF
 
     dir_phy_dinamica            dd 0x0A000000       ; Dir. Phy. dinámica para salvar el #PF
+
+    paginas_creadas             resd 1              ; Cantidad de páginas creadas en el #PF .
 mensajes_error:
     page_fault_msg              db "-----PAGE FAULT-----",0
     page_fault_msg_2            db "Dir. VMA = 0x",0
     page_fault_msg_3            db "Error Code: ",0
     page_fault_msg_4            db "Paginacion OFF. Se puede paginar con VMA del CR2",0
     page_fault_msg_5            db "Paginacion exitosa.",0
-    page_fault_msg_6            db "PTE y PDE (Si no existia, se creo una nueva PT.) escritos exitosamente con VMA del CR2 y +4K de la dir_phy_dinamica.",0
+    page_fault_msg_6            db "#PF Handler - Paginas de 4K creadas: ",0

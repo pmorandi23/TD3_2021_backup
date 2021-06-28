@@ -414,26 +414,4 @@ void mostrar_numero32_VGA(dword numero32, byte fila, byte columna)
 
 }
 
-/* Función que pagina 1024 entradas de tabla de páginas. */
-__attribute__(( section(".functions_c")))
-void carga_tp_dinamica_1024_pte (void)
-{
-    static int i = 0;
-    dword PHY_aux = 0x0A000000;
-
-    for (i=0; i<1024 ; i++){
-
-        //asm("xchg %bx,%bx");
-        /* 0x28 es la entry en la DPT de esta tabla de 1024 posiciones para paginar dinamicamente luego. */
-
-
-        //set_page_table_entry(&__PAGE_TABLES_PHY, 0x0A000000 + 0x1000*i , 0x0A000000 + 0x1000*i,  0, 0, 0, 0, 0, 0, 0, 1, 1);
-
-
-        //PHY_aux = PHY_aux + 0x00001000; // Voy sumando bases de paginas (contenido del PTE)
-        
-    }
-    //asm("xchg %bx,%bx");
-
-}
 

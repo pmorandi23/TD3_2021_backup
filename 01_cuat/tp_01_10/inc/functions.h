@@ -123,6 +123,5 @@ void limpiar_VGA (buff_screen_t* );
 void ejecutar_tarea_1 (tabla_t* , qword*);
 dword get_entry_DTP(dword ) ;
 dword get_entry_TP(dword );  
-void carga_tp_dinamica_1024_pte (void);
 
 

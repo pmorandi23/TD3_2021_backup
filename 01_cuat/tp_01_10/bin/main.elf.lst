@@ -23,87 +23,83 @@
     23                                  GLOBAL page_fault_msg_4
     24                                  GLOBAL page_fault_msg_5
     25                                  GLOBAL page_fault_msg_6
-    26                                  kernel21_code_size EQU kernel32_end-kernel32_init
-    27                                  ;---------EQU-----------------------------
-    28                                  CANTIDAD_DATOS  EQU 10
-    29                                  LONG_BUFFER     EQU 16
-    30                                  
-    31                                  kernel32_init:
-    32                                      ;xchg bx,bx
-    33 00000000 31C0                        xor eax,eax
-    34 00000002 31DB                        xor ebx,ebx
-    35 00000004 31C9                        xor ecx,ecx
-    36 00000006 31D2                        xor edx,edx
-    37                                      ; -> Inicializo el buffer del teclado.
-    38 00000008 55                          push    ebp
-    39 00000009 89E5                        mov     ebp, esp
-    40 0000000B 68[00000000]                push dword memoria_buffer_reservada
-    41 00000010 E8(00000000)                call limpiar_buffer                     
-    42 00000015 C9                          leave
-    43                                      ; -> Escribo la pantalla con mensaje fijo.
-    44 00000016 55                          push    ebp
-    45 00000017 89E5                        mov     ebp, esp
-    46 00000019 68[00000000]                push    __VGA_VMA
-    47 0000001E E8(00000000)                call msg_bienvenida_VGA                     
-    48 00000023 C9                          leave
-    49                                  
+    26                                  GLOBAL paginas_creadas
+    27                                  kernel21_code_size EQU kernel32_end-kernel32_init
+    28                                  ;---------EQU-----------------------------
+    29                                  CANTIDAD_DATOS  EQU 10
+    30                                  LONG_BUFFER     EQU 16
+    31                                  
+    32                                  kernel32_init:
+    33                                      ;xchg bx,bx
+    34 00000000 31C0                        xor eax,eax
+    35 00000002 31DB                        xor ebx,ebx
+    36 00000004 31C9                        xor ecx,ecx
+    37 00000006 31D2                        xor edx,edx
+    38                                      ; -> Inicializo el buffer del teclado.
+    39 00000008 55                          push    ebp
+    40 00000009 89E5                        mov     ebp, esp
+    41 0000000B 68[00000000]                push dword memoria_buffer_reservada
+    42 00000010 E8(00000000)                call limpiar_buffer                     
+    43 00000015 C9                          leave
+    44                                      ; -> Escribo la pantalla con mensaje fijo.
+    45 00000016 55                          push    ebp
+    46 00000017 89E5                        mov     ebp, esp
+    47 00000019 68[00000000]                push    __VGA_VMA
+    48 0000001E E8(00000000)                call msg_bienvenida_VGA                     
+    49 00000023 C9                          leave
     50                                  
-    51                                  main:
-    52 00000024 EBFE                        jmp main
-    53                                  guard:
-    54 00000026 F4                          hlt                                     ; Aguardo por interrupciones / excepciones
-    55 00000027 EBFD                        jmp guard
-    56                                  
+    51                                  
+    52                                  main:
+    53 00000024 EBFE                        jmp main
+    54                                  guard:
+    55 00000026 F4                          hlt                                     ; Aguardo por interrupciones / excepciones
+    56 00000027 EBFD                        jmp guard
     57                                  
-    58                                  kernel32_end:
-    59                                      
-    60                                  
-    61                                  ;-------- VARIABLES DE DATOS PARA PROPOSITO GENERAL----
-    62                                  SECTION .data
-    63                                  variables_globales:
-    64 00000000 <res 00000013>              memoria_buffer_reservada    resb 19             ; Reservo para buffer[0-16] + head[17] + tail[18] + cantidad[19] 
-    64          ******************       warning: uninitialized space declared in non-BSS section `.data': zeroing
-    65                                  
-    66 00000013 <res 00000002>              contador_timer              resw 1              ; Contador del timer
-    66          ******************       warning: uninitialized space declared in non-BSS section `.data': zeroing
-    67                                  
-    68 00000015 <res 00000008>              resultado_promedio          resq 1              ; Resultado del promedio cada 500ms de los dígitos en tabla.
-    68          ******************       warning: uninitialized space declared in non-BSS section `.data': zeroing
-    69                                  
-    70 0000001D <res 00000004>              dir_lineal_page_fault       resd 1              ; Dir. Lineal que produjo una Page Fault Exception.
-    70          ******************       warning: uninitialized space declared in non-BSS section `.data': zeroing
-    71                                  
-    72 00000021 <res 00000004>              error_code_PF               resd 1              ; Código de error del #PF
-    72          ******************       warning: uninitialized space declared in non-BSS section `.data': zeroing
-    73                                  
-    74 00000025 0000000A                    dir_phy_dinamica            dd 0x0A000000       ; Dir. Phy. dinámica para salvar el #PF
-    75                                  mensajes_error:
-    76 00000029 2D2D2D2D2D50414745-         page_fault_msg              db "-----PAGE FAULT-----",0
-    76 00000032 204641554C542D2D2D-
-    76 0000003B 2D2D00             
-    77 0000003E 4469722E20564D4120-         page_fault_msg_2            db "Dir. VMA = 0x",0
-    77 00000047 3D20307800         
-    78 0000004C 4572726F7220436F64-         page_fault_msg_3            db "Error Code: ",0
-    78 00000055 653A2000           
-    79 00000059 506167696E6163696F-         page_fault_msg_4            db "Paginacion OFF. Se puede paginar con VMA del CR2",0
-    79 00000062 6E204F46462E205365-
-    79 0000006B 207075656465207061-
-    79 00000074 67696E617220636F6E-
-    79 0000007D 20564D412064656C20-
-    79 00000086 43523200           
-    80 0000008A 506167696E6163696F-         page_fault_msg_5            db "Paginacion exitosa.",0
-    80 00000093 6E20657869746F7361-
-    80 0000009C 2E00               
-    81 0000009E 505445207920504445-         page_fault_msg_6            db "PTE y PDE (Si no existia, se creo una nueva PT.) escritos exitosamente con VMA del CR2 y +4K de la dir_phy_dinamica.",0
-    81 000000A7 20285369206E6F2065-
-    81 000000B0 7869737469612C2073-
-    81 000000B9 65206372656F20756E-
-    81 000000C2 61206E756576612050-
-    81 000000CB 542E29206573637269-
-    81 000000D4 746F7320657869746F-
-    81 000000DD 73616D656E74652063-
-    81 000000E6 6F6E20564D41206465-
-    81 000000EF 6C204352322079202B-
-    81 000000F8 344B206465206C6120-
-    81 00000101 6469725F7068795F64-
-    81 0000010A 696E616D6963612E00 
+    58                                  
+    59                                  kernel32_end:
+    60                                      
+    61                                  
+    62                                  ;-------- VARIABLES DE DATOS PARA PROPOSITO GENERAL----
+    63                                  SECTION .data
+    64                                  variables_globales:
+    65 00000000 <res 00000013>              memoria_buffer_reservada    resb 19             ; Reservo para buffer[0-16] + head[17] + tail[18] + cantidad[19] 
+    65          ******************       warning: uninitialized space declared in non-BSS section `.data': zeroing
+    66                                  
+    67 00000013 <res 00000002>              contador_timer              resw 1              ; Contador del timer
+    67          ******************       warning: uninitialized space declared in non-BSS section `.data': zeroing
+    68                                  
+    69 00000015 <res 00000008>              resultado_promedio          resq 1              ; Resultado del promedio cada 500ms de los dígitos en tabla.
+    69          ******************       warning: uninitialized space declared in non-BSS section `.data': zeroing
+    70                                  
+    71 0000001D <res 00000004>              dir_lineal_page_fault       resd 1              ; Dir. Lineal que produjo una Page Fault Exception.
+    71          ******************       warning: uninitialized space declared in non-BSS section `.data': zeroing
+    72                                  
+    73 00000021 <res 00000004>              error_code_PF               resd 1              ; Código de error del #PF
+    73          ******************       warning: uninitialized space declared in non-BSS section `.data': zeroing
+    74                                  
+    75 00000025 0000000A                    dir_phy_dinamica            dd 0x0A000000       ; Dir. Phy. dinámica para salvar el #PF
+    76                                  
+    77 00000029 <res 00000004>              paginas_creadas             resd 1              ; Cantidad de páginas creadas en el #PF .
+    77          ******************       warning: uninitialized space declared in non-BSS section `.data': zeroing
+    78                                  mensajes_error:
+    79 0000002D 2D2D2D2D2D50414745-         page_fault_msg              db "-----PAGE FAULT-----",0
+    79 00000036 204641554C542D2D2D-
+    79 0000003F 2D2D00             
+    80 00000042 4469722E20564D4120-         page_fault_msg_2            db "Dir. VMA = 0x",0
+    80 0000004B 3D20307800         
+    81 00000050 4572726F7220436F64-         page_fault_msg_3            db "Error Code: ",0
+    81 00000059 653A2000           
+    82 0000005D 506167696E6163696F-         page_fault_msg_4            db "Paginacion OFF. Se puede paginar con VMA del CR2",0
+    82 00000066 6E204F46462E205365-
+    82 0000006F 207075656465207061-
+    82 00000078 67696E617220636F6E-
+    82 00000081 20564D412064656C20-
+    82 0000008A 43523200           
+    83 0000008E 506167696E6163696F-         page_fault_msg_5            db "Paginacion exitosa.",0
+    83 00000097 6E20657869746F7361-
+    83 000000A0 2E00               
+    84 000000A2 2350462048616E646C-         page_fault_msg_6            db "#PF Handler - Paginas de 4K creadas: ",0
+    84 000000AB 6572202D2050616769-
+    84 000000B4 6E617320646520344B-
+    84 000000BD 20637265616461733A-
+    84 000000C6 2000               

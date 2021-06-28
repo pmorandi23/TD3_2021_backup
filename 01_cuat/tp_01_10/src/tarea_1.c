@@ -45,15 +45,14 @@ void lectura_promedio64 (qword promedio)
     {
         lectura_promedio_direccion = (dword*)promedio; //Guardo como puntero el promedio (dirección VMA) para luego leerla.
         /* Muestro la dir. VMA */
-        mostrar_promedio64_VGA(lectura_promedio_direccion, 10, 79);
+        //mostrar_promedio64_VGA(lectura_promedio_direccion, 10, 79);
          /*Lectura del contenido de la dirección VMA. Genera #PF si no esta paginada.  */
         //asm("xchg %bx,%bx");
 
         aux_lectura = *lectura_promedio_direccion;
         /* Limpio pantalla- */
-        //*lectura_promedio_direccion = 0x14;// Escritura del contenido de la dirección VMA
         /* Muestro contenido de la dir. VMA */
-        mostrar_promedio64_VGA(aux_lectura, 12, 79);
+        //mostrar_promedio64_VGA(aux_lectura, 12, 79);
     }
 
 }
