@@ -226,7 +226,7 @@
    189                                  ISR13_Handler_GP:
    190 0000008C 6687DB                      xchg    bx,bx
    191 0000008F B20D                        mov dl,0x0D
-   192 00000091 F4                          hlt
+   192 00000091 CF                          iretd
    193                                  ;-----------------------------------
    194                                  ;----------Page Fault (#PF)---------
    195                                  ;-----------------------------------
@@ -308,172 +308,197 @@
    271 0000011A 740A                        je pag_no_presente
    272 0000011C 83FB02                      cmp ebx, 0x02
    273 0000011F 7405                        je write_access
-   274 00000121 E9CC000000                  jmp end_handler_PF
+   274 00000121 E9D1000000                  jmp end_handler_PF
    275                                  pag_no_presente:
    276                                  write_access:
-   277 00000126 6687DB                      xchg  bx, bx
+   277                                      ;xchg  bx, bx
    278                                      
    279                                      ; -> Limpio pantalla.
-   280 00000129 55                          push    ebp
-   281 0000012A 89E5                        mov     ebp, esp
-   282 0000012C 68[00000000]                push    __VGA_VMA
-   283 00000131 E8(00000000)                call    limpiar_VGA                     
-   284 00000136 C9                          leave
+   280 00000126 55                          push    ebp
+   281 00000127 89E5                        mov     ebp, esp
+   282 00000129 68[00000000]                push    __VGA_VMA
+   283 0000012E E8(00000000)                call    limpiar_VGA                     
+   284 00000133 C9                          leave
    285                                      ; -> Escribo mensaje "Apago paginacion (bit 8 CR0)"
-   286 00000137 55                          push    ebp
-   287 00000138 89E5                        mov     ebp, esp
-   288 0000013A 6A01                        push    1       ; Es ASCII
-   289 0000013C 6A0A                        push    10      ; Columna VGA
-   290 0000013E 6A01                        push    1       ; Fila    VGA
-   291 00000140 68[00000000]                push    page_fault_msg_4
-   292 00000145 E8(00000000)                call    escribir_mensaje_VGA
-   293 0000014A C9                          leave
+   286 00000134 55                          push    ebp
+   287 00000135 89E5                        mov     ebp, esp
+   288 00000137 6A01                        push    1       ; Es ASCII
+   289 00000139 6A0A                        push    10      ; Columna VGA
+   290 0000013B 6A01                        push    1       ; Fila    VGA
+   291 0000013D 68[00000000]                push    page_fault_msg_4
+   292 00000142 E8(00000000)                call    escribir_mensaje_VGA
+   293 00000147 C9                          leave
    294                                  
-   295 0000014B 6687DB                      xchg  bx, bx
+   295                                      ;xchg  bx, bx
    296                                  
-   297                                      ;---------------------------------------------------
-   298                                      ; -> -----------Apago la paginación-----------------
-   299                                      ;---------------------------------------------------
-   300 0000014E 31C0                        xor   eax, eax
-   301 00000150 0F20C0                      mov   eax, cr0 
-   302 00000153 25FFFFFF7F                  and   eax, 0x7FFFFFFF
-   303 00000158 0F22C0                      mov   cr0, eax
-   304                                      ; -> Debo realizar la paginación para la VMA que falló y 
-   305                                      ; para la PHY 0x0A000000
-   306                                      ; -> Cargo el PDE (Page Directory Entry)
-   307 0000015B 55                          push    ebp
-   308 0000015C 89E5                        mov     ebp, esp
-   309 0000015E 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
-   310 00000160 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
-   311 00000162 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
-   312 00000164 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
-   313 00000166 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
-   314 00000168 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
-   315 0000016A 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
-   316 0000016C FF35[00000000]              push    dword[dir_lineal_page_fault]        ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE. 
-   317 00000172 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
-   318 00000177 E8(00000000)                call    set_dir_page_table_entry
-   319 0000017C C9                          leave
-   320                                  
-   321                                      ;xchg    bx, bx                               ; BREAK ANTES DE ARRANCAR A PAGINAR DINAMICAMENTE
-   322                                  
-   323                                      ; -> Cargo la PTE (Page Table Entry)
-   324                                      ; Ya tengo cargada la PT antes de arrancar la paginación en init32
-   325 0000017D 55                          push    ebp
-   326 0000017E 89E5                        mov     ebp, esp
-   327 00000180 6A01                        push    PAG_P_YES
-   328 00000182 6A01                        push    PAG_RW_W
-   329 00000184 6A00                        push    PAG_US_SUP
-   330 00000186 6A00                        push    PAG_PWT_NO
-   331 00000188 6A00                        push    PAG_PCD_NO
-   332 0000018A 6A00                        push    PAG_A
-   333 0000018C 6A00                        push    PAG_D
-   334 0000018E 6A00                        push    PAG_PAT
-   335 00000190 6A00                        push    PAG_G_YES
-   336 00000192 68[00000000]                push    dword __PAG_DINAMICA_INIT_PHY
-   337                                      ;push    dword [dir_phy_dinamica]        ; Esta debe variar +4KB a medida que se van creando paginas.
-   338 00000197 FF35[00000000]              push    dword [dir_lineal_page_fault]   ; Dir. Lineal VMA que trajo el CR2.
-   339 0000019D 68[00000000]                push    dword __PAGE_TABLES_PHY         ; PT inicializada antes de activar paginación.
-   340 000001A2 E8(00000000)                call    set_page_table_entry 
-   341 000001A7 C9                          leave
-   342                                  
-   343                                      ;---------------------------------------------------
-   344                                      ; -> -----------Prendo la paginación-----------------
-   345                                      ;---------------------------------------------------
-   346 000001A8 31C0                        xor   eax, eax
-   347 000001AA 0F20C0                      mov   eax, cr0 
-   348 000001AD 0D00000080                  or    eax, X86_CR0_PG
-   349 000001B2 0F22C0                      mov   cr0, eax
-   350                                  
-   351                                      ;xchg    bx, bx 
-   352                                  
-   353                                      ; -> Limpio pantalla.
-   354 000001B5 55                          push    ebp
-   355 000001B6 89E5                        mov     ebp, esp
-   356 000001B8 68[00000000]                push    __VGA_VMA
-   357 000001BD E8(00000000)                call    limpiar_VGA                     
-   358 000001C2 C9                          leave
-   359                                      ; -> Escribo mensaje "PTE y PDE paginado OK."
-   360 000001C3 55                          push    ebp
-   361 000001C4 89E5                        mov     ebp, esp
-   362 000001C6 6A01                        push    1       ; Es ASCII
-   363 000001C8 6A00                        push    0      ; Columna VGA
-   364 000001CA 6A01                        push    1       ; Fila    VGA
-   365 000001CC 68[00000000]                push    page_fault_msg_6
-   366 000001D1 E8(00000000)                call    escribir_mensaje_VGA
-   367 000001D6 C9                          leave
-   368                                  
-   369 000001D7 6687DB                      xchg    bx, bx  ; BREAK LUEGO DE PAGINAR EL DPT
-   370                                  
-   371                                      
-   372                                  ; -> Analizo valor de la Dir. Fisica.
-   373                                      ;xor     eax, eax
-   374                                      ;mov     eax,[dir_phy_dinamica]
-   375                                      ;and     eax, 0xFFFFF000                 ; 20 bits mas sig. poseen DIR_BASE_PAGE.
-   376                                      ; -> Puedo paginar desde 0x1FFF8 a 0xA000 = 0x15FF8 -> 90.104 páginas de 4K.
-   377                                      ; Lo limito en 90K páginas y luego las sobreescribo para no romper la memoria.
-   378                                      ;cmp     eax, 0x15F90
-   379                                      ;jle     resetear_dir_phy_dinamica    ;  0x01200025   dir_phy_dinamica
-   380                                  
-   381                                  
-   382                                      ; -> Sumo 4K para mapear la próx. dir física.
-   383 000001DA BB00100000                  mov     ebx, 0x1000
-   384                                      ;shl     ebx, 12
-   385 000001DF 01D8                        add     eax, ebx              ; Sumo 4K
-   386 000001E1 A3[00000000]                mov     [dir_phy_dinamica], eax
-   387                                      ;xchg    bx, bx                          ; BREAK LUEGO DE PAGINAR.
-   388                                  
-   389 000001E6 EB0A                        jmp     end_handler_PF                  ; Finalizo el handler #PF
-   390                                  
+   297                                  
+   298                                      ;---------------------------------------------------
+   299                                      ; -> -----------Guardo VMA de falla y Dir. Fisica en acumuladores
+   300                                      ;----------para poder re-paginar con la paginacion apagada-----------------
+   301                                      ;---------------------------------------------------
+   302                                      ; ->Guardo en edx la VMA de falla del CR2
+   303 00000148 31D2                        xor   edx, edx
+   304 0000014A 8B15[00000000]              mov   edx, [dir_lineal_page_fault] 
+   305                                      ; ->Guardo en ecx la Dir. Fisica dinamica
+   306 00000150 31C9                        xor   ecx, ecx
+   307 00000152 8B0D[00000000]              mov   ecx, [dir_phy_dinamica] 
+   308                                      ;---------------------------------------------------
+   309                                      ; -> -----------Apago la paginación-----------------
+   310                                      ;---------------------------------------------------
+   311 00000158 31C0                        xor   eax, eax
+   312 0000015A 0F20C0                      mov   eax, cr0 
+   313 0000015D 25FFFFFF7F                  and   eax, 0x7FFFFFFF
+   314 00000162 0F22C0                      mov   cr0, eax
+   315                                      ; -> Debo realizar la paginación para la VMA que falló y 
+   316                                      ; para la PHY 0x0A000000
+   317                                      ; -> Cargo el PDE (Page Directory Entry)
+   318                                  
+   319 00000165 52                          push    edx
+   320 00000166 51                          push    ecx
+   321                                  
+   322 00000167 55                          push    ebp
+   323 00000168 89E5                        mov     ebp, esp
+   324 0000016A 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
+   325 0000016C 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
+   326 0000016E 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
+   327 00000170 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
+   328 00000172 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
+   329 00000174 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
+   330 00000176 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
+   331 00000178 52                          push    edx                                 ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE. 
+   332 00000179 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
+   333 0000017E E8(00000000)                call    set_dir_page_table_entry
+   334 00000183 C9                          leave
+   335                                  
+   336                                  
+   337                                  
+   338 00000184 59                          pop    ecx
+   339 00000185 5A                          pop    edx
+   340                                  
+   341                                  
+   342                                      ; -> Cargo la PTE (Page Table Entry)
+   343                                      ; Ya tengo cargada la PT antes de arrancar la paginación en init32
+   344 00000186 55                          push    ebp
+   345 00000187 89E5                        mov     ebp, esp
+   346 00000189 6A01                        push    PAG_P_YES
+   347 0000018B 6A01                        push    PAG_RW_W
+   348 0000018D 6A00                        push    PAG_US_SUP
+   349 0000018F 6A00                        push    PAG_PWT_NO
+   350 00000191 6A00                        push    PAG_PCD_NO
+   351 00000193 6A00                        push    PAG_A
+   352 00000195 6A00                        push    PAG_D
+   353 00000197 6A00                        push    PAG_PAT
+   354 00000199 6A00                        push    PAG_G_YES
+   355                                      ;push    dword 0x0A000000           ; ARREGLAR COMENTARIOS. ACOMODARLOS EN ORDEN.
+   356                                      ;push    dword 0x2345        ; Esta debe variar +4KB a medida que se van creando paginas.
+   357 0000019B 51                          push    ecx
+   358 0000019C 52                          push    edx                   ; Offset de 2*4 = 8 (en la pos 0x11008 de la tabla 0)
+   359                                      ;push    dword [dir_lineal_page_fault]   ; Dir. Lineal VMA que trajo el CR2.
+   360 0000019D 68[00000000]                push    dword __PAGE_TABLES_PHY         ; PT inicializada antes de activar paginación.
+   361 000001A2 E8(00000000)                call    set_page_table_entry 
+   362 000001A7 C9                          leave
+   363                                  
+   364                                      ;---------------------------------------------------
+   365                                      ; -> -----------Prendo la paginación-----------------
+   366                                      ;---------------------------------------------------
+   367 000001A8 31C0                        xor   eax, eax
+   368 000001AA 0F20C0                      mov   eax, cr0 
+   369 000001AD 0D00000080                  or    eax, X86_CR0_PG
+   370 000001B2 0F22C0                      mov   cr0, eax
+   371                                  
+   372                                      ;xchg    bx, bx 
+   373                                  
+   374                                      ; -> Limpio pantalla.
+   375 000001B5 55                          push    ebp
+   376 000001B6 89E5                        mov     ebp, esp
+   377 000001B8 68[00000000]                push    __VGA_VMA
+   378 000001BD E8(00000000)                call    limpiar_VGA                     
+   379 000001C2 C9                          leave
+   380                                      ; -> Escribo mensaje "PTE y PDE paginado OK."
+   381 000001C3 55                          push    ebp
+   382 000001C4 89E5                        mov     ebp, esp
+   383 000001C6 6A01                        push    1       ; Es ASCII
+   384 000001C8 6A00                        push    0      ; Columna VGA
+   385 000001CA 6A01                        push    1       ; Fila    VGA
+   386 000001CC 68[00000000]                push    page_fault_msg_6
+   387 000001D1 E8(00000000)                call    escribir_mensaje_VGA
+   388 000001D6 C9                          leave
+   389                                  
+   390                                      ;xchg    bx, bx  ; BREAK LUEGO DE PAGINAR EL DPT
    391                                  
-   392                                  resetear_dir_phy_dinamica:
-   393 000001E8 C705[00000000]0000-         mov     dword[dir_phy_dinamica], 0x0A000000
-   393 000001F0 000A               
-   394                                  end_handler_PF:
-   395                                     
-   396                                      ; -> Limpio pantalla.
-   397 000001F2 55                          push    ebp
-   398 000001F3 89E5                        mov     ebp, esp
-   399 000001F5 68[00000000]                push    __VGA_VMA
-   400 000001FA E8(00000000)                call    limpiar_VGA                     
-   401 000001FF C9                          leave
-   402                                      ; -> Muestro el mensaje "Paginación exitosa."
-   403 00000200 55                          push    ebp
-   404 00000201 89E5                        mov     ebp, esp
-   405 00000203 6A0A                        push    10      ; Columna VGA
-   406 00000205 6A02                        push    2       ; Fila VGA
-   407 00000207 68[00000000]                push    page_fault_msg_3
-   408 0000020C E8(00000000)                call    escribir_mensaje_VGA
-   409 00000211 C9                          leave
-   410                                      ; -> Finalizo la rutina del #PF
-   411 00000212 B020                        mov al, 0x20                
-   412 00000214 E620                        out 0x20, al                ; ACK al PIC
-   413 00000216 BA0E000000                  mov edx,0x0E                ; Guardo en edx el valor de la excep. #PF
-   414 0000021B 61                          popad                       ; Tomo valores de registros guardados.
-   415 0000021C FB                          sti                         ; Habilito interrupciones.
-   416 0000021D CF                          iretd
-   417                                  
-   418                                  ISR15_Handler_RES:
-   419 0000021E 6687DB                      xchg    bx,bx
-   420 00000221 B20F                        mov dl,0x0F
-   421 00000223 F4                          hlt
-   422                                  
-   423                                  ISR16_Handler_MF:
-   424 00000224 6687DB                      xchg    bx,bx
-   425 00000227 B210                        mov dl,0x10
-   426 00000229 F4                          hlt
-   427                                  
-   428                                  ISR17_Handler_AC:
-   429 0000022A 6687DB                      xchg    bx,bx
-   430 0000022D B211                        mov dl,0x11
-   431 0000022F F4                          hlt
+   392                                      
+   393                                  ; -> Analizo valor de la Dir. Fisica.
+   394                                      ;xor     eax, eax
+   395                                      ;mov     eax,[dir_phy_dinamica]
+   396                                      ;and     eax, 0xFFFFF000                 ; 20 bits mas sig. poseen DIR_BASE_PAGE.
+   397                                      ; -> Puedo paginar desde 0x1FFF8 a 0xA000 = 0x15FF8 -> 90.104 páginas de 4K.
+   398                                      ; Lo limito en 90K páginas y luego las sobreescribo para no romper la memoria.
+   399                                      ;cmp     eax, 0x15F90
+   400                                      ;jle     resetear_dir_phy_dinamica    ;  0x01200025   dir_phy_dinamica
+   401                                  
+   402                                  
+   403                                      ; -> Sumo 4K para mapear la próx. dir física.
+   404 000001D7 31DB                        xor     ebx, ebx
+   405 000001D9 8B1D[00000000]              mov     ebx, [dir_phy_dinamica]
+   406 000001DF 81C300100000                add     ebx, 0x1000         ; Sumo 4k a la dir fisica
+   407 000001E5 891D[00000000]              mov     [dir_phy_dinamica], ebx
+   408                                  
+   409 000001EB EB0A                        jmp     end_handler_PF                  ; Finalizo el handler #PF
+   410                                  
+   411                                  
+   412                                  resetear_dir_phy_dinamica:
+   413 000001ED C705[00000000]0000-         mov     dword[dir_phy_dinamica], 0x0A000000
+   413 000001F5 000A               
+   414                                  end_handler_PF:
+   415                                     
+   416                                      ; -> Limpio pantalla.
+   417 000001F7 55                          push    ebp
+   418 000001F8 89E5                        mov     ebp, esp
+   419 000001FA 68[00000000]                push    __VGA_VMA
+   420 000001FF E8(00000000)                call    limpiar_VGA                     
+   421 00000204 C9                          leave
+   422                                      ; -> Muestro el mensaje "Paginación exitosa."
+   423 00000205 55                          push    ebp
+   424 00000206 89E5                        mov     ebp, esp
+   425 00000208 6A0A                        push    10      ; Columna VGA
+   426 0000020A 6A02                        push    2       ; Fila VGA
+   427 0000020C 68[00000000]                push    page_fault_msg_5
+   428 00000211 E8(00000000)                call    escribir_mensaje_VGA
+   429 00000216 C9                          leave
+   430                                  
+   431                                      ;xchg    bx, bx                          ; BREAK LUEGO DE PAGINAR.
    432                                  
-   433                                  ISR18_Handler_MC:
-   434 00000230 6687DB                      xchg    bx,bx
-   435 00000233 B212                        mov dl,0x12
-   436 00000235 F4                          hlt
-   437                                  
-   438                                  ISR19_Handler_XM:
-   439 00000236 6687DB                      xchg    bx,bx
-   440 00000239 B213                        mov dl,0x13
-   441 0000023B F4                          hlt
+   433                                  
+   434                                      ; -> Finalizo la rutina del #PF
+   435                                      ;mov al, 0x20                
+   436                                      ;out 0x20, al                ; ACK al PIC
+   437                                      ;mov edx,0x0E                ; Guardo en edx el valor de la excep. #PF
+   438 00000217 61                          popad                       ; Tomo valores de registros guardados.
+   439 00000218 58                          pop eax
+   440 00000219 FB                          sti                         ; Habilito interrupciones.
+   441 0000021A CF                          iret
+   442                                  
+   443                                  ISR15_Handler_RES:
+   444 0000021B 6687DB                      xchg    bx,bx
+   445 0000021E B20F                        mov dl,0x0F
+   446 00000220 F4                          hlt
+   447                                  
+   448                                  ISR16_Handler_MF:
+   449 00000221 6687DB                      xchg    bx,bx
+   450 00000224 B210                        mov dl,0x10
+   451 00000226 F4                          hlt
+   452                                  
+   453                                  ISR17_Handler_AC:
+   454 00000227 6687DB                      xchg    bx,bx
+   455 0000022A B211                        mov dl,0x11
+   456 0000022C F4                          hlt
+   457                                  
+   458                                  ISR18_Handler_MC:
+   459 0000022D 6687DB                      xchg    bx,bx
+   460 00000230 B212                        mov dl,0x12
+   461 00000232 F4                          hlt
+   462                                  
+   463                                  ISR19_Handler_XM:
+   464 00000233 6687DB                      xchg    bx,bx
+   465 00000236 B213                        mov dl,0x13
+   466 00000238 F4                          hlt

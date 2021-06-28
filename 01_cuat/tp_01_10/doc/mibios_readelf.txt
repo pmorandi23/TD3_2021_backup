@@ -24,8 +24,8 @@ Section Headers:
   [ 0]                   NULL            00000000 000000 000000 00      0   0  0
   [ 1] .sys_tables_32    PROGBITS        00000000 001000 00019c 00   A  0   0  1
   [ 2] .functions        PROGBITS        00050000 002000 000a64 00 WAX  0   0  4
-  [ 3] .handlers_ISR     PROGBITS        00100000 003000 00023c 00   A  0   0  1
-  [ 4] .datos_sys32      PROGBITS        01200000 004000 00014e 00  WA  0   0  4
+  [ 3] .handlers_ISR     PROGBITS        00100000 003000 000239 00   A  0   0  1
+  [ 4] .datos_sys32      PROGBITS        01200000 004000 000113 00  WA  0   0  4
   [ 5] .codigo_kernel32  PROGBITS        01220000 005000 000029 00   A  0   0  1
   [ 6] .tarea_1_text     PROGBITS        01310000 006000 00040d 00  AX  0   0  1
   [ 7] .tarea_1_bss      NOBITS          01320000 007000 000030 00  WA  0   0  8
@@ -33,8 +33,8 @@ Section Headers:
   [ 9] .tarea_1_rodata   PROGBITS        01340000 008000 000024 00   A  0   0  4
   [10] .codigo_init16    PROGBITS        ffff8000 009000 000069 00   A  0   0  1
   [11] .video_init       PROGBITS        ffff8069 009069 001322 00   A  0   0  1
-  [12] .codigo_init32    PROGBITS        ffff938b 00a38b 0005fb 00   A  0   0  1
-  [13] .functions_rom    PROGBITS        ffff9986 00a986 0000a0 00 WAX  0   0  1
+  [12] .codigo_init32    PROGBITS        ffff938b 00a38b 0005f8 00   A  0   0  1
+  [13] .functions_rom    PROGBITS        ffff9983 00a983 0000a0 00 WAX  0   0  1
   [14] .codigo_reset     PROGBITS        fffffff0 00aff0 000010 00   A  0   0 16
   [15] .comment          PROGBITS        00000000 00b000 000029 01  MS  0   0  1
   [16] .symtab           SYMTAB          00000000 00b02c 0014c0 10     17 191  4
@@ -52,14 +52,14 @@ Program Headers:
   Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
   LOAD           0x001000 0x00000000 0xffff0000 0x0019c 0x0019c R   0x1000
   LOAD           0x002000 0x00050000 0xffff019c 0x00a64 0x00a64 RWE 0x1000
-  LOAD           0x003000 0x00100000 0xffff0c00 0x0023c 0x0023c R   0x1000
-  LOAD           0x004000 0x01200000 0xffff0e3c 0x0014e 0x0014e RW  0x1000
-  LOAD           0x005000 0x01220000 0xffff0f8a 0x00029 0x00029 R   0x1000
-  LOAD           0x006000 0x01310000 0xffff0fb3 0x0040d 0x0040d R E 0x1000
-  LOAD           0x007000 0x01320000 0xffff13c0 0x00000 0x00030 RW  0x1000
-  LOAD           0x007000 0x01330000 0xffff13f0 0x00001 0x00001 RW  0x1000
-  LOAD           0x008000 0x01340000 0xffff13f1 0x00024 0x00024 R   0x1000
-  LOAD           0x009000 0xffff8000 0xffff8000 0x01a26 0x01a26 RWE 0x1000
+  LOAD           0x003000 0x00100000 0xffff0c00 0x00239 0x00239 R   0x1000
+  LOAD           0x004000 0x01200000 0xffff0e39 0x00113 0x00113 RW  0x1000
+  LOAD           0x005000 0x01220000 0xffff0f4c 0x00029 0x00029 R   0x1000
+  LOAD           0x006000 0x01310000 0xffff0f75 0x0040d 0x0040d R E 0x1000
+  LOAD           0x007000 0x01320000 0xffff1382 0x00000 0x00030 RW  0x1000
+  LOAD           0x007000 0x01330000 0xffff13b2 0x00001 0x00001 RW  0x1000
+  LOAD           0x008000 0x01340000 0xffff13b3 0x00024 0x00024 R   0x1000
+  LOAD           0x009000 0xffff8000 0xffff8000 0x01a23 0x01a23 RWE 0x1000
   LOAD           0x00aff0 0xfffffff0 0xfffffff0 0x00010 0x00010 R   0x1000
   GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RWE 0x10
 
@@ -99,7 +99,7 @@ Symbol table '.symtab' contains 332 entries:
     10: ffff8000     0 SECTION LOCAL  DEFAULT   10 
     11: ffff8069     0 SECTION LOCAL  DEFAULT   11 
     12: ffff938b     0 SECTION LOCAL  DEFAULT   12 
-    13: ffff9986     0 SECTION LOCAL  DEFAULT   13 
+    13: ffff9983     0 SECTION LOCAL  DEFAULT   13 
     14: fffffff0     0 SECTION LOCAL  DEFAULT   14 
     15: 00000000     0 SECTION LOCAL  DEFAULT   15 
     16: 00000000     0 FILE    LOCAL  DEFAULT  ABS src/sys_tables.s
@@ -180,13 +180,13 @@ Symbol table '.symtab' contains 332 entries:
     91: 00100092     0 NOTYPE  LOCAL  DEFAULT    3 ISR14_Handler_PF
     92: 00100126     0 NOTYPE  LOCAL  DEFAULT    3 pag_no_presente
     93: 00100126     0 NOTYPE  LOCAL  DEFAULT    3 write_access
-    94: 001001e8     0 NOTYPE  LOCAL  DEFAULT    3 resetear_dir_phy_dinamica
-    95: 001001f2     0 NOTYPE  LOCAL  DEFAULT    3 end_handler_PF
-    96: 0010021e     0 NOTYPE  LOCAL  DEFAULT    3 ISR15_Handler_RES
-    97: 00100224     0 NOTYPE  LOCAL  DEFAULT    3 ISR16_Handler_MF
-    98: 0010022a     0 NOTYPE  LOCAL  DEFAULT    3 ISR17_Handler_AC
-    99: 00100230     0 NOTYPE  LOCAL  DEFAULT    3 ISR18_Handler_MC
-   100: 00100236     0 NOTYPE  LOCAL  DEFAULT    3 ISR19_Handler_XM
+    94: 001001ed     0 NOTYPE  LOCAL  DEFAULT    3 resetear_dir_phy_dinamica
+    95: 001001f7     0 NOTYPE  LOCAL  DEFAULT    3 end_handler_PF
+    96: 0010021b     0 NOTYPE  LOCAL  DEFAULT    3 ISR15_Handler_RES
+    97: 00100221     0 NOTYPE  LOCAL  DEFAULT    3 ISR16_Handler_MF
+    98: 00100227     0 NOTYPE  LOCAL  DEFAULT    3 ISR17_Handler_AC
+    99: 0010022d     0 NOTYPE  LOCAL  DEFAULT    3 ISR18_Handler_MC
+   100: 00100233     0 NOTYPE  LOCAL  DEFAULT    3 ISR19_Handler_XM
    101: 00000000     0 FILE    LOCAL  DEFAULT  ABS src/main.s
    102: 00000029     0 NOTYPE  LOCAL  DEFAULT  ABS kernel21_code_size
    103: 0000000a     0 NOTYPE  LOCAL  DEFAULT  ABS CANTIDAD_DATOS
@@ -270,26 +270,26 @@ Symbol table '.symtab' contains 332 entries:
    181: 00000000     0 NOTYPE  LOCAL  DEFAULT  ABS PAG_A
    182: 00000000     0 NOTYPE  LOCAL  DEFAULT  ABS PAG_PS_4K
    183: ffff93a5     0 NOTYPE  LOCAL  DEFAULT   12 start32_launcher.stack_in
-   184: ffff9983     0 NOTYPE  LOCAL  DEFAULT   12 start32_launcher.guard
+   184: ffff9980     0 NOTYPE  LOCAL  DEFAULT   12 start32_launcher.guard
    185: 00000000     0 FILE    LOCAL  DEFAULT  ABS functions_rom.c
    186: 00000000     0 FILE    LOCAL  DEFAULT  ABS src/functions_asm.s
-   187: ffff9a0e     0 NOTYPE  LOCAL  DEFAULT   13 ciclo1
-   188: ffff9a1d     0 NOTYPE  LOCAL  DEFAULT   13 ciclo2
+   187: ffff9a0b     0 NOTYPE  LOCAL  DEFAULT   13 ciclo1
+   188: ffff9a1a     0 NOTYPE  LOCAL  DEFAULT   13 ciclo2
    189: 00000000     0 FILE    LOCAL  DEFAULT  ABS src/reset.s
    190: fffffff5     0 NOTYPE  LOCAL  DEFAULT   14 halted
    191: 00000050     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR02_Handler_NMI
-   192: 0000014e     0 NOTYPE  GLOBAL DEFAULT  ABS __data_size
+   192: 00000113     0 NOTYPE  GLOBAL DEFAULT  ABS __data_size
    193: fffffff0     0 NOTYPE  GLOBAL DEFAULT  ABS __RESET_LMA
    194: 00000074     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR08_Handler_DF
    195: 00050379    61 FUNC    GLOBAL DEFAULT    2 set_cr3
    196: 1fff8000     0 NOTYPE  GLOBAL DEFAULT  ABS __STACK_START_32_VMA
    197: ffff019c     0 NOTYPE  GLOBAL DEFAULT  ABS __FUNCTIONS_LMA
    198: ffff8031     0 NOTYPE  GLOBAL DEFAULT   10 return_init_screen
-   199: 0000023c     0 NOTYPE  GLOBAL DEFAULT  ABS __handlers_32_size
+   199: 00000239     0 NOTYPE  GLOBAL DEFAULT  ABS __handlers_32_size
    200: 00000a64     0 NOTYPE  GLOBAL DEFAULT  ABS __functions_size
-   201: ffff9986     0 NOTYPE  GLOBAL DEFAULT  ABS __FUNCTIONS_ROM_VMA
+   201: ffff9983     0 NOTYPE  GLOBAL DEFAULT  ABS __FUNCTIONS_ROM_VMA
    202: ffff8000     0 NOTYPE  GLOBAL DEFAULT  ABS __INIT_16_LMA
-   203: ffff9986     0 NOTYPE  GLOBAL DEFAULT  ABS __FUNCTIONS_ROM_LMA
+   203: ffff9983     0 NOTYPE  GLOBAL DEFAULT  ABS __FUNCTIONS_ROM_LMA
    204: 01200013     0 NOTYPE  GLOBAL DEFAULT    4 contador_timer
    205: 01340000     1 OBJECT  GLOBAL DEFAULT    9 var_global_rodata
    206: 01200025     0 NOTYPE  GLOBAL DEFAULT    4 dir_phy_dinamica
@@ -301,14 +301,14 @@ Symbol table '.symtab' contains 332 entries:
    212: ffff8000     0 NOTYPE  GLOBAL DEFAULT  ABS __INIT_16_VMA
    213: 0120008a     0 NOTYPE  GLOBAL DEFAULT    4 page_fault_msg_5
    214: 01310000     0 NOTYPE  GLOBAL DEFAULT  ABS __TAREA1_TEXT_VMA
-   215: ffff99c2     0 NOTYPE  GLOBAL DEFAULT   13 init_pic
+   215: ffff99bf     0 NOTYPE  GLOBAL DEFAULT   13 init_pic
    216: 000508b9    32 FUNC    GLOBAL DEFAULT    2 get_entry_TP
    217: 0005003c    74 FUNC    GLOBAL DEFAULT    2 limpiar_buffer
-   218: ffff99fe     0 NOTYPE  GLOBAL DEFAULT   13 init_teclado
+   218: ffff99fb     0 NOTYPE  GLOBAL DEFAULT   13 init_teclado
    219: 0120003e     0 NOTYPE  GLOBAL DEFAULT    4 page_fault_msg_2
-   220: 00000224     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR16_Handler_MF
+   220: 00000221     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR16_Handler_MF
    221: 00010000     0 NOTYPE  GLOBAL DEFAULT  ABS __PAGE_TABLES_VMA
-   222: ffff99ef     0 NOTYPE  GLOBAL DEFAULT   13 init_timer
+   222: ffff99ec     0 NOTYPE  GLOBAL DEFAULT   13 init_timer
    223: 00210000     0 NOTYPE  GLOBAL DEFAULT  ABS __DIGITS_TABLE_PHY
    224: 00000086     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR12_Handler_SS
    225: 00000068     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR06_Handler_UD
@@ -318,7 +318,7 @@ Symbol table '.symtab' contains 332 entries:
    229: 0005049e   295 FUNC    GLOBAL DEFAULT    2 set_page_table_entry
    230: 00000056     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR03_Handler_BP
    231: ffff8069     0 NOTYPE  GLOBAL DEFAULT  ABS __VGA_INIT_LMA
-   232: ffff0fb3     0 NOTYPE  GLOBAL DEFAULT  ABS __TAREA1_TEXT_LMA
+   232: ffff0f75     0 NOTYPE  GLOBAL DEFAULT  ABS __TAREA1_TEXT_LMA
    233: 00000000     0 NOTYPE  GLOBAL DEFAULT  ABS __SYS_TABLES_VMA
    234: 00009000     0 NOTYPE  GLOBAL DEFAULT  ABS __STACK_START_16
    235: 0005089e    27 FUNC    GLOBAL DEFAULT    2 get_entry_DTP
@@ -330,7 +330,7 @@ Symbol table '.symtab' contains 332 entries:
    241: 1fff8000     0 NOTYPE  GLOBAL DEFAULT  ABS __STACK_START_32_PHY
    242: 00340000     0 NOTYPE  GLOBAL DEFAULT  ABS __TAREA1_RODATA_PHY
    243: 01220000     0 NOTYPE  GLOBAL DEFAULT    5 kernel32_init
-   244: 012000d9     0 NOTYPE  GLOBAL DEFAULT    4 page_fault_msg_6
+   244: 0120009e     0 NOTYPE  GLOBAL DEFAULT    4 page_fault_msg_6
    245: 00000196     0 NOTYPE  GLOBAL DEFAULT    1 _idtr_32
    246: 000501b4   287 FUNC    GLOBAL DEFAULT    2 escribir_tabla_digitos
    247: 0000008c     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR13_Handler_GP
@@ -345,7 +345,7 @@ Symbol table '.symtab' contains 332 entries:
    256: 01200000     0 NOTYPE  GLOBAL DEFAULT    4 memoria_buffer_reservada
    257: 000508d9   151 FUNC    GLOBAL DEFAULT    2 mostrar_numero32_VGA
    258: 0000006e     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR07_Handler_NM
-   259: ffff0e3c     0 NOTYPE  GLOBAL DEFAULT  ABS __DATOS_SYS32_LMA
+   259: ffff0e39     0 NOTYPE  GLOBAL DEFAULT  ABS __DATOS_SYS32_LMA
    260: 00000008     0 NOTYPE  GLOBAL DEFAULT  ABS CS_SEL_32
    261: 00000018     0 NOTYPE  GLOBAL DEFAULT    1 _gdtr_32
    262: 01310000   121 FUNC    GLOBAL DEFAULT    6 ejecutar_tarea_1
@@ -360,20 +360,20 @@ Symbol table '.symtab' contains 332 entries:
    271: 00009fff     0 NOTYPE  GLOBAL DEFAULT  ABS __STACK_END_16
    272: 00330000     0 NOTYPE  GLOBAL DEFAULT  ABS __TAREA1_DATA_PHY
    273: ffff0000     0 NOTYPE  GLOBAL DEFAULT  ABS __INIT_ROM_VMA
-   274: ffff0f8a     0 NOTYPE  GLOBAL DEFAULT  ABS __KERNEL_32_LMA
-   275: 0000022a     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR17_Handler_AC
+   274: ffff0f4c     0 NOTYPE  GLOBAL DEFAULT  ABS __KERNEL_32_LMA
+   275: 00000227     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR17_Handler_AC
    276: 01200059     0 NOTYPE  GLOBAL DEFAULT    4 page_fault_msg_4
    277: 00010000     0 NOTYPE  GLOBAL DEFAULT  ABS __PAGE_TABLES_PHY
    278: fffffff0     0 NOTYPE  GLOBAL DEFAULT  ABS __RESET_VMA
    279: 1ffff000     0 NOTYPE  GLOBAL DEFAULT  ABS __TAREA1_STACK_START_PHY
    280: 00000044     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR00_Handler_DE
-   281: 00000236     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR19_Handler_XM
+   281: 00000233     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR19_Handler_XM
    282: 00000092     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR14_Handler_PF
    283: 01200015     0 NOTYPE  GLOBAL DEFAULT    4 resultado_promedio
    284: 00200000     0 NOTYPE  GLOBAL DEFAULT  ABS __DATOS_SYS32_PHY
    285: 0000005c     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR04_Handler_OF
-   286: ffff13f0     0 NOTYPE  GLOBAL DEFAULT  ABS __TAREA1_DATA_LMA
-   287: 00000230     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR18_Handler_MC
+   286: ffff13b2     0 NOTYPE  GLOBAL DEFAULT  ABS __TAREA1_DATA_LMA
+   287: 0000022d     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR18_Handler_MC
    288: 000507a3   142 FUNC    GLOBAL DEFAULT    2 msg_bienvenida_VGA
    289: 01210000     0 NOTYPE  GLOBAL DEFAULT  ABS __DIGITS_TABLE_VMA
    290: ffff938b     0 NOTYPE  GLOBAL DEFAULT  ABS __INIT_32_VMA
@@ -386,7 +386,7 @@ Symbol table '.symtab' contains 332 entries:
    297: 01200029     0 NOTYPE  GLOBAL DEFAULT    4 page_fault_msg
    298: 013103a4   105 FUNC    GLOBAL DEFAULT    6 sumatoria_digitos_64
    299: 00050831   109 FUNC    GLOBAL DEFAULT    2 limpiar_VGA
-   300: ffff13f1     0 NOTYPE  GLOBAL DEFAULT  ABS __TAREA1_RODATA_LMA
+   300: ffff13b3     0 NOTYPE  GLOBAL DEFAULT  ABS __TAREA1_RODATA_LMA
    301: ffff8069     0 NOTYPE  GLOBAL DEFAULT  ABS __VGA_INIT_VMA
    302: 00000062     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR05_Handler_BR
    303: 0000040d     0 NOTYPE  GLOBAL DEFAULT  ABS __tarea_01_size
@@ -403,7 +403,7 @@ Symbol table '.symtab' contains 332 entries:
    314: 013101a0   516 FUNC    GLOBAL DEFAULT    6 promedio_digitos_64
    315: 00000029     0 NOTYPE  GLOBAL DEFAULT  ABS __codigo_kernel32_size
    316: 000503b6   232 FUNC    GLOBAL DEFAULT    2 set_dir_page_table_entry
-   317: ffff9986    60 FUNC    GLOBAL DEFAULT   13 __fast_memcpy_rom
+   317: ffff9983    60 FUNC    GLOBAL DEFAULT   13 __fast_memcpy_rom
    318: 00050970    53 FUNC    GLOBAL DEFAULT    2 carga_tp_dinamica_1024_pt
    319: 00050086   193 FUNC    GLOBAL DEFAULT    2 determinar_tecla_presiona
    320: 1fff8fff     0 NOTYPE  GLOBAL DEFAULT  ABS __STACK_END_32_PHY
@@ -416,7 +416,7 @@ Symbol table '.symtab' contains 332 entries:
    327: 00000080     0 NOTYPE  GLOBAL DEFAULT    3 L_ISR11_Handler_NP
    328: 01330000     0 NOTYPE  GLOBAL DEFAULT  ABS __TAREA1_DATA_VMA
    329: 0005033d    60 FUNC    GLOBAL DEFAULT    2 contador_handler
-   330: ffff13c0     0 NOTYPE  GLOBAL DEFAULT  ABS __TAREA1_BSS_LMA
+   330: ffff1382     0 NOTYPE  GLOBAL DEFAULT  ABS __TAREA1_BSS_LMA
    331: 00000030     0 NOTYPE  GLOBAL DEFAULT  ABS __tarea_1_bss_size
 
 No version information found in this file.

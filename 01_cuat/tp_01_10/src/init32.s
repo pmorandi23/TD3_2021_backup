@@ -843,7 +843,7 @@ start32_launcher:
 
     ;call carga_tp_dinamica_1024_pte  
 
-    xchg  bx, bx
+    ;xchg  bx, bx
     ; -> Habilito la paginación
     mov   eax, cr0 
     or    eax, X86_CR0_PG

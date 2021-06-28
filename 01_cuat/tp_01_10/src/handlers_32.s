@@ -189,7 +189,7 @@ ISR12_Handler_SS:
 ISR13_Handler_GP:
     xchg    bx,bx
     mov dl,0x0D
-    hlt
+    iretd
 ;-----------------------------------
 ;----------Page Fault (#PF)---------
 ;-----------------------------------
@@ -274,7 +274,7 @@ ISR14_Handler_PF:
     jmp end_handler_PF
 pag_no_presente:
 write_access:
-    xchg  bx, bx
+    ;xchg  bx, bx
     
     ; -> Limpio pantalla.
     push    ebp
@@ -292,8 +292,19 @@ write_access:
     call    escribir_mensaje_VGA
     leave
 
-    xchg  bx, bx
+    ;xchg  bx, bx
 
+
+    ;---------------------------------------------------
+    ; -> -----------Guardo VMA de falla y Dir. Fisica en acumuladores
+    ;----------para poder re-paginar con la paginacion apagada-----------------
+    ;---------------------------------------------------
+    ; ->Guardo en edx la VMA de falla del CR2
+    xor   edx, edx
+    mov   edx, [dir_lineal_page_fault] 
+    ; ->Guardo en ecx la Dir. Fisica dinamica
+    xor   ecx, ecx
+    mov   ecx, [dir_phy_dinamica] 
     ;---------------------------------------------------
     ; -> -----------Apago la paginación-----------------
     ;---------------------------------------------------
@@ -304,6 +315,10 @@ write_access:
     ; -> Debo realizar la paginación para la VMA que falló y 
     ; para la PHY 0x0A000000
     ; -> Cargo el PDE (Page Directory Entry)
+
+    push    edx
+    push    ecx
+
     push    ebp
     mov     ebp, esp
     push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un descriptor con P=0 a lo largo de la estructura de tablas.
@@ -313,12 +328,16 @@ write_access:
     push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
     push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
     push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
-    push    dword[dir_lineal_page_fault]        ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE. 
+    push    edx                                 ; Dir. Lineal(VMA) - Me va a dar la ubicación del PDE. 
     push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
     call    set_dir_page_table_entry
     leave
 
-    ;xchg    bx, bx                               ; BREAK ANTES DE ARRANCAR A PAGINAR DINAMICAMENTE
+
+
+    pop    ecx
+    pop    edx
+
 
     ; -> Cargo la PTE (Page Table Entry)
     ; Ya tengo cargada la PT antes de arrancar la paginación en init32
@@ -333,9 +352,11 @@ write_access:
     push    PAG_D
     push    PAG_PAT
     push    PAG_G_YES
-    push    dword __PAG_DINAMICA_INIT_PHY
-    ;push    dword [dir_phy_dinamica]        ; Esta debe variar +4KB a medida que se van creando paginas.
-    push    dword [dir_lineal_page_fault]   ; Dir. Lineal VMA que trajo el CR2.
+    ;push    dword 0x0A000000           ; ARREGLAR COMENTARIOS. ACOMODARLOS EN ORDEN.
+    ;push    dword 0x2345        ; Esta debe variar +4KB a medida que se van creando paginas.
+    push    ecx
+    push    edx                   ; Offset de 2*4 = 8 (en la pos 0x11008 de la tabla 0)
+    ;push    dword [dir_lineal_page_fault]   ; Dir. Lineal VMA que trajo el CR2.
     push    dword __PAGE_TABLES_PHY         ; PT inicializada antes de activar paginación.
     call    set_page_table_entry 
     leave
@@ -366,7 +387,7 @@ write_access:
     call    escribir_mensaje_VGA
     leave
 
-    xchg    bx, bx  ; BREAK LUEGO DE PAGINAR EL DPT
+    ;xchg    bx, bx  ; BREAK LUEGO DE PAGINAR EL DPT
 
     
 ; -> Analizo valor de la Dir. Fisica.
@@ -380,11 +401,10 @@ write_access:
 
 
     ; -> Sumo 4K para mapear la próx. dir física.
-    mov     ebx, 0x1000
-    ;shl     ebx, 12
-    add     eax, ebx              ; Sumo 4K
-    mov     [dir_phy_dinamica], eax
-    ;xchg    bx, bx                          ; BREAK LUEGO DE PAGINAR.
+    xor     ebx, ebx
+    mov     ebx, [dir_phy_dinamica]
+    add     ebx, 0x1000         ; Sumo 4k a la dir fisica
+    mov     [dir_phy_dinamica], ebx
 
     jmp     end_handler_PF                  ; Finalizo el handler #PF
 
@@ -404,16 +424,21 @@ end_handler_PF:
     mov     ebp, esp
     push    10      ; Columna VGA
     push    2       ; Fila VGA
-    push    page_fault_msg_3
+    push    page_fault_msg_5
     call    escribir_mensaje_VGA
     leave
+
+    ;xchg    bx, bx                          ; BREAK LUEGO DE PAGINAR.
+
+
     ; -> Finalizo la rutina del #PF
-    mov al, 0x20                
-    out 0x20, al                ; ACK al PIC
-    mov edx,0x0E                ; Guardo en edx el valor de la excep. #PF
+    ;mov al, 0x20                
+    ;out 0x20, al                ; ACK al PIC
+    ;mov edx,0x0E                ; Guardo en edx el valor de la excep. #PF
     popad                       ; Tomo valores de registros guardados.
+    pop eax
     sti                         ; Habilito interrupciones.
-    iretd
+    iret
 
 ISR15_Handler_RES:
     xchg    bx,bx

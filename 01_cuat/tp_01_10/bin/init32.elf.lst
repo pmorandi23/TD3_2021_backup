@@ -142,7 +142,7 @@
    113 00000034 E8(00000000)                call    __fast_memcpy_rom
    114 00000039 C9                          leave
    115 0000003A 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
-   116 0000003D 0F85B5050000                jne     .guard
+   116 0000003D 0F85B2050000                jne     .guard
    117                                      ; -> Desempaquetamiento de la ROM (copia del kernel a RAM)
    118 00000043 55                          push    ebp
    119 00000044 89E5                        mov     ebp, esp 
@@ -152,7 +152,7 @@
    123 00000055 E8(00000000)                call    __fast_memcpy
    124 0000005A C9                          leave
    125 0000005B 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
-   126 0000005E 0F8594050000                jne     .guard
+   126 0000005E 0F8591050000                jne     .guard
    127                                      ; -> Desempaquetamiento de la ROM (copia de los handlers Teclado + ISR a RAM)
    128 00000064 55                          push    ebp
    129 00000065 89E5                        mov     ebp, esp 
@@ -162,7 +162,7 @@
    133 00000076 E8(00000000)                call    __fast_memcpy
    134 0000007B C9                          leave
    135 0000007C 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
-   136 0000007F 0F8573050000                jne     .guard
+   136 0000007F 0F8570050000                jne     .guard
    137                                      ; -> Desempaquetamiento de la ROM (copia de datos de ROM a RAM)
    138 00000085 55                          push    ebp
    139 00000086 89E5                        mov     ebp, esp 
@@ -172,7 +172,7 @@
    143 00000097 E8(00000000)                call    __fast_memcpy
    144 0000009C C9                          leave
    145 0000009D 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
-   146 000000A0 0F8552050000                jne     .guard
+   146 000000A0 0F854F050000                jne     .guard
    147                                      ; -> Desempaquetamiento de la ROM (copia de las tablas de sistema (GDT e IDT) a RAM)
    148 000000A6 55                          push    ebp
    149 000000A7 89E5                        mov     ebp, esp 
@@ -182,7 +182,7 @@
    153 000000B8 E8(00000000)                call    __fast_memcpy
    154 000000BD C9                          leave
    155 000000BE 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
-   156 000000C1 0F8531050000                jne     .guard
+   156 000000C1 0F852E050000                jne     .guard
    157                                    ; -> Desempaquetamiento de la ROM (copia del .text de la TAREA_1 a RAM)
    158 000000C7 55                          push    ebp
    159 000000C8 89E5                        mov     ebp, esp 
@@ -192,7 +192,7 @@
    163 000000D9 E8(00000000)                call    __fast_memcpy
    164 000000DE C9                          leave
    165 000000DF 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
-   166 000000E2 0F8510050000                jne     .guard
+   166 000000E2 0F850D050000                jne     .guard
    167                                   ; -> Desempaquetamiento de la ROM (copia del .bss de la TAREA _1 a RAM)
    168 000000E8 55                          push    ebp
    169 000000E9 89E5                        mov     ebp, esp 
@@ -202,7 +202,7 @@
    173 000000FA E8(00000000)                call    __fast_memcpy
    174 000000FF C9                          leave
    175 00000100 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
-   176 00000103 0F85EF040000                jne     .guard
+   176 00000103 0F85EC040000                jne     .guard
    177                                     ; -> Desempaquetamiento de la ROM (copia del .data de la TAREA _1 a RAM)
    178 00000109 55                          push    ebp
    179 0000010A 89E5                        mov     ebp, esp 
@@ -212,7 +212,7 @@
    183 0000011B E8(00000000)                call    __fast_memcpy
    184 00000120 C9                          leave
    185 00000121 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
-   186 00000124 0F85CE040000                jne     .guard
+   186 00000124 0F85CB040000                jne     .guard
    187                                      ; -> Desempaquetamiento de la ROM (copia del .rodata de la TAREA _1 a RAM)
    188 0000012A 55                          push    ebp
    189 0000012B 89E5                        mov     ebp, esp 
@@ -222,7 +222,7 @@
    193 0000013C E8(00000000)                call    __fast_memcpy
    194 00000141 C9                          leave
    195 00000142 83F801                      cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
-   196 00000145 0F85AD040000                jne     .guard
+   196 00000145 0F85AA040000                jne     .guard
    197                                  
    198                                      ;-> Cargo la IDT y la GDT ya copiada en RAM
    199 0000014B 0F0115[00000000]            lgdt [_gdtr_32]
@@ -872,19 +872,19 @@
    843                                  
    844                                      ;call carga_tp_dinamica_1024_pte  
    845                                  
-   846 000005E2 6687DB                      xchg  bx, bx
+   846                                      ;xchg  bx, bx
    847                                      ; -> Habilito la paginación
-   848 000005E5 0F20C0                      mov   eax, cr0 
-   849 000005E8 0D00000080                  or    eax, X86_CR0_PG
-   850 000005ED 0F22C0                      mov   cr0, eax
+   848 000005E2 0F20C0                      mov   eax, cr0 
+   849 000005E5 0D00000080                  or    eax, X86_CR0_PG
+   850 000005EA 0F22C0                      mov   cr0, eax
    851                                  
-   852 000005F0 FB                          sti                     ; Habilitación de las Interrupciones
+   852 000005ED FB                          sti                     ; Habilitación de las Interrupciones
    853                                  
-   854 000005F1 EA[00000000][0000]          jmp CS_SEL_32:kernel32_init ; Salto en memoria a la sección del núcleo
+   854 000005EE EA[00000000][0000]          jmp CS_SEL_32:kernel32_init ; Salto en memoria a la sección del núcleo
    855                                  
    856                                  .guard:
-   857 000005F8 F4                          hlt
-   858 000005F9 EBFD                        jmp .guard
+   857 000005F5 F4                          hlt
+   858 000005F6 EBFD                        jmp .guard
    859                                  
    860                                  
    861                                  

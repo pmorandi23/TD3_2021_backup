@@ -77,5 +77,5 @@ mensajes_error:
     page_fault_msg_2            db "Dir. VMA = 0x",0
     page_fault_msg_3            db "Error Code: ",0
     page_fault_msg_4            db "Paginacion OFF. Se puede paginar con VMA del CR2",0
-    page_fault_msg_5            db "DPT escrito exitosamente con VMA del CR2. Si no existia, se creo una nueva PT.",0
+    page_fault_msg_5            db "Paginacion exitosa.",0
     page_fault_msg_6            db "PTE y PDE (Si no existia, se creo una nueva PT.) escritos exitosamente con VMA del CR2 y +4K de la dir_phy_dinamica.",0

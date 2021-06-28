@@ -203,7 +203,7 @@ void set_dir_page_table_entry (dword dir_PHY_base_dpt, dword dir_VMA, byte _ps, 
 {
     dword dpte = 0;
 
-    dword* dst = (dword*) dir_PHY_base_dpt;
+    dword* dst = (dword*) dir_PHY_base_dpt; // 0x10000 - Base de el DPT - base para el CR3 
     dword entry_dtp , init_pt = 0;
 
     
