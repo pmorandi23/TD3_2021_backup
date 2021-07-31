@@ -1,0 +1,92 @@
+     1                                  SECTION .functions_asm_rom
+     2                                  ;---------------INCLUDES-----------------
+     3                                  %include "inc/functions_asm.h"
+     1                              <1> ;----------------PIC----------------------------
+     2                              <1> %define PORT_A_8042    0x60
+     3                              <1> %define CTRL_PORT_8042 0x64
+     4                              <1> %define KEYB_DIS       0xAD
+     5                              <1> %define KEYB_EN        0xAE
+     6                              <1> %define READ_OUT_8042  0xD0
+     7                              <1> %define WRITE_OUT_8042 0xD1
+     8                              <1> 
+     4                                  
+     5                                  ;---------------GLOBAL-------------------
+     6                                  GLOBAL handler_teclado
+     7                                  GLOBAL init_pic
+     8                                  GLOBAL init_timer
+     9                                  GLOBAL init_teclado
+    10                                  
+    11                                  ;--------------INIT DE PICS E INTERRUPCIONES DEL 8042----------------
+    12                                  ;	Funcion: 	Inicializa el pic en cascada y le asigna el rango de tipo de interrupcion de 0x20 a 0x27 
+    13                                  ;				y de 0x28 a 0x2F respectivamente.
+    14                                  ;				PIC: Programable Interrupt Controller
+    15                                  ;------------------------------------------------------------------------------------------------------------
+    16                                  init_pic:
+    17                                  ;// Inicialización PIC N°1
+    18                                    ;//ICW1: Initialization Control Word
+    19 00000000 B011                      mov     al,0x11   ;//Establece IRQs activas x flanco, Modo cascada, e ICW4
+    20 00000002 E620                      out     0x20,al
+    21                                    ;//ICW2:
+    22 00000004 B020                      mov     al,0x20   ;//Establece para el PIC#1 el valor base del Tipo de INT que recibi� en el registro BH = 0x20
+    23 00000006 E621                      out     0x21,al
+    24                                    ;//ICW3:
+    25 00000008 B004                      mov     al,0x04   ;//Establece PIC#1 como Master, e indica que un PIC Slave cuya Interrupci�n ingresa por IRQ2
+    26 0000000A E621                      out     0x21,al
+    27                                    ;//ICW4
+    28 0000000C B001                      mov     al,0x01   ;// Establece al PIC en Modo 8086
+    29 0000000E E621                      out     0x21,al
+    30                                  ;//Antes de inicializar el PIC N�2, deshabilitamos las Interrupciones del PIC1
+    31 00000010 B0FD                      mov     al,0xFD   ;0x11111101
+    32 00000012 E621                      out     0x21,al
+    33                                  ;//Ahora inicializamos el PIC N�2
+    34                                    ;//ICW1
+    35 00000014 B011                      mov     al,0x11   ;//Establece IRQs activas x flanco, Modo cascada, e ICW4
+    36 00000016 E6A0                      out     0xA0,al
+    37                                    ;//ICW2
+    38 00000018 B028                      mov     al,0x28    ;//Establece para el PIC#2 el valor base del Tipo de INT que recibi� en el registro BL = 0x28
+    39 0000001A E6A1                      out     0xA1,al
+    40                                    ;//ICW3
+    41 0000001C B002                      mov     al,0x02   ;//Establece al PIC#2 como Slave, y le indca que ingresa su Interrupci�n al Master por IRQ2
+    42 0000001E E6A1                      out     0xA1,al
+    43                                    ;//ICW4
+    44 00000020 B001                      mov     al,0x01   ;// Establece al PIC en Modo 8086
+    45 00000022 E6A1                      out     0xA1,al
+    46                                  ;Enmascaramos el resto de las Interrupciones (las del PIC#2)
+    47 00000024 B0FF                      mov     al,0xFF
+    48 00000026 E6A1                      out     0xA1,al
+    49                                  ; Habilitamos la interrupcion del timer y teclado.
+    50 00000028 B0FC                      mov     al,0xFC   ;0x11111100
+    51 0000002A E621                      out     0x21,al
+    52 0000002C C3                        ret
+    53                                  
+    54                                  ; Inicializar timer para que interrumpa cada 10 milisegundos.
+    55                                  init_timer:
+    56 0000002D B036                      mov al,0x36         ; Canal cero. 
+    57 0000002F E643                      out 0x43,al         ; Le escribo al PIT
+    58 00000031 66B89C2E                  mov ax,11932        ; Dividir 11932 Hz . Tick cada 10ms (99,998Hz)
+    59 00000035 E640                      out 0x40, al        ; Programar byte bajo del timer de 16 bits. 
+    60 00000037 88E0                      mov al, ah          
+    61 00000039 E640                      out 0x40,al         ; Programar byte alto del timer de 16 bits.         
+    62 0000003B C3                        ret
+    63                                  
+    64                                  init_teclado:
+    65                                  ; Inicializar controlador de teclado.
+    66 0000003C B0FF                      MOV al, 0xFF         ;Enviar comando de reset al controlador
+    67 0000003E E664                      OUT 0x64, al         ;de teclado
+    68 00000040 B900010000                MOV ecx, 256         ;Esperar que rearranque el controlador.
+    69 00000045 E2FE                      LOOP $
+    70 00000047 B900000100                MOV ecx, 0x10000
+    71                                  ciclo1:
+    72 0000004C E460                      IN al, 0x60          ;Esperar que termine el reset del controlador.
+    73 0000004E A801                      TEST al, 1
+    74 00000050 E1FA                      LOOPZ ciclo1
+    75 00000052 B0F4                      MOV al, 0xF4         ;Habilitar el teclado.
+    76 00000054 E664                      OUT 0x64, al
+    77 00000056 B900000100                MOV ecx, 0x10000
+    78                                  ciclo2:
+    79 0000005B E460                      IN al, 0x60          ;Esperar que termine el comando.
+    80 0000005D A801                      TEST al, 1
+    81 0000005F E1FA                      LOOPZ  ciclo2
+    82 00000061 E460                      IN al, 0x60          ;Vaciar el buffer de teclado.
+    83 00000063 C3                        ret
+    84                                  
