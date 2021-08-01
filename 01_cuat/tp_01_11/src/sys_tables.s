@@ -40,6 +40,26 @@ H_ISRXX_Handler     EQU 0x0010
 GDT_32:
 NULL_SEL    equ $-GDT_32       ;Indice de GDT = 0x00
     dq 0x0
+
+CS_SEL_16       equ $-GDT_32       ;0x08
+    dw 0xFFFF       ;Limit 15-0
+    dw 0x0000       ;Base 15-0
+    db 0xFF         ;Base 23-16
+    db 10011001b    ;Atributos:
+                    ;P
+                    ;DPL
+                    ;S
+                    ;D/C
+                    ;ED/C
+                    ;R/w
+                    ;A
+    db 01000000b    ;Limit
+                    ;G
+                    ;D/B
+                    ;L
+                    ;AVL
+    db 0xFF         ;Base 31-24
+
 CS_SEL_00   equ $-GDT_32       ;Indice de GDT = 0x10
     dw 0xFFFF       ;Limit 15-0
     dw 0x0000       ;Base 15-0
@@ -120,7 +140,7 @@ DS_SEL_11      equ $-GDT_32       ;Indice de GDT = 0x20
 
 TSS_SEL equ $-GDT_32          ;Base 0x00001000 Limite 0x00000067
     dw  0x0067                ;Limite del segmento(bits 15 -0)
-    dw  0x0000                ;Base del segmento(bits 15-0)
+    dw  0x1000                ;Base del segmento(bits 15-0)
     db  0                     ;Base del segmento(bits 23-16)
     db  10001001b             ; Atributos
                                   ; P=1 Presente en el segmento
@@ -129,7 +149,7 @@ TSS_SEL equ $-GDT_32          ;Base 0x00001000 Limite 0x00000067
                                   ; TIPO = 1 0 B 1 siendo B = Busy y queda en 0 (Avaibable)
     db  00000000b             ; G = 0, D/B = 0, L = 0 , AVL = 0 
                               ; Límite del segmento (bits 16 - 19)
-    db  0x40                  ; Base del segmento(bits 31-24)    
+    db  0x00                  ; Base del segmento(bits 31-24)    
 
 
 GDT_LENGTH EQU $-GDT_32

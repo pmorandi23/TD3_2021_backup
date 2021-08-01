@@ -12,27 +12,36 @@ byte variable_global_inicializada = 0; //.data
 
 /* Tarea cada 500ms que muestra el promedio en pantalla de digitos almacenados en memoria. */
 __attribute__(( section(".functions_tarea_1")))
-void ejecutar_tarea_1 (tabla_t* tabla_digitos, qword* promedio_vma)
+void ejecutar_tarea_1 ()
 {
-    qword promedio = tabla_digitos->promedio_dig;
-    
-    /* Si tengo digitos, trabajo. Sino no. */
-    if (tabla_digitos->indice_tabla > 0)
-    {
-        /* Sumo todos los dígitos que hay en la tabla de 64b */
-        sumatoria_digitos_64(tabla_digitos);
-        /* Promedio de todos los dígitos de 64b. */
-        promedio_digitos_64(tabla_digitos, (qword*)promedio_vma);
-        /* Titulo del promedio */
-        escribir_mensaje_VGA("Promedio de digitos de 64 bits:", 0, 49, ASCII_TRUE);
-        /* Escribo en pantalla caracter por caracter en el borde superior derecho. */
-        mostrar_promedio64_VGA(promedio, 1, 79);
-        /* Analizo si el promedio es una direccion valida menor a 512MB */
-        lectura_promedio64(promedio);
+    //ejecutar_tarea_1 (tabla_t* tabla_digitos, qword* promedio_vma)
 
+    //qword promedio = tabla_digitos->promedio_dig;
+    
+    /* 
+    
+     */
+    // if (tabla_digitos->indice_tabla > 0)
+    // {
+    //     /* Sumo todos los dígitos que hay en la tabla de 64b */
+    //     sumatoria_digitos_64(tabla_digitos);
+    //     /* Promedio de todos los dígitos de 64b. */
+    //     promedio_digitos_64(tabla_digitos, (qword*)promedio_vma);
+    //     /* Titulo del promedio */
+    //     escribir_mensaje_VGA("Promedio de digitos de 64 bits:", 0, 49, ASCII_TRUE);
+    //     /* Escribo en pantalla caracter por caracter en el borde superior derecho. */
+    //     mostrar_promedio64_VGA(promedio, 1, 79);
+    //     /* Analizo si el promedio es una direccion valida menor a 512MB */
+    //     lectura_promedio64(promedio);
+
+    // }
+
+    asm("xchg %bx,%bx");
+
+     while (1)
+    {
+        
     }
-     
-    return;
 
 }
 /* Función que lee el promedio64, analiza si es una direccion valida y pagina a una valida si no lo es. */

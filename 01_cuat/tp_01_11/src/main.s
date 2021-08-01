@@ -79,9 +79,9 @@ variables_globales:
 
     dir_phy_dinamica            dd 0x0A000000       ; Dir. Phy. dinámica para salvar el #PF
 
-    paginas_creadas             resd 1              ; Cantidad de páginas creadas en el #PF .
+    paginas_creadas             resd  1              ; Cantidad de páginas creadas en el #PF .
 
-    TSS_aux                     resd  1               ; TSS auxiliar para guardar o leer contextos en memoria
+    TSS_aux                     resd  1            ; TSS auxiliar para guardar o leer contextos en memoria
 
     CR3_aux                     resd  1               ; CR3 auxiliar para guardar o leer contextos de memoria
 

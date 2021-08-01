@@ -1,4 +1,7 @@
 SECTION .functions_asm
+
+%include "inc/processor-flags.h" 
+
 ;---------------EXTERN-------------------
 EXTERN  DS_SEL_00
 EXTERN  CS_SEL_00
@@ -27,8 +30,13 @@ init_tss:
 
     ; -> Paso parámetros del stack a los registros.
 
+    ;xchg bx, bx
+
+    ; Flag de TSS de kernel
+    mov edi, [ esp + 24 ] 
     ; Base de la TSS
-    mov eax, [ esp + 20 ]               
+    mov eax, [ esp + 20 ] 
+    ;mov [ TSS_aux ], eax              
     ; CR3
     mov ebx, [ esp + 16 ]
     ; Stack user
@@ -51,9 +59,9 @@ init_tss:
     ;SS1 - Stack Segment de Nivel 1
     mov [eax + 16], dword(0) 
     ;ESP2 - Stack Pointer de Nivel 2
-    mov [eax + 20], dword(0) 
+    mov [eax + 20], dword(ecx)            ; Stack de nivel 3
     ;SS2 - Stack Segment de Nivel 2
-    mov [eax + 24], dword(0) 
+    mov [eax + 24], dword(DS_SEL_11 + 3)  ; Selector de datos de nivel 3
     ;CR3 - Control Register 3
     mov [eax + 28], (ebx)                 ; CR3 de la tarea
     ;EIP - Instruction Pointer
@@ -76,22 +84,47 @@ init_tss:
     mov [eax + 64], dword(0) 
     ;EDI
     mov [eax + 68], dword(0) 
+
+    cmp edi, flag_TSS_sup
+    je tss_nivel_0
+
+tss_nivel_3:
     ;ES 
-    mov [eax + 72], dword(DS_SEL_11)    ; Selector de nivel 3
+    mov [eax + 72], dword(DS_SEL_11 + 3)    ; Selector de nivel 3 con RPL = 3
     ;CS 
-    mov [eax + 76], dword(CS_SEL_11)    ; Selector de nivel 3
+    mov [eax + 76], dword(CS_SEL_11 + 3)    ; Selector de nivel 3 con RPL = 3
     ;SS 
-    mov [eax + 80], dword(DS_SEL_11)    ; Selector de nivel 3
+    mov [eax + 80], dword(DS_SEL_11 + 3)    ; Selector de nivel 3 con RPL = 3
     ;DS 
-    mov [eax + 84], dword(DS_SEL_11)    ; Selector de nivel 3
+    mov [eax + 84], dword(DS_SEL_11 + 3)    ; Selector de nivel 3 con RPL = 3
     ;FS 
-    mov [eax + 88], dword(DS_SEL_11)    ; Selector de nivel 3
+    mov [eax + 88], dword(DS_SEL_11 + 3)    ; Selector de nivel 3 con RPL = 3
     ;GS 
-    mov [eax + 92], dword(DS_SEL_11)    ; Selector de nivel 3
+    mov [eax + 92], dword(DS_SEL_11 + 3)    ; Selector de nivel 3 con RPL = 3
+
+    jmp fin_init_tss
+tss_nivel_0:
+    ;ES 
+    mov [eax + 72], dword(DS_SEL_00)    ; Selector de nivel 3
+    ;CS 
+    mov [eax + 76], dword(CS_SEL_00)    ; Selector de nivel 3
+    ;SS 
+    mov [eax + 80], dword(DS_SEL_00)    ; Selector de nivel 3
+    ;DS 
+    mov [eax + 84], dword(DS_SEL_00)    ; Selector de nivel 3
+    ;FS 
+    mov [eax + 88], dword(DS_SEL_00)    ; Selector de nivel 3
+    ;GS 
+    mov [eax + 92], dword(DS_SEL_00)    ; Selector de nivel 3
+    
+
+fin_init_tss:
+
     ;LDTR
     mov [eax + 96], dword(0) 
     ;Bitmap E/S
     mov [eax + 100], dword(0)
+
     ret
     
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -101,64 +134,51 @@ init_tss:
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 leer_contexto_siguiente_asm:
 
-    xchg bx, bx
+    ;xchg bx, bx
   
     ; CR3 de la próxima tarea
     mov eax, [CR3_aux]
     mov cr3, eax
 
     ;Cargo los registros de segmento
-    mov eax, [TSS_aux + 0x48]       ;Recupero es
-    mov es, eax 
-    mov eax, [TSS_aux + 0x54]       ;Recupero ds
-    mov ds, eax
-    mov eax, [TSS_aux + 0x58]       ;Recupero fs
-    mov fs, eax
-    mov eax, [TSS_aux + 0x5C]       ;Recupero gs
-    mov gs, eax
+    mov eax, [TSS_aux]         
+    mov es, [eax + 0x48]            ;Recupero es     
+    mov ds, [eax + 0x54]            ;Recupero ds   
+    mov fs, [eax + 0x58]            ;Recupero fs   
+    mov gs, [eax + 0x5C]            ;Recupero gs    
     
-    ;mov esp, [TSS_aux + 0x38]
-    mov ebp, [TSS_aux + 0x3C]   
+    ; Stack de nivel 0 de la tarea
 
-    ;seteo el Stack
-    mov eax, [TSS_aux + 0x04]      ;Recupero ESP0
-
-    ; REVISAR POR QUE FALLA EL STACK !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    
-
-    mov [Stack_aux], eax
-    mov eax, [TSS_aux + 0x08]      ;Recupero SS0
-    mov [Stack_aux + 4], eax
+    mov ebx, [eax + 0x04]           ;Recupero ESP0
+    mov [Stack_aux], ebx
+    mov ebx, [eax + 0x08]           ;Recupero SS0
+    mov [Stack_aux + 4], ebx
 
     ;LSS --> load stack segment
     lss esp, [Stack_aux]
 
-    ;cargo el stack 
-    mov eax, [TSS_aux + 0x18]      ;Recupero SS2
-    add eax, 3                     ;cargo el RPL al selector
-    push eax
-    mov eax, [TSS_aux + 0x14]      ;Recupero ESP2
-    push eax
-    mov eax, [TSS_aux + 0x24]      ;Recupero EFLAGS
-    push eax
-    mov eax, [TSS_aux + 0x4C]      ;Recupero CS
-    push eax
-    mov eax, [TSS_aux + 0x20]      ;Recupero EIP
-    push eax
+    ; Cargo Stack de nivel 3 de la tarea
+    mov ebx, [eax + 0x18]      ;Recupero SS2
+    push ebx
+    mov ebx, [eax + 0x14]      ;Recupero ESP2
+    push ebx
+    mov ebx, [eax + 0x24]      ;Recupero EFLAGS
+    push ebx
+    mov ebx, [eax + 0x4C]      ;Recupero CS
+    push ebx
+    mov ebx, [eax + 0x20]      ;Recupero EIP
+    push ebx
 
     ;Registros de Proposito general
-    mov eax, [TSS_aux + 0x28]    
-    mov ecx, [TSS_aux + 0x2C]
-    mov edx, [TSS_aux + 0x30]
-    mov ebx, [TSS_aux + 0x34]       
-    mov esi, [TSS_aux + 0x40]
-    mov edi, [TSS_aux + 0x44]
-
-    ; REVISAR ACA
-    xchg bx, bx
+    mov ecx, [eax + 0x2C]
+    mov edx, [eax + 0x30]
+    mov ebx, [eax + 0x34]       
+    mov esi, [eax + 0x40]
+    mov edi, [eax + 0x44]
+    mov eax, [eax + 0x28]     ; Debe estar último
 
     ; Cargo la TSS
-    push TSS_aux
+    push dword [TSS_aux]
     call cargar_TSS_CPU
     add esp,4
 
@@ -174,7 +194,6 @@ guardar_contexto_asm:
     ;xchg bx, bx
     ; Recupero de la pila los registros generales
     popad
-
     ;Registros Generales
     mov [TSS_aux + 40],   eax      ;Guardo EAX
     mov [TSS_aux + 44],   ecx      ;Guardo ECX
@@ -194,15 +213,12 @@ guardar_contexto_asm:
     mov eax, cr3                  ;Guardo CR3
     mov [TSS_aux + 28],   eax 
     ;Registros del Stack
-    ; REVISAR CUANTO AGREGARLE AL STACK
 
     cmp byte[primer_context_save], 1
     je no_guardo_stack_user
 
-    xchg bx, bx
-
-    add esp, 12                         ;sumo 12 porque tengo guardados el EIP, CS y EFLAGS del SYSCALL
-    pop eax                             ;al hacer el pop vacio la pila para que no cresca por siempre
+    ;xchg bx, bx
+    pop eax                             
     ;mov eax, [esp + 12]                ;Guardo EIP
     mov [TSS_aux + 32],   eax  
     pop eax
@@ -212,8 +228,6 @@ guardar_contexto_asm:
     mov [TSS_aux + 20],   eax
     pop eax                             ;Guardo SS2      
     mov [TSS_aux + 24],   eax
-
-    ; REVISAR QUE HACE FALTA AGREGAR. HAY QUE VER COMO LLEGA.
 
     jmp fin_guardar_contexto
 
@@ -237,9 +251,9 @@ fin_guardar_contexto:
 cargar_TSS_CPU:
 
     mov ebx, [esp + 4]
-
     ;backlink
     mov eax, [ebx]
+
     mov [__TSS_BASICA], eax 
     ;ESP0
     mov eax, [ebx+0x04]

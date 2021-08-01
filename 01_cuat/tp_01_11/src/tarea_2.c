@@ -16,5 +16,11 @@ byte variable_global_inicializada_tarea2 = 0; //.data dummy
 __attribute__(( section(".functions_tarea_2")))
 void ejecutar_tarea_2 ()
 {
-    
+    asm("xchg %bx,%bx");
+
+    while (1)
+    {
+        
+    }
+    //ejecutar_tarea_2();
 }

@@ -14,24 +14,26 @@
      9                              <1> %define X86_CR0_NW      0x20000000 ; /* Not Write-through*/
     10                              <1> %define X86_CR0_CD      0x40000000 ; /* Cache Disable*/
     11                              <1> %define X86_CR0_PG      0x80000000 ; /* PaGine*/
-    12                              <1> 
-    13                              <1> ;------------DTP y TP(Descriptor de Tablas de Páginas y Tabla de Páginas) flags--------------------------
-    14                              <1> PAG_PCD_YES  equ 1       ; cachable                          
-    15                              <1> PAG_PCD_NO   equ 0       ; no cachable
-    16                              <1> PAG_PWT_YES  equ 1       ; 1 se escribe en cache y ram       
-    17                              <1> PAG_PWT_NO   equ 0       ; 0 
-    18                              <1> PAG_P_YES    equ 1       ; 1 presente
-    19                              <1> PAG_P_NO     equ 0       ; 0 no presente
-    20                              <1> PAG_RW_W     equ 1       ; 1 lectura y escritura
-    21                              <1> PAG_RW_R     equ 0       ; 0 solo lectura
-    22                              <1> PAG_US_SUP   equ 0       ; 0 supervisor
-    23                              <1> PAG_US_US    equ 1       ; 1 usuario  
-    24                              <1> PAG_D        equ 0       ; modificacion en la pagina
-    25                              <1> PAG_PAT      equ 0       ; PAT                   
-    26                              <1> PAG_G_YES    equ 0       ; Global                 
-    27                              <1> PAG_A        equ 0       ; accedida
-    28                              <1> PAG_PS_4K    equ 0       ; tamaño de pagina de 4KB
-    29                              <1> 
+    12                              <1> %define flag_TSS_sup    1
+    13                              <1> %define flag_TSS_us     0
+    14                              <1> 
+    15                              <1> ;------------DTP y TP(Descriptor de Tablas de Páginas y Tabla de Páginas) flags--------------------------
+    16                              <1> PAG_PCD_YES  equ 1       ; cachable                          
+    17                              <1> PAG_PCD_NO   equ 0       ; no cachable
+    18                              <1> PAG_PWT_YES  equ 1       ; 1 se escribe en cache y ram       
+    19                              <1> PAG_PWT_NO   equ 0       ; 0 
+    20                              <1> PAG_P_YES    equ 1       ; 1 presente
+    21                              <1> PAG_P_NO     equ 0       ; 0 no presente
+    22                              <1> PAG_RW_W     equ 1       ; 1 lectura y escritura
+    23                              <1> PAG_RW_R     equ 0       ; 0 solo lectura
+    24                              <1> PAG_US_SUP   equ 0       ; 0 supervisor
+    25                              <1> PAG_US_US    equ 1       ; 1 usuario  
+    26                              <1> PAG_D        equ 0       ; modificacion en la pagina
+    27                              <1> PAG_PAT      equ 0       ; PAT                   
+    28                              <1> PAG_G_YES    equ 0       ; Global                 
+    29                              <1> PAG_A        equ 0       ; accedida
+    30                              <1> PAG_PS_4K    equ 0       ; tamaño de pagina de 4KB
+    31                              <1> 
      6                                  
      7                                  GLOBAL return_init_screen
      8                                  GLOBAL start16

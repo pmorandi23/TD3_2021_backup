@@ -173,7 +173,7 @@ ENTRY (reset)
     __STACK_KERNEL_TAREA2_VMA       = 0x1FFF5000;               
     __STACK_KERNEL_TAREA2_END_VMA   = 0x1FFF5FFF;
 
-    __STACK_KERNEL_TAERA3_VMA       = 0x1FFF6000;               
+    __STACK_KERNEL_TAREA3_VMA       = 0x1FFF6000;               
     __STACK_KERNEL_TAREA3_END_VMA   = 0x1FFF6FFF;
 
     __STACK_KERNEL_TAREA4_VMA       = 0x1FFF7000;               
@@ -193,11 +193,11 @@ ENTRY (reset)
     __TAREA4_STACK_END_VMA          = 0x00792FFF;
 
     /* ----------------TSS---------------- */
-    __TSS_BASICA                    = 0x40000000;           /* Para el CPU */
-    __TSS1_VMA                      = 0x41000000;
-    __TSS2_VMA                      = 0x42000000;
-    __TSS3_VMA                      = 0x43000000;
-    __TSS4_VMA                      = 0x44000000;
+    __TSS_BASICA                    = 0x00001000;           /* Para el CPU */
+    __TSS1_VMA                      = 0x00001100;
+    __TSS2_VMA                      = 0x00001200;
+    __TSS3_VMA                      = 0x00001300;
+    __TSS4_VMA                      = 0x00001400;
     /*-----------------ROM----------------*/
     __INIT_ROM_VMA                  = 0xFFFF0000;      
     __RESET_VMA                     = 0xFFFFFFF0;

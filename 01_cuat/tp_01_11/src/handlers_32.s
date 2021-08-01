@@ -105,7 +105,7 @@ IRQ00_Handler:
     
     push    ebp
     mov     ebp, esp 
-    push contador_timer                         ; Contador del Timer actual              
+    ;push contador_timer                         ; Contador del Timer actual              
     ;push __DIGITS_TABLE_VMA                    ; Dir. de tabla de dígitos
     ;push resultado_promedio                    ; Resultado del prom. cada 500ms
     call scheduler_c                            ; Cada 10 ms el tick
@@ -119,10 +119,8 @@ IRQ00_Handler:
     mov     al, byte [tarea_RUNNING]
     mov     bl, byte [tarea_READY]
     cmp     al, bl
-    je      end_handler_timer
+    je      pop_registros
 
-
-    ; xchg    bx, bx                              ; Breakpoint
 
     ; Determino base de la TSS donde se guardará el contexto de ejecución actual
     push    ebp
@@ -131,13 +129,9 @@ IRQ00_Handler:
     call    determinar_TSS_a_guardar
     leave
 
-    ;xchg    bx, bx                              ; Breakpoint
-
     ; Guardo contexto de ejecución del programa que estaba corriendo antes de interrumpir el Timer
     jmp guardar_contexto_asm
 return_guardar_contexto:
-
-    ;xchg    bx, bx                              ; Breakpoint
 
     ; Determino base de la TSS del contexto de ejec. a leer de memoria para próxima tarea a ejecutarse
     push    ebp
@@ -146,24 +140,25 @@ return_guardar_contexto:
     call    determinar_TSS_a_leer
     leave
 
-    ;xchg bx, bx
-
      ; Leo contexto de ejecución para la próxima tarea y se lo asigno a la TSS del CPU.
     jmp leer_contexto_siguiente_asm
 
 return_leer_contexto:
 
-    xchg bx, bx
+    ;xchg bx, bx
 
     ; La tarea está en condiciones de pasar de READY a RUNNING
     xor eax, eax
     mov al, byte [tarea_READY]
     mov byte [tarea_RUNNING], al
+    jmp end_handler_timer
+
+pop_registros:
+    popad                                       ; Recupero registros
 
 end_handler_timer:
     mov al, 0x20                                ; ACK de la IRQ para el PIC 
     out 0x20, al
-    popad                                       ; Recupero registros
     iret                                        ; Retorno de la IRQ
 
 ;----------HANDLER IRQ TECLADO-----------------

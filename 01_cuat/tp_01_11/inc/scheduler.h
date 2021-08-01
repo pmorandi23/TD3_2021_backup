@@ -20,11 +20,11 @@ extern long unsigned __CR3_TAREA_2_PHY;
 extern long unsigned __CR3_TAREA_3_PHY;
 extern long unsigned __CR3_TAREA_4_PHY;
 //-----------------EXTERN VARIABLES-------------------
-extern dword* TSS_aux;
-extern dword* CR3_aux;
+extern dword TSS_aux;
+extern dword CR3_aux;
 
 //------------PROTOTIPOS DE FUNCION-------------
-void scheduler_c (dword* );
+void scheduler_c (void );
 void determinar_TSS_a_leer(byte*);
 void determinar_TSS_a_guardar(byte*);
 

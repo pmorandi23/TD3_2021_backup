@@ -84,10 +84,10 @@
     79                                  
     80 00000024 0000000A                    dir_phy_dinamica            dd 0x0A000000       ; Dir. Phy. dinámica para salvar el #PF
     81                                  
-    82 00000028 <res 00000004>              paginas_creadas             resd 1              ; Cantidad de páginas creadas en el #PF .
+    82 00000028 <res 00000004>              paginas_creadas             resd  1              ; Cantidad de páginas creadas en el #PF .
     82          ******************       warning: uninitialized space declared in non-BSS section `.data_kernel': zeroing
     83                                  
-    84 0000002C <res 00000004>              TSS_aux                     resd  1               ; TSS auxiliar para guardar o leer contextos en memoria
+    84 0000002C <res 00000004>              TSS_aux                     resd  1            ; TSS auxiliar para guardar o leer contextos en memoria
     84          ******************       warning: uninitialized space declared in non-BSS section `.data_kernel': zeroing
     85                                  
     86 00000030 <res 00000004>              CR3_aux                     resd  1               ; CR3 auxiliar para guardar o leer contextos de memoria

@@ -9,6 +9,8 @@
 %define X86_CR0_NW      0x20000000 ; /* Not Write-through*/
 %define X86_CR0_CD      0x40000000 ; /* Cache Disable*/
 %define X86_CR0_PG      0x80000000 ; /* PaGine*/
+%define flag_TSS_sup    1
+%define flag_TSS_us     0
 
 ;------------DTP y TP(Descriptor de Tablas de Páginas y Tabla de Páginas) flags--------------------------
 PAG_PCD_YES  equ 1       ; cachable                          
