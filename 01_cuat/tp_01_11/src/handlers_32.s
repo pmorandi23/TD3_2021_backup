@@ -28,6 +28,7 @@ EXTERN guardar_contexto_asm
 EXTERN determinar_TSS_a_leer
 EXTERN determinar_TSS_a_guardar
 EXTERN leer_contexto_siguiente_asm
+EXTERN mostrar_promedio64_VGA
  
 ;---------------EXTERN VARIABLES GLOBALES-----------
 EXTERN memoria_buffer_reservada
@@ -70,6 +71,10 @@ GLOBAL L_IRQ01_Handler
 GLOBAL L_ISR128_Handler_SC
 GLOBAL return_guardar_contexto
 GLOBAL return_leer_contexto
+GLOBAL SYS_H
+GLOBAL SYS_P
+GLOBAL SYS_P_VGA
+GLOBAL SYS_R
 ;----------------EQU--------------------
 VMA_ISR_TECLADO     EQU 0x00100000
 ; Parte baja de las direcciones de los Handlers 
@@ -94,7 +99,10 @@ L_ISR19_Handler_XM  EQU ISR19_Handler_XM    - VMA_ISR_TECLADO
 L_IRQ00_Handler     EQU IRQ00_Handler       - VMA_ISR_TECLADO
 L_IRQ01_Handler     EQU IRQ01_Handler       - VMA_ISR_TECLADO
 L_ISR128_Handler_SC EQU ISR128_Handler_SC   - VMA_ISR_TECLADO
-
+SYS_H               EQU     0
+SYS_R               EQU     1
+SYS_P               EQU     2
+SYS_P_VGA           EQU     3
 ;----------------SECTION-----------------------
 SECTION .teclado_and_ISR
 ;------------ HANDLER IRQ TIMER---------------------
@@ -110,8 +118,6 @@ IRQ00_Handler:
     ;push resultado_promedio                    ; Resultado del prom. cada 500ms
     call scheduler_c                            ; Cada 10 ms el tick
     leave
-
-    ;xchg    bx, bx                              ; Breakpoint
 
     ; Si la tarea en ejecución es igual a la próxima tarea, no hago nada.
     xor     eax, eax
@@ -144,9 +150,6 @@ return_guardar_contexto:
     jmp leer_contexto_siguiente_asm
 
 return_leer_contexto:
-
-    ;xchg bx, bx
-
     ; La tarea está en condiciones de pasar de READY a RUNNING
     xor eax, eax
     mov al, byte [tarea_READY]
@@ -178,7 +181,9 @@ IRQ01_Handler:
     add     esp, 8
 
 end_handler_teclado:
+
     ;xchg    bx, bx                              ; Breakpoint
+    
     mov     al, 0x20                             ; ACK de la IRQ para el PIC 
     out     0x20, al
     popad                                        ; Recupero registros
@@ -489,18 +494,127 @@ ISR19_Handler_XM:
 ISR128_Handler_SC:
 
     ; -> Analizo que sys call fue requerida por la tarea de nivel usuario
+    sti
 
-    ;cmp eax, SYS_R
-    ;je sys_read
-;
-    ;cmp eax, SYS_P
-    ;je sys_print
-;
-    ;cmp eax, SYS_P_VGA
-    ;je sys_print_VGA
-;
-    ;cmp eax, SYS_H
-    ;je sys_hlt
+    cmp eax, SYS_R
+    je sys_read
 
+    cmp eax, SYS_P
+    je sys_print
+
+    cmp eax, SYS_P_VGA
+    je sys_print_VGA
+
+    cmp eax, SYS_H
+    je sys_hlt
+
+sys_read:
+
+    cmp ebx, 1 
+    je read_byte
+
+    cmp ebx, 2 
+    je read_word
+
+    cmp ebx, 3 
+    je read_dword
+
+    cmp ebx, 4 
+    je read_qword
+
+;8bits
+read_byte:
+    mov al, [esi]
+    jmp SYS_CALL_FIN
+
+;16bits
+read_word:
+    mov ax, [esi]
+    jmp SYS_CALL_FIN
+
+;32bits
+read_dword:
+    mov eax, [esi]
+    jmp SYS_CALL_FIN
+
+;64bits
+read_qword:
+    mov dword eax, [esi]
+    mov dword edx, [esi + 4]            ;parte alta 
+    jmp SYS_CALL_FIN
+
+sys_print:
+
+    cmp ebx, 1 
+    je print_byte
+
+    cmp ebx, 2 
+    je print_word
+
+    cmp ebx, 3 
+    je print_dword
+
+    cmp ebx, 4 
+    je print_qword
+
+;8bits
+print_byte:
+    mov byte [edi], cl
+    jmp SYS_CALL_FIN
+
+;16bits
+print_word:
+    mov word [edi], cx
+    jmp SYS_CALL_FIN
+
+;32bits
+print_dword:
+    mov dword [edi], ecx
+    jmp SYS_CALL_FIN
+
+;64bits
+print_qword:
+    mov dword [edi], ecx
+    mov dword [edi + 4], edx            ;parte alta 
+    jmp SYS_CALL_FIN
+
+sys_print_VGA:
+
+    cmp ebx, 1
+    je print_VGA_byte
+
+    cmp ebx, 2
+    je print_VGA_word
+
+    cmp ebx, 3
+    je print_VGA_dword
+
+    cmp ebx, 4
+    je print_VGA_qword
+
+print_VGA_byte:
+
+print_VGA_word:
+
+print_VGA_dword:
+
+print_VGA_qword:
+    ;xchg bx, bx
+
+    push    ebp
+    mov     ebp, esp
+    push    ecx                    ; Columna VGA
+    push    edx                    ; Fila VGA
+    push    edi                    ; Numero de 64 bits
+    call    mostrar_promedio64_VGA
+    leave
+    jmp SYS_CALL_FIN
+
+sys_hlt:
+
+    hlt
+    jmp sys_hlt
+;    add esp, 12
+SYS_CALL_FIN:
 
     iret            ; Vuelvo a la tarea de usuario

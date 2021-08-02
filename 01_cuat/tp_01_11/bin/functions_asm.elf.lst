@@ -171,216 +171,194 @@
    140 000000E7 A1[00000000]                mov eax, [CR3_aux]
    141 000000EC 0F22D8                      mov cr3, eax
    142                                  
-   143                                  
-   144                                      ;mov eax, [TSS_aux]
-   145                                      ;mov es, [eax + 48]
-   146                                  
-   147                                  
-   148                                      ;Cargo los registros de segmento
-   149 000000EF A1[00000000]                mov eax, [TSS_aux]         
-   150 000000F4 8E4048                      mov es, [eax + 0x48]            ;Recupero es     
-   151 000000F7 8E5854                      mov ds, [eax + 0x54]            ;Recupero ds   
-   152 000000FA 8E6058                      mov fs, [eax + 0x58]            ;Recupero fs   
-   153 000000FD 8E685C                      mov gs, [eax + 0x5C]            ;Recupero gs    
-   154                                      
-   155                                      ; Stack de nivel 0 de la tarea
+   143                                      ;Cargo los registros de segmento
+   144 000000EF A1[00000000]                mov eax, [TSS_aux]         
+   145 000000F4 8E4048                      mov es, [eax + 0x48]            ;Recupero es     
+   146 000000F7 8E5854                      mov ds, [eax + 0x54]            ;Recupero ds   
+   147 000000FA 8E6058                      mov fs, [eax + 0x58]            ;Recupero fs   
+   148 000000FD 8E685C                      mov gs, [eax + 0x5C]            ;Recupero gs    
+   149                                      
+   150                                      ; Stack de nivel 0 de la tarea
+   151                                  
+   152 00000100 8B5804                      mov ebx, [eax + 0x04]           ;Recupero ESP0
+   153 00000103 891D[00000000]              mov [Stack_aux], ebx
+   154 00000109 8B5808                      mov ebx, [eax + 0x08]           ;Recupero SS0
+   155 0000010C 891D[04000000]              mov [Stack_aux + 4], ebx
    156                                  
-   157 00000100 8B5804                      mov ebx, [eax + 0x04]           ;Recupero ESP0
-   158 00000103 891D[00000000]              mov [Stack_aux], ebx
-   159 00000109 8B5808                      mov ebx, [eax + 0x08]           ;Recupero SS0
-   160 0000010C 891D[04000000]              mov [Stack_aux + 4], ebx
-   161                                  
-   162                                      ;LSS --> load stack segment
-   163                                  
-   164 00000112 0FB225[00000000]            lss esp, [Stack_aux]
-   165                                  
-   166                                      ; Cargo Stack de nivel 3 de la tarea
-   167 00000119 8B5818                      mov ebx, [eax + 0x18]      ;Recupero SS2
-   168 0000011C 53                          push ebx
-   169 0000011D 8B5814                      mov ebx, [eax + 0x14]      ;Recupero ESP2
-   170 00000120 53                          push ebx
-   171 00000121 8B5824                      mov ebx, [eax + 0x24]      ;Recupero EFLAGS
-   172 00000124 53                          push ebx
-   173 00000125 8B584C                      mov ebx, [eax + 0x4C]      ;Recupero CS
-   174 00000128 53                          push ebx
-   175 00000129 8B5820                      mov ebx, [eax + 0x20]      ;Recupero EIP
-   176 0000012C 53                          push ebx
-   177                                  
-   178                                      ;Registros de Proposito general
-   179 0000012D 8B482C                      mov ecx, [eax + 0x2C]
-   180 00000130 8B5030                      mov edx, [eax + 0x30]
-   181 00000133 8B5834                      mov ebx, [eax + 0x34]       
-   182 00000136 8B7040                      mov esi, [eax + 0x40]
-   183 00000139 8B7844                      mov edi, [eax + 0x44]
-   184 0000013C 8B4028                      mov eax, [eax + 0x28]     ; Debe estar último
-   185                                  
-   186                                      ; REVISAR ACA
-   187                                      ; xchg bx, bx
-   188                                  
-   189                                      ; Cargo la TSS
-   190 0000013F FF35[00000000]              push dword [TSS_aux]
-   191 00000145 E8A0000000                  call cargar_TSS_CPU
-   192 0000014A 83C404                      add esp,4
+   157                                      ;LSS --> load stack segment
+   158 00000112 0FB225[00000000]            lss esp, [Stack_aux]
+   159                                  
+   160                                      ; Cargo Stack de nivel 3 de la tarea
+   161 00000119 8B5818                      mov ebx, [eax + 0x18]      ;Recupero SS2
+   162 0000011C 53                          push ebx
+   163 0000011D 8B5814                      mov ebx, [eax + 0x14]      ;Recupero ESP2
+   164 00000120 53                          push ebx
+   165 00000121 8B5824                      mov ebx, [eax + 0x24]      ;Recupero EFLAGS
+   166 00000124 53                          push ebx
+   167 00000125 8B584C                      mov ebx, [eax + 0x4C]      ;Recupero CS
+   168 00000128 53                          push ebx
+   169 00000129 8B5820                      mov ebx, [eax + 0x20]      ;Recupero EIP
+   170 0000012C 53                          push ebx
+   171                                  
+   172                                      ;Registros de Proposito general
+   173 0000012D 8B482C                      mov ecx, [eax + 0x2C]
+   174 00000130 8B5030                      mov edx, [eax + 0x30]
+   175 00000133 8B5834                      mov ebx, [eax + 0x34]       
+   176 00000136 8B7040                      mov esi, [eax + 0x40]
+   177 00000139 8B7844                      mov edi, [eax + 0x44]
+   178 0000013C 8B4028                      mov eax, [eax + 0x28]     ; Debe estar último
+   179                                  
+   180                                      ; Cargo la TSS
+   181 0000013F FF35[00000000]              push dword [TSS_aux]
+   182 00000145 E8A0000000                  call cargar_TSS_CPU
+   183 0000014A 83C404                      add esp,4
+   184                                  
+   185 0000014D E9(00000000)                jmp return_leer_contexto
+   186                                  
+   187                                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   188                                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CONTEXT SAVE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   189                                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   190                                      ; Función que guarda en memoria el contexto de registros de la tarea que es suspendida.
+   191                                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   192                                  guardar_contexto_asm:
    193                                  
-   194 0000014D E9(00000000)                jmp return_leer_contexto
-   195                                  
-   196                                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   197                                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CONTEXT SAVE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   198                                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   199                                      ; Función que guarda en memoria el contexto de registros de la tarea que es suspendida.
-   200                                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   201                                  guardar_contexto_asm:
-   202                                  
-   203                                      ;xchg bx, bx
-   204                                      ; Recupero de la pila los registros generales
-   205 00000152 61                          popad
-   206                                  
-   207                                  
-   208                                      ;Registros Generales
-   209 00000153 A3[28000000]                mov [TSS_aux + 40],   eax      ;Guardo EAX
-   210 00000158 890D[2C000000]              mov [TSS_aux + 44],   ecx      ;Guardo ECX
-   211 0000015E 8915[30000000]              mov [TSS_aux + 48],   edx      ;Guardo EDX
-   212 00000164 891D[34000000]              mov [TSS_aux + 52],   ebx      ;Guardo EBX
-   213                                      ;mov [TSS_aux + 56],  esp      ;Guardo ESP
-   214 0000016A 892D[3C000000]              mov [TSS_aux + 60],   ebp      ;Guardo EBP 
-   215 00000170 8935[40000000]              mov [TSS_aux + 64],   esi      ;Guardo ESI
-   216 00000176 893D[44000000]              mov [TSS_aux + 68],   edi      ;Guardo EDI 
-   217                                      ;Registros de Segmento
-   218 0000017C 8C05[48000000]              mov [TSS_aux + 72],   es       ;Guardo ES
-   219                                      ;mov [TSS_aux + 76],  cs        ;Guardo CS        
-   220                                      ;mov [TSS_aux + 80],  ss      ;Guardo SS
-   221 00000182 8C1D[54000000]              mov [TSS_aux + 84],   ds       ;Guardo DS   
-   222 00000188 8C25[58000000]              mov [TSS_aux + 88],   fs       ;Guardo FS       
-   223 0000018E 8C2D[5C000000]              mov [TSS_aux + 92],   gs       ;Guardo GS    
-   224 00000194 0F20D8                      mov eax, cr3                  ;Guardo CR3
-   225 00000197 A3[1C000000]                mov [TSS_aux + 28],   eax 
-   226                                      ;Registros del Stack
-   227                                  
-   228 0000019C 803D[00000000]01            cmp byte[primer_context_save], 1
-   229 000001A3 741A                        je no_guardo_stack_user
-   230                                  
-   231                                      ;xchg bx, bx
-   232                                  
-   233                                      ; REVISAR CUANTO AGREGARLE AL STACK CUANDO NO SEA LA PRIMERA VEZ
-   234                                  
-   235                                      ;add esp, 12                         ;sumo 12 porque tengo guardados el EIP, CS y EFLAGS del SYSCALL
-   236 000001A5 58                          pop eax                             ;al hacer el pop vacio la pila para que no cresca por siempre
-   237                                      ;mov eax, [esp + 12]                ;Guardo EIP
-   238 000001A6 A3[20000000]                mov [TSS_aux + 32],   eax  
-   239 000001AB 58                          pop eax
-   240                                      ;mov eax, [esp + 20]                ;Guardo EFLAGS
-   241 000001AC A3[24000000]                mov [TSS_aux + 36],   eax  
-   242 000001B1 58                          pop eax                             ;Guardo ESP2      
-   243 000001B2 A3[14000000]                mov [TSS_aux + 20],   eax
-   244 000001B7 58                          pop eax                             ;Guardo SS2      
-   245 000001B8 A3[18000000]                mov [TSS_aux + 24],   eax
-   246                                  
-   247                                      ; REVISAR QUE HACE FALTA AGREGAR. HAY QUE VER COMO LLEGA.
+   194                                      ;xchg bx, bx
+   195                                      ; Recupero de la pila los registros generales
+   196 00000152 61                          popad
+   197                                      ;Registros Generales
+   198 00000153 A3[28000000]                mov [TSS_aux + 40],   eax      ;Guardo EAX
+   199 00000158 890D[2C000000]              mov [TSS_aux + 44],   ecx      ;Guardo ECX
+   200 0000015E 8915[30000000]              mov [TSS_aux + 48],   edx      ;Guardo EDX
+   201 00000164 891D[34000000]              mov [TSS_aux + 52],   ebx      ;Guardo EBX
+   202                                      ;mov [TSS_aux + 56],  esp      ;Guardo ESP
+   203 0000016A 892D[3C000000]              mov [TSS_aux + 60],   ebp      ;Guardo EBP 
+   204 00000170 8935[40000000]              mov [TSS_aux + 64],   esi      ;Guardo ESI
+   205 00000176 893D[44000000]              mov [TSS_aux + 68],   edi      ;Guardo EDI 
+   206                                      ;Registros de Segmento
+   207 0000017C 8C05[48000000]              mov [TSS_aux + 72],   es       ;Guardo ES
+   208                                      ;mov [TSS_aux + 76],  cs        ;Guardo CS        
+   209                                      ;mov [TSS_aux + 80],  ss      ;Guardo SS
+   210 00000182 8C1D[54000000]              mov [TSS_aux + 84],   ds       ;Guardo DS   
+   211 00000188 8C25[58000000]              mov [TSS_aux + 88],   fs       ;Guardo FS       
+   212 0000018E 8C2D[5C000000]              mov [TSS_aux + 92],   gs       ;Guardo GS    
+   213 00000194 0F20D8                      mov eax, cr3                  ;Guardo CR3
+   214 00000197 A3[1C000000]                mov [TSS_aux + 28],   eax 
+   215                                      ;Registros del Stack
+   216                                  
+   217 0000019C 803D[00000000]01            cmp byte[primer_context_save], 1
+   218 000001A3 741A                        je no_guardo_stack_user
+   219                                  
+   220                                      ;xchg bx, bx
+   221 000001A5 58                          pop eax                             
+   222                                      ;mov eax, [esp + 12]                ;Guardo EIP
+   223 000001A6 A3[20000000]                mov [TSS_aux + 32],   eax  
+   224 000001AB 58                          pop eax
+   225                                      ;mov eax, [esp + 20]                ;Guardo EFLAGS
+   226 000001AC A3[24000000]                mov [TSS_aux + 36],   eax  
+   227 000001B1 58                          pop eax                             ;Guardo ESP2      
+   228 000001B2 A3[14000000]                mov [TSS_aux + 20],   eax
+   229 000001B7 58                          pop eax                             ;Guardo SS2      
+   230 000001B8 A3[18000000]                mov [TSS_aux + 24],   eax
+   231                                  
+   232 000001BD EB26                        jmp fin_guardar_contexto
+   233                                  
+   234                                  no_guardo_stack_user:
+   235                                  
+   236                                      ;xchg bx, bx
+   237 000001BF 8B0424                      mov eax, [esp]
+   238 000001C2 A3[20000000]                mov [TSS_aux + 32],   eax      ; Guardo EIP
+   239 000001C7 8B442404                    mov eax, [ esp + 4 ]
+   240 000001CB A3[4C000000]                mov [TSS_aux + 76],   eax      ; Guardo CS
+   241 000001D0 8B442408                    mov eax, [ esp + 8 ]
+   242 000001D4 A3[24000000]                mov [TSS_aux + 36],   eax      ; Guardo EFLAGS
+   243 000001D9 8C15[08000000]              mov [TSS_aux + 8],    ss       ; Guardo SS0
+   244 000001DF 8925[04000000]              mov [TSS_aux + 4],    esp      ; Guardo ESP0 
+   245                                  
+   246                                  fin_guardar_contexto:
+   247 000001E5 E9(00000000)                jmp return_guardar_contexto
    248                                  
-   249 000001BD EB26                        jmp fin_guardar_contexto
-   250                                  
-   251                                  no_guardo_stack_user:
-   252                                  
-   253                                      ;xchg bx, bx
-   254                                  
-   255 000001BF 8B0424                      mov eax, [esp]
-   256 000001C2 A3[20000000]                mov [TSS_aux + 32],   eax      ; Guardo EIP
-   257 000001C7 8B442404                    mov eax, [ esp + 4 ]
-   258 000001CB A3[4C000000]                mov [TSS_aux + 76],   eax      ; Guardo CS
-   259 000001D0 8B442408                    mov eax, [ esp + 8 ]
-   260 000001D4 A3[24000000]                mov [TSS_aux + 36],   eax      ; Guardo EFLAGS
-   261 000001D9 8C15[08000000]              mov [TSS_aux + 8],    ss       ; Guardo SS0
-   262 000001DF 8925[04000000]              mov [TSS_aux + 4],    esp      ; Guardo ESP0 
-   263                                  
-   264                                  fin_guardar_contexto:
-   265 000001E5 E9(00000000)                jmp return_guardar_contexto
-   266                                  
-   267                                          
-   268                                  cargar_TSS_CPU:
-   269                                  
-   270                                  
-   271                                      ;xchg bx, bx
-   272                                  
-   273 000001EA 8B5C2404                    mov ebx, [esp + 4]
-   274                                  
-   275                                      ;backlink
-   276 000001EE 8B03                        mov eax, [ebx]
-   277                                  
-   278 000001F0 A3[00000000]                mov [__TSS_BASICA], eax 
-   279                                      ;ESP0
-   280 000001F5 8B4304                      mov eax, [ebx+0x04]
-   281 000001F8 A3[04000000]                mov [__TSS_BASICA+0x04], eax
-   282                                      ;SS0
-   283 000001FD 8B4308                      mov eax, [ebx+0x08]
-   284 00000200 A3[08000000]                mov [__TSS_BASICA+0x08], eax
-   285                                      ;ESP1
-   286 00000205 8B430C                      mov eax, [ebx+0x0C]
-   287 00000208 A3[0C000000]                mov [__TSS_BASICA+0x0C], eax 
-   288                                      ;SS1
-   289 0000020D 8B4310                      mov eax, [ebx+0x10]
-   290 00000210 A3[10000000]                mov [__TSS_BASICA+0x10], eax
-   291                                      ;ESP2
-   292 00000215 8B4314                      mov eax, [ebx+0x14]
-   293 00000218 A3[14000000]                mov [__TSS_BASICA+0x14], eax 
-   294                                      ;SS2
-   295 0000021D 8B4318                      mov eax, [ebx+0x18]
-   296 00000220 A3[18000000]                mov [__TSS_BASICA+0x18], eax 
-   297                                      ;CR3
-   298 00000225 8B431C                      mov eax, [ebx+0x1C]
-   299 00000228 A3[1C000000]                mov [__TSS_BASICA+0x1C], eax
-   300                                      ;EIP
-   301 0000022D 8B4320                      mov eax, [ebx+0x20]
-   302 00000230 A3[20000000]                mov [__TSS_BASICA+0x20], eax 
-   303                                      ;EFLAGS
-   304 00000235 8B4324                      mov eax, [ebx+0x24]
-   305 00000238 A3[24000000]                mov [__TSS_BASICA+0x24], eax 
-   306                                      ;EAX
-   307 0000023D 8B4328                      mov eax, [ebx+0x28]
-   308 00000240 A3[28000000]                mov [__TSS_BASICA+0x28], eax 
-   309                                      ;ECX
-   310 00000245 8B432C                      mov eax, [ebx+0x2C]
-   311 00000248 A3[2C000000]                mov [__TSS_BASICA+0x2C], eax 
-   312                                      ;EDX
-   313 0000024D 8B4330                      mov eax, [ebx+0x30]
-   314 00000250 A3[30000000]                mov [__TSS_BASICA+0x30], eax 
-   315                                      ;EBX
-   316 00000255 8B4334                      mov eax, [ebx+0x34]
-   317 00000258 A3[34000000]                mov [__TSS_BASICA+0x34], eax 
-   318                                      ;ESP
-   319 0000025D 8B4338                      mov eax, [ebx+0x38]
-   320 00000260 A3[38000000]                mov [__TSS_BASICA+0x38], eax
-   321                                      ;EBP
-   322 00000265 8B433C                      mov eax, [ebx+0x3C]
-   323 00000268 A3[3C000000]                mov [__TSS_BASICA+0x3C], eax
-   324                                      ;ESI
-   325 0000026D 8B4340                      mov eax, [ebx+0x40]
-   326 00000270 A3[40000000]                mov [__TSS_BASICA+0x40], eax
-   327                                      ;EDI
-   328 00000275 8B4344                      mov eax, [ebx+0x44]
-   329 00000278 A3[44000000]                mov [__TSS_BASICA+0x44], eax
-   330                                      ;ES
-   331 0000027D 8B4348                      mov eax, [ebx+0x48]
-   332 00000280 A3[48000000]                mov [__TSS_BASICA+0x48], eax
-   333                                      ;CS
-   334 00000285 8B434C                      mov eax, [ebx+0x4C]
-   335 00000288 A3[4C000000]                mov [__TSS_BASICA+0x4C], eax
-   336                                      ;SS
-   337 0000028D 8B4350                      mov eax, [ebx+0x50]
-   338 00000290 A3[50000000]                mov [__TSS_BASICA+0x50], eax
-   339                                      ;DS
-   340 00000295 8B4354                      mov eax, [ebx+0x54]
-   341 00000298 A3[54000000]                mov [__TSS_BASICA+0x54], eax
-   342                                      ;FS
-   343 0000029D 8B4358                      mov eax, [ebx+0x58]
-   344 000002A0 A3[58000000]                mov [__TSS_BASICA+0x58], eax
-   345                                      ;GS
-   346 000002A5 8B435C                      mov eax, [ebx+0x5C]
-   347 000002A8 A3[5C000000]                mov [__TSS_BASICA+0x5C], eax
-   348                                      ;LDTR
-   349 000002AD 8B4360                      mov eax, [ebx+0x60]
-   350 000002B0 A3[60000000]                mov [__TSS_BASICA+0x60], eax
-   351                                      ;Bitmap E/S
-   352 000002B5 8B4364                      mov eax, [ebx+0x64]
-   353 000002B8 A3[64000000]                mov [__TSS_BASICA+0x64], eax
-   354                                  
-   355 000002BD C3                          ret
+   249                                          
+   250                                  cargar_TSS_CPU:
+   251                                  
+   252 000001EA 8B5C2404                    mov ebx, [esp + 4]
+   253                                      ;backlink
+   254 000001EE 8B03                        mov eax, [ebx]
+   255                                  
+   256 000001F0 A3[00000000]                mov [__TSS_BASICA], eax 
+   257                                      ;ESP0
+   258 000001F5 8B4304                      mov eax, [ebx+0x04]
+   259 000001F8 A3[04000000]                mov [__TSS_BASICA+0x04], eax
+   260                                      ;SS0
+   261 000001FD 8B4308                      mov eax, [ebx+0x08]
+   262 00000200 A3[08000000]                mov [__TSS_BASICA+0x08], eax
+   263                                      ;ESP1
+   264 00000205 8B430C                      mov eax, [ebx+0x0C]
+   265 00000208 A3[0C000000]                mov [__TSS_BASICA+0x0C], eax 
+   266                                      ;SS1
+   267 0000020D 8B4310                      mov eax, [ebx+0x10]
+   268 00000210 A3[10000000]                mov [__TSS_BASICA+0x10], eax
+   269                                      ;ESP2
+   270 00000215 8B4314                      mov eax, [ebx+0x14]
+   271 00000218 A3[14000000]                mov [__TSS_BASICA+0x14], eax 
+   272                                      ;SS2
+   273 0000021D 8B4318                      mov eax, [ebx+0x18]
+   274 00000220 A3[18000000]                mov [__TSS_BASICA+0x18], eax 
+   275                                      ;CR3
+   276 00000225 8B431C                      mov eax, [ebx+0x1C]
+   277 00000228 A3[1C000000]                mov [__TSS_BASICA+0x1C], eax
+   278                                      ;EIP
+   279 0000022D 8B4320                      mov eax, [ebx+0x20]
+   280 00000230 A3[20000000]                mov [__TSS_BASICA+0x20], eax 
+   281                                      ;EFLAGS
+   282 00000235 8B4324                      mov eax, [ebx+0x24]
+   283 00000238 A3[24000000]                mov [__TSS_BASICA+0x24], eax 
+   284                                      ;EAX
+   285 0000023D 8B4328                      mov eax, [ebx+0x28]
+   286 00000240 A3[28000000]                mov [__TSS_BASICA+0x28], eax 
+   287                                      ;ECX
+   288 00000245 8B432C                      mov eax, [ebx+0x2C]
+   289 00000248 A3[2C000000]                mov [__TSS_BASICA+0x2C], eax 
+   290                                      ;EDX
+   291 0000024D 8B4330                      mov eax, [ebx+0x30]
+   292 00000250 A3[30000000]                mov [__TSS_BASICA+0x30], eax 
+   293                                      ;EBX
+   294 00000255 8B4334                      mov eax, [ebx+0x34]
+   295 00000258 A3[34000000]                mov [__TSS_BASICA+0x34], eax 
+   296                                      ;ESP
+   297 0000025D 8B4338                      mov eax, [ebx+0x38]
+   298 00000260 A3[38000000]                mov [__TSS_BASICA+0x38], eax
+   299                                      ;EBP
+   300 00000265 8B433C                      mov eax, [ebx+0x3C]
+   301 00000268 A3[3C000000]                mov [__TSS_BASICA+0x3C], eax
+   302                                      ;ESI
+   303 0000026D 8B4340                      mov eax, [ebx+0x40]
+   304 00000270 A3[40000000]                mov [__TSS_BASICA+0x40], eax
+   305                                      ;EDI
+   306 00000275 8B4344                      mov eax, [ebx+0x44]
+   307 00000278 A3[44000000]                mov [__TSS_BASICA+0x44], eax
+   308                                      ;ES
+   309 0000027D 8B4348                      mov eax, [ebx+0x48]
+   310 00000280 A3[48000000]                mov [__TSS_BASICA+0x48], eax
+   311                                      ;CS
+   312 00000285 8B434C                      mov eax, [ebx+0x4C]
+   313 00000288 A3[4C000000]                mov [__TSS_BASICA+0x4C], eax
+   314                                      ;SS
+   315 0000028D 8B4350                      mov eax, [ebx+0x50]
+   316 00000290 A3[50000000]                mov [__TSS_BASICA+0x50], eax
+   317                                      ;DS
+   318 00000295 8B4354                      mov eax, [ebx+0x54]
+   319 00000298 A3[54000000]                mov [__TSS_BASICA+0x54], eax
+   320                                      ;FS
+   321 0000029D 8B4358                      mov eax, [ebx+0x58]
+   322 000002A0 A3[58000000]                mov [__TSS_BASICA+0x58], eax
+   323                                      ;GS
+   324 000002A5 8B435C                      mov eax, [ebx+0x5C]
+   325 000002A8 A3[5C000000]                mov [__TSS_BASICA+0x5C], eax
+   326                                      ;LDTR
+   327 000002AD 8B4360                      mov eax, [ebx+0x60]
+   328 000002B0 A3[60000000]                mov [__TSS_BASICA+0x60], eax
+   329                                      ;Bitmap E/S
+   330 000002B5 8B4364                      mov eax, [ebx+0x64]
+   331 000002B8 A3[64000000]                mov [__TSS_BASICA+0x64], eax
+   332                                  
+   333 000002BD C3                          ret

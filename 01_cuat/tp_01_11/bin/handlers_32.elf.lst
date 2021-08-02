@@ -67,480 +67,594 @@
     28                                  EXTERN determinar_TSS_a_leer
     29                                  EXTERN determinar_TSS_a_guardar
     30                                  EXTERN leer_contexto_siguiente_asm
-    31                                   
-    32                                  ;---------------EXTERN VARIABLES GLOBALES-----------
-    33                                  EXTERN memoria_buffer_reservada
-    34                                  EXTERN contador_timer
-    35                                  EXTERN dir_lineal_page_fault
-    36                                  EXTERN dir_phy_dinamica
-    37                                  EXTERN resultado_promedio
-    38                                  EXTERN error_code_PF
-    39                                  EXTERN paginas_creadas
-    40                                  EXTERN page_fault_msg
-    41                                  EXTERN page_fault_msg_2
-    42                                  EXTERN page_fault_msg_3
-    43                                  EXTERN page_fault_msg_4
-    44                                  EXTERN page_fault_msg_5
-    45                                  EXTERN page_fault_msg_6
-    46                                  EXTERN tarea_RUNNING
-    47                                  EXTERN tarea_READY
-    48                                  EXTERN tarea_SUSPENDING
-    49                                  EXTERN primer_context_save
-    50                                  ;----------------GLOBAL--------------------
-    51                                  GLOBAL L_ISR00_Handler_DE
-    52                                  GLOBAL L_ISR02_Handler_NMI
-    53                                  GLOBAL L_ISR03_Handler_BP
-    54                                  GLOBAL L_ISR04_Handler_OF
-    55                                  GLOBAL L_ISR05_Handler_BR
-    56                                  GLOBAL L_ISR06_Handler_UD
-    57                                  GLOBAL L_ISR07_Handler_NM
-    58                                  GLOBAL L_ISR08_Handler_DF
-    59                                  GLOBAL L_ISR10_Handler_TS
-    60                                  GLOBAL L_ISR11_Handler_NP
-    61                                  GLOBAL L_ISR12_Handler_SS
-    62                                  GLOBAL L_ISR13_Handler_GP
-    63                                  GLOBAL L_ISR14_Handler_PF
-    64                                  GLOBAL L_ISR16_Handler_MF
-    65                                  GLOBAL L_ISR17_Handler_AC
-    66                                  GLOBAL L_ISR18_Handler_MC
-    67                                  GLOBAL L_ISR19_Handler_XM
-    68                                  GLOBAL L_IRQ00_Handler
-    69                                  GLOBAL L_IRQ01_Handler
-    70                                  GLOBAL L_ISR128_Handler_SC
-    71                                  GLOBAL return_guardar_contexto
-    72                                  GLOBAL return_leer_contexto
-    73                                  ;----------------EQU--------------------
-    74                                  VMA_ISR_TECLADO     EQU 0x00100000
-    75                                  ; Parte baja de las direcciones de los Handlers 
-    76                                  L_ISR00_Handler_DE  EQU ISR00_Handler_DE    - VMA_ISR_TECLADO 
-    77                                  L_ISR01_Handler_DB  EQU ISR01_Handler_DB    - VMA_ISR_TECLADO 
-    78                                  L_ISR02_Handler_NMI EQU ISR02_Handler_NMI   - VMA_ISR_TECLADO 
-    79                                  L_ISR03_Handler_BP  EQU ISR03_Handler_BP    - VMA_ISR_TECLADO 
-    80                                  L_ISR04_Handler_OF  EQU ISR04_Handler_OF    - VMA_ISR_TECLADO 
-    81                                  L_ISR05_Handler_BR  EQU ISR05_Handler_BR    - VMA_ISR_TECLADO 
-    82                                  L_ISR06_Handler_UD  EQU ISR06_Handler_UD    - VMA_ISR_TECLADO 
-    83                                  L_ISR07_Handler_NM  EQU ISR07_Handler_NM    - VMA_ISR_TECLADO 
-    84                                  L_ISR08_Handler_DF  EQU ISR08_Handler_DF    - VMA_ISR_TECLADO   
-    85                                  L_ISR10_Handler_TS  EQU ISR10_Handler_TS    - VMA_ISR_TECLADO 
-    86                                  L_ISR11_Handler_NP  EQU ISR11_Handler_NP    - VMA_ISR_TECLADO 
-    87                                  L_ISR12_Handler_SS  EQU ISR12_Handler_SS    - VMA_ISR_TECLADO 
-    88                                  L_ISR13_Handler_GP  EQU ISR13_Handler_GP    - VMA_ISR_TECLADO 
-    89                                  L_ISR14_Handler_PF  EQU ISR14_Handler_PF    - VMA_ISR_TECLADO 
-    90                                  L_ISR16_Handler_MF  EQU ISR16_Handler_MF    - VMA_ISR_TECLADO 
-    91                                  L_ISR17_Handler_AC  EQU ISR17_Handler_AC    - VMA_ISR_TECLADO 
-    92                                  L_ISR18_Handler_MC  EQU ISR18_Handler_MC    - VMA_ISR_TECLADO 
-    93                                  L_ISR19_Handler_XM  EQU ISR19_Handler_XM    - VMA_ISR_TECLADO 
-    94                                  L_IRQ00_Handler     EQU IRQ00_Handler       - VMA_ISR_TECLADO
-    95                                  L_IRQ01_Handler     EQU IRQ01_Handler       - VMA_ISR_TECLADO
-    96                                  L_ISR128_Handler_SC EQU ISR128_Handler_SC   - VMA_ISR_TECLADO
-    97                                  
-    98                                  ;----------------SECTION-----------------------
-    99                                  SECTION .teclado_and_ISR
-   100                                  ;------------ HANDLER IRQ TIMER---------------------
-   101                                  IRQ00_Handler:
-   102                                      ;xchg    bx, bx                              ; Breakpoint
-   103                                  
-   104 00000000 60                          pushad                                      ; Salvo los registros de uso general.
-   105                                      
-   106 00000001 55                          push    ebp
-   107 00000002 89E5                        mov     ebp, esp 
-   108                                      ;push contador_timer                         ; Contador del Timer actual              
-   109                                      ;push __DIGITS_TABLE_VMA                    ; Dir. de tabla de dígitos
-   110                                      ;push resultado_promedio                    ; Resultado del prom. cada 500ms
-   111 00000004 E8(00000000)                call scheduler_c                            ; Cada 10 ms el tick
-   112 00000009 C9                          leave
-   113                                  
-   114                                      ;xchg    bx, bx                              ; Breakpoint
-   115                                  
-   116                                      ; Si la tarea en ejecución es igual a la próxima tarea, no hago nada.
-   117 0000000A 31C0                        xor     eax, eax
-   118 0000000C 31DB                        xor     ebx, ebx
-   119 0000000E A0[00000000]                mov     al, byte [tarea_RUNNING]
-   120 00000013 8A1D[00000000]              mov     bl, byte [tarea_READY]
-   121 00000019 38D8                        cmp     al, bl
-   122 0000001B 7434                        je      pop_registros
-   123                                  
-   124                                  
-   125                                      ; Determino base de la TSS donde se guardará el contexto de ejecución actual
-   126 0000001D 55                          push    ebp
-   127 0000001E 89E5                        mov     ebp, esp
-   128 00000020 68[00000000]                push    tarea_SUSPENDING
-   129 00000025 E8(00000000)                call    determinar_TSS_a_guardar
-   130 0000002A C9                          leave
-   131                                  
-   132                                      ; Guardo contexto de ejecución del programa que estaba corriendo antes de interrumpir el Timer
-   133 0000002B E9(00000000)                jmp guardar_contexto_asm
-   134                                  return_guardar_contexto:
-   135                                  
-   136                                      ; Determino base de la TSS del contexto de ejec. a leer de memoria para próxima tarea a ejecutarse
-   137 00000030 55                          push    ebp
-   138 00000031 89E5                        mov     ebp, esp
-   139 00000033 68[00000000]                push    tarea_READY
-   140 00000038 E8(00000000)                call    determinar_TSS_a_leer
-   141 0000003D C9                          leave
-   142                                  
-   143                                       ; Leo contexto de ejecución para la próxima tarea y se lo asigno a la TSS del CPU.
-   144 0000003E E9(00000000)                jmp leer_contexto_siguiente_asm
-   145                                  
-   146                                  return_leer_contexto:
-   147                                  
-   148                                      ;xchg bx, bx
-   149                                  
-   150                                      ; La tarea está en condiciones de pasar de READY a RUNNING
-   151 00000043 31C0                        xor eax, eax
-   152 00000045 A0[00000000]                mov al, byte [tarea_READY]
-   153 0000004A A2[00000000]                mov byte [tarea_RUNNING], al
-   154 0000004F EB01                        jmp end_handler_timer
-   155                                  
-   156                                  pop_registros:
-   157 00000051 61                          popad                                       ; Recupero registros
+    31                                  EXTERN mostrar_promedio64_VGA
+    32                                   
+    33                                  ;---------------EXTERN VARIABLES GLOBALES-----------
+    34                                  EXTERN memoria_buffer_reservada
+    35                                  EXTERN contador_timer
+    36                                  EXTERN dir_lineal_page_fault
+    37                                  EXTERN dir_phy_dinamica
+    38                                  EXTERN resultado_promedio
+    39                                  EXTERN error_code_PF
+    40                                  EXTERN paginas_creadas
+    41                                  EXTERN page_fault_msg
+    42                                  EXTERN page_fault_msg_2
+    43                                  EXTERN page_fault_msg_3
+    44                                  EXTERN page_fault_msg_4
+    45                                  EXTERN page_fault_msg_5
+    46                                  EXTERN page_fault_msg_6
+    47                                  EXTERN tarea_RUNNING
+    48                                  EXTERN tarea_READY
+    49                                  EXTERN tarea_SUSPENDING
+    50                                  EXTERN primer_context_save
+    51                                  ;----------------GLOBAL--------------------
+    52                                  GLOBAL L_ISR00_Handler_DE
+    53                                  GLOBAL L_ISR02_Handler_NMI
+    54                                  GLOBAL L_ISR03_Handler_BP
+    55                                  GLOBAL L_ISR04_Handler_OF
+    56                                  GLOBAL L_ISR05_Handler_BR
+    57                                  GLOBAL L_ISR06_Handler_UD
+    58                                  GLOBAL L_ISR07_Handler_NM
+    59                                  GLOBAL L_ISR08_Handler_DF
+    60                                  GLOBAL L_ISR10_Handler_TS
+    61                                  GLOBAL L_ISR11_Handler_NP
+    62                                  GLOBAL L_ISR12_Handler_SS
+    63                                  GLOBAL L_ISR13_Handler_GP
+    64                                  GLOBAL L_ISR14_Handler_PF
+    65                                  GLOBAL L_ISR16_Handler_MF
+    66                                  GLOBAL L_ISR17_Handler_AC
+    67                                  GLOBAL L_ISR18_Handler_MC
+    68                                  GLOBAL L_ISR19_Handler_XM
+    69                                  GLOBAL L_IRQ00_Handler
+    70                                  GLOBAL L_IRQ01_Handler
+    71                                  GLOBAL L_ISR128_Handler_SC
+    72                                  GLOBAL return_guardar_contexto
+    73                                  GLOBAL return_leer_contexto
+    74                                  GLOBAL SYS_H
+    75                                  GLOBAL SYS_P
+    76                                  GLOBAL SYS_P_VGA
+    77                                  GLOBAL SYS_R
+    78                                  ;----------------EQU--------------------
+    79                                  VMA_ISR_TECLADO     EQU 0x00100000
+    80                                  ; Parte baja de las direcciones de los Handlers 
+    81                                  L_ISR00_Handler_DE  EQU ISR00_Handler_DE    - VMA_ISR_TECLADO 
+    82                                  L_ISR01_Handler_DB  EQU ISR01_Handler_DB    - VMA_ISR_TECLADO 
+    83                                  L_ISR02_Handler_NMI EQU ISR02_Handler_NMI   - VMA_ISR_TECLADO 
+    84                                  L_ISR03_Handler_BP  EQU ISR03_Handler_BP    - VMA_ISR_TECLADO 
+    85                                  L_ISR04_Handler_OF  EQU ISR04_Handler_OF    - VMA_ISR_TECLADO 
+    86                                  L_ISR05_Handler_BR  EQU ISR05_Handler_BR    - VMA_ISR_TECLADO 
+    87                                  L_ISR06_Handler_UD  EQU ISR06_Handler_UD    - VMA_ISR_TECLADO 
+    88                                  L_ISR07_Handler_NM  EQU ISR07_Handler_NM    - VMA_ISR_TECLADO 
+    89                                  L_ISR08_Handler_DF  EQU ISR08_Handler_DF    - VMA_ISR_TECLADO   
+    90                                  L_ISR10_Handler_TS  EQU ISR10_Handler_TS    - VMA_ISR_TECLADO 
+    91                                  L_ISR11_Handler_NP  EQU ISR11_Handler_NP    - VMA_ISR_TECLADO 
+    92                                  L_ISR12_Handler_SS  EQU ISR12_Handler_SS    - VMA_ISR_TECLADO 
+    93                                  L_ISR13_Handler_GP  EQU ISR13_Handler_GP    - VMA_ISR_TECLADO 
+    94                                  L_ISR14_Handler_PF  EQU ISR14_Handler_PF    - VMA_ISR_TECLADO 
+    95                                  L_ISR16_Handler_MF  EQU ISR16_Handler_MF    - VMA_ISR_TECLADO 
+    96                                  L_ISR17_Handler_AC  EQU ISR17_Handler_AC    - VMA_ISR_TECLADO 
+    97                                  L_ISR18_Handler_MC  EQU ISR18_Handler_MC    - VMA_ISR_TECLADO 
+    98                                  L_ISR19_Handler_XM  EQU ISR19_Handler_XM    - VMA_ISR_TECLADO 
+    99                                  L_IRQ00_Handler     EQU IRQ00_Handler       - VMA_ISR_TECLADO
+   100                                  L_IRQ01_Handler     EQU IRQ01_Handler       - VMA_ISR_TECLADO
+   101                                  L_ISR128_Handler_SC EQU ISR128_Handler_SC   - VMA_ISR_TECLADO
+   102                                  SYS_H               EQU     0
+   103                                  SYS_R               EQU     1
+   104                                  SYS_P               EQU     2
+   105                                  SYS_P_VGA           EQU     3
+   106                                  ;----------------SECTION-----------------------
+   107                                  SECTION .teclado_and_ISR
+   108                                  ;------------ HANDLER IRQ TIMER---------------------
+   109                                  IRQ00_Handler:
+   110                                      ;xchg    bx, bx                              ; Breakpoint
+   111                                  
+   112 00000000 60                          pushad                                      ; Salvo los registros de uso general.
+   113                                      
+   114 00000001 55                          push    ebp
+   115 00000002 89E5                        mov     ebp, esp 
+   116                                      ;push contador_timer                         ; Contador del Timer actual              
+   117                                      ;push __DIGITS_TABLE_VMA                    ; Dir. de tabla de dígitos
+   118                                      ;push resultado_promedio                    ; Resultado del prom. cada 500ms
+   119 00000004 E8(00000000)                call scheduler_c                            ; Cada 10 ms el tick
+   120 00000009 C9                          leave
+   121                                  
+   122                                      ; Si la tarea en ejecución es igual a la próxima tarea, no hago nada.
+   123 0000000A 31C0                        xor     eax, eax
+   124 0000000C 31DB                        xor     ebx, ebx
+   125 0000000E A0[00000000]                mov     al, byte [tarea_RUNNING]
+   126 00000013 8A1D[00000000]              mov     bl, byte [tarea_READY]
+   127 00000019 38D8                        cmp     al, bl
+   128 0000001B 7434                        je      pop_registros
+   129                                  
+   130                                  
+   131                                      ; Determino base de la TSS donde se guardará el contexto de ejecución actual
+   132 0000001D 55                          push    ebp
+   133 0000001E 89E5                        mov     ebp, esp
+   134 00000020 68[00000000]                push    tarea_SUSPENDING
+   135 00000025 E8(00000000)                call    determinar_TSS_a_guardar
+   136 0000002A C9                          leave
+   137                                  
+   138                                      ; Guardo contexto de ejecución del programa que estaba corriendo antes de interrumpir el Timer
+   139 0000002B E9(00000000)                jmp guardar_contexto_asm
+   140                                  return_guardar_contexto:
+   141                                  
+   142                                      ; Determino base de la TSS del contexto de ejec. a leer de memoria para próxima tarea a ejecutarse
+   143 00000030 55                          push    ebp
+   144 00000031 89E5                        mov     ebp, esp
+   145 00000033 68[00000000]                push    tarea_READY
+   146 00000038 E8(00000000)                call    determinar_TSS_a_leer
+   147 0000003D C9                          leave
+   148                                  
+   149                                       ; Leo contexto de ejecución para la próxima tarea y se lo asigno a la TSS del CPU.
+   150 0000003E E9(00000000)                jmp leer_contexto_siguiente_asm
+   151                                  
+   152                                  return_leer_contexto:
+   153                                      ; La tarea está en condiciones de pasar de READY a RUNNING
+   154 00000043 31C0                        xor eax, eax
+   155 00000045 A0[00000000]                mov al, byte [tarea_READY]
+   156 0000004A A2[00000000]                mov byte [tarea_RUNNING], al
+   157 0000004F EB01                        jmp end_handler_timer
    158                                  
-   159                                  end_handler_timer:
-   160 00000052 B020                        mov al, 0x20                                ; ACK de la IRQ para el PIC 
-   161 00000054 E620                        out 0x20, al
-   162 00000056 CF                          iret                                        ; Retorno de la IRQ
-   163                                  
-   164                                  ;----------HANDLER IRQ TECLADO-----------------
-   165                                  IRQ01_Handler:
-   166 00000057 60                          pushad                                      ; Guardo todos los registros  para asegurarme que no se rompa el estado actual.
-   167 00000058 B221                        mov     dl,0x21                             ; Guardo la interrupcion en el registro DX
-   168 0000005A 31C0                        xor     eax, eax
-   169                                      ; ->Leo el puerto
-   170 0000005C E460                        in      al, PORT_A_8042                     ; Leo el puerto 0x60 (Keyboard Output Buffer Register)
-   171 0000005E 88C3                        mov     bl, al                              ; Copio lo leído en otro registro
-   172 00000060 80E380                      and     bl, 0x80                            ; Hago un AND para obtener el bit 7 (BRK)
-   173 00000063 80FB80                      cmp     bl, 0x80                            ; Si el bit vale 0 la tecla fue presionada (Make), si es 1 se dejó de presionar (Break)
-   174 00000066 740E                        jz      end_handler_teclado                 ; Si se dejo de presionar, no la leo. Solo leo cuando se presionada (Make)
-   175 00000068 68[00000000]                push    dword memoria_buffer_reservada      ; Buffer en VMA
-   176 0000006D 50                          push    eax                                 ; Tecla presionada.
-   177 0000006E E8(00000000)                call determinar_tecla_presionada
-   178 00000073 83C408                      add     esp, 8
-   179                                  
-   180                                  end_handler_teclado:
-   181                                      ;xchg    bx, bx                              ; Breakpoint
-   182 00000076 B020                        mov     al, 0x20                             ; ACK de la IRQ para el PIC 
-   183 00000078 E620                        out     0x20, al
-   184 0000007A 61                          popad                                        ; Recupero registros
-   185 0000007B CF                          iret                                         ; Retorno de la IRQ
-   186                                  
-   187                                  ;-----------HANDLERs DE EXCEPTIONS-------------
-   188                                  ;#DE (Divide Error)
-   189                                  ISR00_Handler_DE:
-   190 0000007C 6687DB                      xchg    bx,bx
-   191 0000007F B200                        mov     dl,0x00
-   192 00000081 F4                          hlt
-   193                                  
-   194                                  ISR01_Handler_DB:
-   195 00000082 6687DB                      xchg    bx,bx
-   196 00000085 B201                        mov dl,0x01
-   197 00000087 F4                          hlt
+   159                                  pop_registros:
+   160 00000051 61                          popad                                       ; Recupero registros
+   161                                  
+   162                                  end_handler_timer:
+   163 00000052 B020                        mov al, 0x20                                ; ACK de la IRQ para el PIC 
+   164 00000054 E620                        out 0x20, al
+   165 00000056 CF                          iret                                        ; Retorno de la IRQ
+   166                                  
+   167                                  ;----------HANDLER IRQ TECLADO-----------------
+   168                                  IRQ01_Handler:
+   169 00000057 60                          pushad                                      ; Guardo todos los registros  para asegurarme que no se rompa el estado actual.
+   170 00000058 B221                        mov     dl,0x21                             ; Guardo la interrupcion en el registro DX
+   171 0000005A 31C0                        xor     eax, eax
+   172                                      ; ->Leo el puerto
+   173 0000005C E460                        in      al, PORT_A_8042                     ; Leo el puerto 0x60 (Keyboard Output Buffer Register)
+   174 0000005E 88C3                        mov     bl, al                              ; Copio lo leído en otro registro
+   175 00000060 80E380                      and     bl, 0x80                            ; Hago un AND para obtener el bit 7 (BRK)
+   176 00000063 80FB80                      cmp     bl, 0x80                            ; Si el bit vale 0 la tecla fue presionada (Make), si es 1 se dejó de presionar (Break)
+   177 00000066 740E                        jz      end_handler_teclado                 ; Si se dejo de presionar, no la leo. Solo leo cuando se presionada (Make)
+   178 00000068 68[00000000]                push    dword memoria_buffer_reservada      ; Buffer en VMA
+   179 0000006D 50                          push    eax                                 ; Tecla presionada.
+   180 0000006E E8(00000000)                call determinar_tecla_presionada
+   181 00000073 83C408                      add     esp, 8
+   182                                  
+   183                                  end_handler_teclado:
+   184                                  
+   185                                      ;xchg    bx, bx                              ; Breakpoint
+   186                                      
+   187 00000076 B020                        mov     al, 0x20                             ; ACK de la IRQ para el PIC 
+   188 00000078 E620                        out     0x20, al
+   189 0000007A 61                          popad                                        ; Recupero registros
+   190 0000007B CF                          iret                                         ; Retorno de la IRQ
+   191                                  
+   192                                  ;-----------HANDLERs DE EXCEPTIONS-------------
+   193                                  ;#DE (Divide Error)
+   194                                  ISR00_Handler_DE:
+   195 0000007C 6687DB                      xchg    bx,bx
+   196 0000007F B200                        mov     dl,0x00
+   197 00000081 F4                          hlt
    198                                  
-   199                                  ISR02_Handler_NMI:
-   200 00000088 6687DB                      xchg    bx,bx
-   201 0000008B B202                        mov dl,0x02
-   202 0000008D F4                          hlt
+   199                                  ISR01_Handler_DB:
+   200 00000082 6687DB                      xchg    bx,bx
+   201 00000085 B201                        mov dl,0x01
+   202 00000087 F4                          hlt
    203                                  
-   204                                  ISR03_Handler_BP:
-   205 0000008E 6687DB                      xchg    bx,bx
-   206 00000091 B203                        mov dl,0x03
-   207 00000093 F4                          hlt
+   204                                  ISR02_Handler_NMI:
+   205 00000088 6687DB                      xchg    bx,bx
+   206 0000008B B202                        mov dl,0x02
+   207 0000008D F4                          hlt
    208                                  
-   209                                  ISR04_Handler_OF:
-   210 00000094 6687DB                      xchg    bx,bx
-   211 00000097 B204                        mov dl,0x04
-   212 00000099 F4                          hlt
+   209                                  ISR03_Handler_BP:
+   210 0000008E 6687DB                      xchg    bx,bx
+   211 00000091 B203                        mov dl,0x03
+   212 00000093 F4                          hlt
    213                                  
-   214                                  ISR05_Handler_BR:
-   215 0000009A 6687DB                      xchg    bx,bx
-   216 0000009D B205                        mov dl,0x05
-   217 0000009F F4                          hlt
-   218                                  ;#UD (Invalid Opcode Fetch) 
-   219                                  ISR06_Handler_UD:
-   220 000000A0 6687DB                      xchg    bx,bx
-   221 000000A3 B206                        mov     dl,0x06
-   222 000000A5 F4                          hlt
-   223                                  
-   224                                  ISR07_Handler_NM:
-   225 000000A6 6687DB                      xchg    bx,bx
-   226 000000A9 B207                        mov dl,0x07
-   227 000000AB F4                          hlt
+   214                                  ISR04_Handler_OF:
+   215 00000094 6687DB                      xchg    bx,bx
+   216 00000097 B204                        mov dl,0x04
+   217 00000099 F4                          hlt
+   218                                  
+   219                                  ISR05_Handler_BR:
+   220 0000009A 6687DB                      xchg    bx,bx
+   221 0000009D B205                        mov dl,0x05
+   222 0000009F F4                          hlt
+   223                                  ;#UD (Invalid Opcode Fetch) 
+   224                                  ISR06_Handler_UD:
+   225 000000A0 6687DB                      xchg    bx,bx
+   226 000000A3 B206                        mov     dl,0x06
+   227 000000A5 F4                          hlt
    228                                  
-   229                                  ISR08_Handler_DF:
-   230 000000AC 6687DB                      xchg    bx,bx
-   231 000000AF B208                        mov dl,0x08
-   232 000000B1 F4                          hlt
+   229                                  ISR07_Handler_NM:
+   230 000000A6 6687DB                      xchg    bx,bx
+   231 000000A9 B207                        mov dl,0x07
+   232 000000AB F4                          hlt
    233                                  
-   234                                  ISR10_Handler_TS:
-   235 000000B2 6687DB                      xchg    bx,bx
-   236 000000B5 B20A                        mov dl,0x0A
-   237 000000B7 F4                          hlt
+   234                                  ISR08_Handler_DF:
+   235 000000AC 6687DB                      xchg    bx,bx
+   236 000000AF B208                        mov dl,0x08
+   237 000000B1 F4                          hlt
    238                                  
-   239                                  ISR11_Handler_NP:
-   240 000000B8 6687DB                      xchg    bx,bx
-   241 000000BB B20B                        mov dl,0x0B
-   242 000000BD F4                          hlt
+   239                                  ISR10_Handler_TS:
+   240 000000B2 6687DB                      xchg    bx,bx
+   241 000000B5 B20A                        mov dl,0x0A
+   242 000000B7 F4                          hlt
    243                                  
-   244                                  ISR12_Handler_SS:
-   245 000000BE 6687DB                      xchg    bx,bx
-   246 000000C1 B20C                        mov dl,0x0C
-   247 000000C3 F4                          hlt
-   248                                  ; Funciono al no tener el CS al retornar de un call
-   249                                  ISR13_Handler_GP:
-   250 000000C4 6687DB                      xchg    bx,bx
-   251 000000C7 B20D                        mov dl,0x0D
-   252 000000C9 CF                          iretd
-   253                                  ;-----------------------------------
-   254                                  ;----------Page Fault (#PF)---------
-   255                                  ;-----------------------------------
-   256                                  
-   257                                  ;Error code
-   258                                  ;The Page Fault sets an error code:
-   259                                  ;
-   260                                  ; 31              4               0
-   261                                  ;+---+--  --+---+---+---+---+---+---+
-   262                                  ;|   Reserved   | I | R | U | W | P |
-   263                                  ;+---+--  --+---+---+---+---+---+---+
-   264                                  ;Length	Name	Description
-   265                                  ;P	1 bit	Present	When set, the page fault was caused by a page-protection violation. When not set, it was caused by a non-present page.
-   266                                  ;W	1 bit	Write	When set, the page fault was caused by a write access. When not set, it was caused by a read access.
-   267                                  ;U	1 bit	User	When set, the page fault was caused while CPL = 3. This does not necessarily mean that the page fault was a privilege violation.
-   268                                  ;R	1 bit	Reserved write	When set, one or more page directory entries contain reserved bits which are set to 1. This only applies when the PSE or PAE flags in CR4 are set to 1.
-   269                                  ;I	1 bit	Instruction Fetch	When set, the page fault was caused by an instruction fetch. This only applies when the No-Execute bit is supported and enabled.
-   270                                  ISR14_Handler_PF:
-   271 000000CA FA                          cli                                     ; Deshabilito interrupciones.
-   272 000000CB 60                          pushad                                  ; Guardo registros.
-   273 000000CC 8B5C2420                    mov     ebx, [esp + 32]                 ; Guardo el Error Code. 
-   274 000000D0 891D[00000000]              mov     [error_code_PF], ebx
-   275 000000D6 0F20D0                      mov     eax, cr2
-   276 000000D9 A3[00000000]                mov     [dir_lineal_page_fault], eax    ; Guardo dir. lineal VMA que falló
-   277                                      ; -> Limpio pantalla.
-   278 000000DE 55                          push    ebp
-   279 000000DF 89E5                        mov     ebp, esp
-   280 000000E1 68[00000000]                push    __VGA_VMA
-   281 000000E6 E8(00000000)                call    limpiar_VGA                     
-   282 000000EB C9                          leave
-   283                                      ; -> Escribo mensaje de Page Fault.
-   284 000000EC 55                          push    ebp
-   285 000000ED 89E5                        mov     ebp, esp
-   286 000000EF 6A01                        push    1       ; Es ASCII
-   287 000000F1 6A0A                        push    10      ; Columna VGA
-   288 000000F3 6A00                        push    0       ; Fila    VGA
-   289 000000F5 68[00000000]                push    page_fault_msg
-   290 000000FA E8(00000000)                call    escribir_mensaje_VGA
-   291 000000FF C9                          leave
-   292                                       ; -> Escribo mensaje "La dir VMA es"
-   293 00000100 55                          push    ebp
-   294 00000101 89E5                        mov     ebp, esp
-   295 00000103 6A01                        push    1       ; Es ASCII
-   296 00000105 6A0A                        push    10      ; Columna VGA
-   297 00000107 6A01                        push    1       ; Fila    VGA
-   298 00000109 68[00000000]                push    page_fault_msg_2
-   299 0000010E E8(00000000)                call    escribir_mensaje_VGA
-   300 00000113 C9                          leave
-   301                                      ; -> Muestro la dir VMA no mapeada en PHY
-   302 00000114 55                          push    ebp
-   303 00000115 89E5                        mov     ebp, esp
-   304 00000117 6A1E                        push    30      ; Columna VGA
-   305 00000119 6A01                        push    1       ; Fila VGA
-   306 0000011B FF35[00000000]              push    dword[dir_lineal_page_fault]
-   307 00000121 E8(00000000)                call    mostrar_numero32_VGA
-   308 00000126 C9                          leave
-   309                                      ; -> Muestro el mensaje "Error Code:"
-   310 00000127 55                          push    ebp
-   311 00000128 89E5                        mov     ebp, esp
-   312 0000012A 6A0A                        push    10      ; Columna VGA
-   313 0000012C 6A02                        push    2       ; Fila VGA
-   314 0000012E 68[00000000]                push    page_fault_msg_3
-   315 00000133 E8(00000000)                call    escribir_mensaje_VGA
-   316 00000138 C9                          leave
-   317                                      ; -> Muestro el valor del Error Code
-   318 00000139 55                          push    ebp
-   319 0000013A 89E5                        mov     ebp, esp
-   320 0000013C 6A1E                        push    30      ; Columna VGA
-   321 0000013E 6A02                        push    2       ; Fila VGA
-   322 00000140 FF35[00000000]              push    dword[error_code_PF]
-   323 00000146 E8(00000000)                call    mostrar_numero32_VGA
-   324 0000014B C9                          leave
-   325                                  
-   326                                      ;xchg    bx, bx 
-   327                                      ; -> Analizo el Error Code
-   328                                      ; Si es una Pagina no presente (Bit 0 = 0) debe repaginar.
-   329 0000014C 83E31F                      and ebx, 0x1F   ; Bits 0 - 5 donde tengo los flags.
-   330 0000014F 83FB00                      cmp ebx, 0x00
-   331 00000152 740A                        je pag_no_presente
-   332 00000154 83FB02                      cmp ebx, 0x02
-   333 00000157 7405                        je write_access
-   334 00000159 E9D1000000                  jmp end_handler_PF
-   335                                  pag_no_presente:
-   336                                  write_access:
-   337                                      ;xchg  bx, bx
-   338                                  
-   339                                      ;---------------------------------------------------
-   340                                      ; -> -----------Guardo VMA de falla y Dir. Fisica en GPRs
-   341                                      ;----------para poder re-paginar con la paginacion apagada-----------------
-   342                                      ;---------------------------------------------------
-   343                                      ; ->Guardo en edx la VMA de falla del CR2
-   344 0000015E 31D2                        xor   edx, edx
-   345 00000160 8B15[00000000]              mov   edx, [dir_lineal_page_fault] 
-   346                                      ; ->Guardo en ecx la Dir. Fisica dinamica
-   347 00000166 31C9                        xor   ecx, ecx
-   348 00000168 8B0D[00000000]              mov   ecx, [dir_phy_dinamica] 
-   349                                      ;---------------------------------------------------
-   350                                      ; -> -----------Apago la paginación-----------------
-   351                                      ;---------------------------------------------------
-   352 0000016E 31C0                        xor   eax, eax
-   353 00000170 0F20C0                      mov   eax, cr0 
-   354 00000173 25FFFFFF7F                  and   eax, 0x7FFFFFFF
-   355 00000178 0F22C0                      mov   cr0, eax
-   356                                      ; -> Debo realizar la paginación para la VMA que falló y 
-   357                                      ; para la PHY 0x0A000000
-   358                                      ; -> Cargo el PDE (Page Directory Entry) - De no existir, lo crea.
-   359 0000017B 52                          push    edx                                 ; Guardo edx (VMA de falla del CR2)
-   360 0000017C 51                          push    ecx                                 ; Guardo ecx (Dir. Fisica dinamica)
-   361                                  
-   362 0000017D 55                          push    ebp
-   363 0000017E 89E5                        mov     ebp, esp
-   364 00000180 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
-   365 00000182 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
-   366 00000184 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
-   367 00000186 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
-   368 00000188 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
-   369 0000018A 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
-   370 0000018C 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
-   371 0000018E 52                          push    edx                                 ; Dir. Lineal VMA que produjo el #PF y traje del CR2. 
-   372 0000018F 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
-   373 00000194 E8(00000000)                call    set_dir_page_table_entry
-   374 00000199 C9                          leave
-   375                                  
-   376 0000019A 59                          pop    ecx                                  ; Leo ecx
-   377 0000019B 5A                          pop    edx                                  ; Leo edx
-   378                                  
-   379                                      ; -> Cargo la PTE (Page Table Entry)
-   380 0000019C 55                          push    ebp
-   381 0000019D 89E5                        mov     ebp, esp
-   382 0000019F 6A01                        push    PAG_P_YES
-   383 000001A1 6A01                        push    PAG_RW_W
-   384 000001A3 6A00                        push    PAG_US_SUP
-   385 000001A5 6A00                        push    PAG_PWT_NO
-   386 000001A7 6A00                        push    PAG_PCD_NO
-   387 000001A9 6A00                        push    PAG_A
-   388 000001AB 6A00                        push    PAG_D
-   389 000001AD 6A00                        push    PAG_PAT
-   390 000001AF 6A00                        push    PAG_G_YES
-   391 000001B1 51                          push    ecx                             ; Dir física dinámica ( se va sumando de a 4K para nuevas páginas)
-   392 000001B2 52                          push    edx                             ; Dir. Lineal VMA que produjo el #PF y traje del CR2.
-   393 000001B3 68[00000000]                push    dword __PAGE_TABLES_PHY         ; PT inicializada antes de activar paginación.
-   394 000001B8 E8(00000000)                call    set_page_table_entry 
-   395 000001BD C9                          leave
-   396                                  
-   397                                      ;---------------------------------------------------
-   398                                      ; -> -----------Prendo la paginación-----------------
-   399                                      ;---------------------------------------------------
-   400 000001BE 31C0                        xor   eax, eax
-   401 000001C0 0F20C0                      mov   eax, cr0 
-   402 000001C3 0D00000080                  or    eax, X86_CR0_PG
-   403 000001C8 0F22C0                      mov   cr0, eax
-   404                                  
-   405                                      ;xchg    bx, bx 
-   406                                      
-   407                                      ; -> Analizo valor de la Dir. Fisica.
-   408                                      ;xor     eax, eax
-   409                                      ;mov     eax,[dir_phy_dinamica]
-   410                                      ;and     eax, 0xFFFFF000                 ; 20 bits mas sig. poseen DIR_BASE_PAGE.
-   411                                      ; -> Puedo paginar desde 0x1FFF8 a 0xA000 = 0x15FF8 -> 90.104 páginas de 4K.
-   412                                      ; Lo limito en 90K páginas y luego las sobreescribo para no romper la memoria.
-   413                                      ;cmp     eax, 0x15F90
-   414                                      ;jle     resetear_dir_phy_dinamica    ;  0x01200025   dir_phy_dinamica
-   415                                  
-   416                                  
-   417                                      ; -> Sumo 4K para mapear la próx. dir física.
-   418 000001CB 31DB                        xor     ebx, ebx
-   419 000001CD 8B1D[00000000]              mov     ebx, [dir_phy_dinamica]
-   420 000001D3 81C300100000                add     ebx, 0x1000                     ; Sumo 4k a la dir fisica
-   421 000001D9 891D[00000000]              mov     [dir_phy_dinamica], ebx
-   422                                      ; -> Sumo al contador de páginas de 4K creadas
-   423 000001DF 31DB                        xor     ebx, ebx
-   424 000001E1 8B1D[00000000]              mov     ebx, [paginas_creadas]
-   425 000001E7 83C301                      add     ebx, 0x01
-   426 000001EA 891D[00000000]              mov     [paginas_creadas], ebx
-   427                                      ; -> Limpio pantalla.
-   428 000001F0 55                          push    ebp
-   429 000001F1 89E5                        mov     ebp, esp
-   430 000001F3 68[00000000]                push    __VGA_VMA
-   431 000001F8 E8(00000000)                call    limpiar_VGA                     
-   432 000001FD C9                          leave
-   433                                      ; -> Muestro el mensaje "Cantidad de paginas de 4k creadas: ."
-   434 000001FE 55                          push    ebp
-   435 000001FF 89E5                        mov     ebp, esp
-   436 00000201 6A2C                        push    44      ; Columna VGA
-   437 00000203 6A0C                        push    12       ; Fila VGA
-   438 00000205 68[00000000]                push    page_fault_msg_6
-   439 0000020A E8(00000000)                call    escribir_mensaje_VGA
-   440 0000020F C9                          leave
-   441                                       ; -> Muestro el valor de la cantidad de págs. creadas
-   442 00000210 55                          push    ebp
-   443 00000211 89E5                        mov     ebp, esp
-   444 00000213 6A4F                        push    79      ; Columna VGA
-   445 00000215 6A0D                        push    13       ; Fila VGA
-   446 00000217 FF35[00000000]              push    dword[paginas_creadas]
-   447 0000021D E8(00000000)                call    mostrar_numero32_VGA
-   448 00000222 C9                          leave
-   449                                  
-   450 00000223 EB0A                        jmp     end_handler_PF                  ; Finalizo el handler #PF
-   451                                  
-   452                                  
-   453                                  resetear_dir_phy_dinamica:
-   454 00000225 C705[00000000]0000-         mov     dword[dir_phy_dinamica], 0x0A000000
-   454 0000022D 000A               
-   455                                  end_handler_PF:
-   456                                     
-   457                                      ;xchg    bx, bx                          ; BREAK LUEGO DE PAGINAR.
-   458                                  
-   459 0000022F 61                          popad                       ; Tomo valores de registros guardados.
-   460 00000230 58                          pop eax                     ; Porque me queda un valor para ser popeado y poder retornar con CS:DIR LINEAL al punto donde se produjo el #PF
-   461 00000231 FB                          sti                         ; Habilito interrupciones.
-   462 00000232 CF                          iret
+   244                                  ISR11_Handler_NP:
+   245 000000B8 6687DB                      xchg    bx,bx
+   246 000000BB B20B                        mov dl,0x0B
+   247 000000BD F4                          hlt
+   248                                  
+   249                                  ISR12_Handler_SS:
+   250 000000BE 6687DB                      xchg    bx,bx
+   251 000000C1 B20C                        mov dl,0x0C
+   252 000000C3 F4                          hlt
+   253                                  ; Funciono al no tener el CS al retornar de un call
+   254                                  ISR13_Handler_GP:
+   255 000000C4 6687DB                      xchg    bx,bx
+   256 000000C7 B20D                        mov dl,0x0D
+   257 000000C9 CF                          iretd
+   258                                  ;-----------------------------------
+   259                                  ;----------Page Fault (#PF)---------
+   260                                  ;-----------------------------------
+   261                                  
+   262                                  ;Error code
+   263                                  ;The Page Fault sets an error code:
+   264                                  ;
+   265                                  ; 31              4               0
+   266                                  ;+---+--  --+---+---+---+---+---+---+
+   267                                  ;|   Reserved   | I | R | U | W | P |
+   268                                  ;+---+--  --+---+---+---+---+---+---+
+   269                                  ;Length	Name	Description
+   270                                  ;P	1 bit	Present	When set, the page fault was caused by a page-protection violation. When not set, it was caused by a non-present page.
+   271                                  ;W	1 bit	Write	When set, the page fault was caused by a write access. When not set, it was caused by a read access.
+   272                                  ;U	1 bit	User	When set, the page fault was caused while CPL = 3. This does not necessarily mean that the page fault was a privilege violation.
+   273                                  ;R	1 bit	Reserved write	When set, one or more page directory entries contain reserved bits which are set to 1. This only applies when the PSE or PAE flags in CR4 are set to 1.
+   274                                  ;I	1 bit	Instruction Fetch	When set, the page fault was caused by an instruction fetch. This only applies when the No-Execute bit is supported and enabled.
+   275                                  ISR14_Handler_PF:
+   276 000000CA FA                          cli                                     ; Deshabilito interrupciones.
+   277 000000CB 60                          pushad                                  ; Guardo registros.
+   278 000000CC 8B5C2420                    mov     ebx, [esp + 32]                 ; Guardo el Error Code. 
+   279 000000D0 891D[00000000]              mov     [error_code_PF], ebx
+   280 000000D6 0F20D0                      mov     eax, cr2
+   281 000000D9 A3[00000000]                mov     [dir_lineal_page_fault], eax    ; Guardo dir. lineal VMA que falló
+   282                                      ; -> Limpio pantalla.
+   283 000000DE 55                          push    ebp
+   284 000000DF 89E5                        mov     ebp, esp
+   285 000000E1 68[00000000]                push    __VGA_VMA
+   286 000000E6 E8(00000000)                call    limpiar_VGA                     
+   287 000000EB C9                          leave
+   288                                      ; -> Escribo mensaje de Page Fault.
+   289 000000EC 55                          push    ebp
+   290 000000ED 89E5                        mov     ebp, esp
+   291 000000EF 6A01                        push    1       ; Es ASCII
+   292 000000F1 6A0A                        push    10      ; Columna VGA
+   293 000000F3 6A00                        push    0       ; Fila    VGA
+   294 000000F5 68[00000000]                push    page_fault_msg
+   295 000000FA E8(00000000)                call    escribir_mensaje_VGA
+   296 000000FF C9                          leave
+   297                                       ; -> Escribo mensaje "La dir VMA es"
+   298 00000100 55                          push    ebp
+   299 00000101 89E5                        mov     ebp, esp
+   300 00000103 6A01                        push    1       ; Es ASCII
+   301 00000105 6A0A                        push    10      ; Columna VGA
+   302 00000107 6A01                        push    1       ; Fila    VGA
+   303 00000109 68[00000000]                push    page_fault_msg_2
+   304 0000010E E8(00000000)                call    escribir_mensaje_VGA
+   305 00000113 C9                          leave
+   306                                      ; -> Muestro la dir VMA no mapeada en PHY
+   307 00000114 55                          push    ebp
+   308 00000115 89E5                        mov     ebp, esp
+   309 00000117 6A1E                        push    30      ; Columna VGA
+   310 00000119 6A01                        push    1       ; Fila VGA
+   311 0000011B FF35[00000000]              push    dword[dir_lineal_page_fault]
+   312 00000121 E8(00000000)                call    mostrar_numero32_VGA
+   313 00000126 C9                          leave
+   314                                      ; -> Muestro el mensaje "Error Code:"
+   315 00000127 55                          push    ebp
+   316 00000128 89E5                        mov     ebp, esp
+   317 0000012A 6A0A                        push    10      ; Columna VGA
+   318 0000012C 6A02                        push    2       ; Fila VGA
+   319 0000012E 68[00000000]                push    page_fault_msg_3
+   320 00000133 E8(00000000)                call    escribir_mensaje_VGA
+   321 00000138 C9                          leave
+   322                                      ; -> Muestro el valor del Error Code
+   323 00000139 55                          push    ebp
+   324 0000013A 89E5                        mov     ebp, esp
+   325 0000013C 6A1E                        push    30      ; Columna VGA
+   326 0000013E 6A02                        push    2       ; Fila VGA
+   327 00000140 FF35[00000000]              push    dword[error_code_PF]
+   328 00000146 E8(00000000)                call    mostrar_numero32_VGA
+   329 0000014B C9                          leave
+   330                                  
+   331                                      ;xchg    bx, bx 
+   332                                      ; -> Analizo el Error Code
+   333                                      ; Si es una Pagina no presente (Bit 0 = 0) debe repaginar.
+   334 0000014C 83E31F                      and ebx, 0x1F   ; Bits 0 - 5 donde tengo los flags.
+   335 0000014F 83FB00                      cmp ebx, 0x00
+   336 00000152 740A                        je pag_no_presente
+   337 00000154 83FB02                      cmp ebx, 0x02
+   338 00000157 7405                        je write_access
+   339 00000159 E9D1000000                  jmp end_handler_PF
+   340                                  pag_no_presente:
+   341                                  write_access:
+   342                                      ;xchg  bx, bx
+   343                                  
+   344                                      ;---------------------------------------------------
+   345                                      ; -> -----------Guardo VMA de falla y Dir. Fisica en GPRs
+   346                                      ;----------para poder re-paginar con la paginacion apagada-----------------
+   347                                      ;---------------------------------------------------
+   348                                      ; ->Guardo en edx la VMA de falla del CR2
+   349 0000015E 31D2                        xor   edx, edx
+   350 00000160 8B15[00000000]              mov   edx, [dir_lineal_page_fault] 
+   351                                      ; ->Guardo en ecx la Dir. Fisica dinamica
+   352 00000166 31C9                        xor   ecx, ecx
+   353 00000168 8B0D[00000000]              mov   ecx, [dir_phy_dinamica] 
+   354                                      ;---------------------------------------------------
+   355                                      ; -> -----------Apago la paginación-----------------
+   356                                      ;---------------------------------------------------
+   357 0000016E 31C0                        xor   eax, eax
+   358 00000170 0F20C0                      mov   eax, cr0 
+   359 00000173 25FFFFFF7F                  and   eax, 0x7FFFFFFF
+   360 00000178 0F22C0                      mov   cr0, eax
+   361                                      ; -> Debo realizar la paginación para la VMA que falló y 
+   362                                      ; para la PHY 0x0A000000
+   363                                      ; -> Cargo el PDE (Page Directory Entry) - De no existir, lo crea.
+   364 0000017B 52                          push    edx                                 ; Guardo edx (VMA de falla del CR2)
+   365 0000017C 51                          push    ecx                                 ; Guardo ecx (Dir. Fisica dinamica)
+   366                                  
+   367 0000017D 55                          push    ebp
+   368 0000017E 89E5                        mov     ebp, esp
+   369 00000180 6A01                        push    PAG_P_YES                           ; Presente: Indica si la página está en la memoria (P=1), generando una excepción #PF cuando se intenta acceder a una dirección de memoria que tiene al menos un de
+   370 00000182 6A01                        push    PAG_RW_W                            ; Readable / Writable: Establece si la página es Read Only (0) o si puede ser escrita (1).
+   371 00000184 6A00                        push    PAG_US_SUP                          ; User / Supervisor: Privilegio de la P´agina: ’0’ Supervisor (Kernel), y ’1’ Usuario.
+   372 00000186 6A00                        push    PAG_PWT_NO                          ; Page-Level Write Through. Establece el modo de escritura que tendrá la página en el Cache.
+   373 00000188 6A00                        push    PAG_PCD_NO                          ; Page-Level Cache Disable. Establece que una página integre el tipo de memoria no cacheable.
+   374 0000018A 6A00                        push    PAG_A                               ; Accedido. Se setea cada vez que la página es accedida.
+   375 0000018C 6A00                        push    PAG_PS_4K                           ; Page Size: Existe solo en el DPT. Si es ’0’ la PDE corresponde a una PT de 4 Kbytes. Si es ’1’ a una página de 4Mbytes.
+   376 0000018E 52                          push    edx                                 ; Dir. Lineal VMA que produjo el #PF y traje del CR2. 
+   377 0000018F 68[00000000]                push    dword __PAGE_TABLES_PHY             ; Dir. Fisica(PHY) - Base de la DPT.
+   378 00000194 E8(00000000)                call    set_dir_page_table_entry
+   379 00000199 C9                          leave
+   380                                  
+   381 0000019A 59                          pop    ecx                                  ; Leo ecx
+   382 0000019B 5A                          pop    edx                                  ; Leo edx
+   383                                  
+   384                                      ; -> Cargo la PTE (Page Table Entry)
+   385 0000019C 55                          push    ebp
+   386 0000019D 89E5                        mov     ebp, esp
+   387 0000019F 6A01                        push    PAG_P_YES
+   388 000001A1 6A01                        push    PAG_RW_W
+   389 000001A3 6A00                        push    PAG_US_SUP
+   390 000001A5 6A00                        push    PAG_PWT_NO
+   391 000001A7 6A00                        push    PAG_PCD_NO
+   392 000001A9 6A00                        push    PAG_A
+   393 000001AB 6A00                        push    PAG_D
+   394 000001AD 6A00                        push    PAG_PAT
+   395 000001AF 6A00                        push    PAG_G_YES
+   396 000001B1 51                          push    ecx                             ; Dir física dinámica ( se va sumando de a 4K para nuevas páginas)
+   397 000001B2 52                          push    edx                             ; Dir. Lineal VMA que produjo el #PF y traje del CR2.
+   398 000001B3 68[00000000]                push    dword __PAGE_TABLES_PHY         ; PT inicializada antes de activar paginación.
+   399 000001B8 E8(00000000)                call    set_page_table_entry 
+   400 000001BD C9                          leave
+   401                                  
+   402                                      ;---------------------------------------------------
+   403                                      ; -> -----------Prendo la paginación-----------------
+   404                                      ;---------------------------------------------------
+   405 000001BE 31C0                        xor   eax, eax
+   406 000001C0 0F20C0                      mov   eax, cr0 
+   407 000001C3 0D00000080                  or    eax, X86_CR0_PG
+   408 000001C8 0F22C0                      mov   cr0, eax
+   409                                  
+   410                                      ;xchg    bx, bx 
+   411                                      
+   412                                      ; -> Analizo valor de la Dir. Fisica.
+   413                                      ;xor     eax, eax
+   414                                      ;mov     eax,[dir_phy_dinamica]
+   415                                      ;and     eax, 0xFFFFF000                 ; 20 bits mas sig. poseen DIR_BASE_PAGE.
+   416                                      ; -> Puedo paginar desde 0x1FFF8 a 0xA000 = 0x15FF8 -> 90.104 páginas de 4K.
+   417                                      ; Lo limito en 90K páginas y luego las sobreescribo para no romper la memoria.
+   418                                      ;cmp     eax, 0x15F90
+   419                                      ;jle     resetear_dir_phy_dinamica    ;  0x01200025   dir_phy_dinamica
+   420                                  
+   421                                  
+   422                                      ; -> Sumo 4K para mapear la próx. dir física.
+   423 000001CB 31DB                        xor     ebx, ebx
+   424 000001CD 8B1D[00000000]              mov     ebx, [dir_phy_dinamica]
+   425 000001D3 81C300100000                add     ebx, 0x1000                     ; Sumo 4k a la dir fisica
+   426 000001D9 891D[00000000]              mov     [dir_phy_dinamica], ebx
+   427                                      ; -> Sumo al contador de páginas de 4K creadas
+   428 000001DF 31DB                        xor     ebx, ebx
+   429 000001E1 8B1D[00000000]              mov     ebx, [paginas_creadas]
+   430 000001E7 83C301                      add     ebx, 0x01
+   431 000001EA 891D[00000000]              mov     [paginas_creadas], ebx
+   432                                      ; -> Limpio pantalla.
+   433 000001F0 55                          push    ebp
+   434 000001F1 89E5                        mov     ebp, esp
+   435 000001F3 68[00000000]                push    __VGA_VMA
+   436 000001F8 E8(00000000)                call    limpiar_VGA                     
+   437 000001FD C9                          leave
+   438                                      ; -> Muestro el mensaje "Cantidad de paginas de 4k creadas: ."
+   439 000001FE 55                          push    ebp
+   440 000001FF 89E5                        mov     ebp, esp
+   441 00000201 6A2C                        push    44      ; Columna VGA
+   442 00000203 6A0C                        push    12       ; Fila VGA
+   443 00000205 68[00000000]                push    page_fault_msg_6
+   444 0000020A E8(00000000)                call    escribir_mensaje_VGA
+   445 0000020F C9                          leave
+   446                                       ; -> Muestro el valor de la cantidad de págs. creadas
+   447 00000210 55                          push    ebp
+   448 00000211 89E5                        mov     ebp, esp
+   449 00000213 6A4F                        push    79      ; Columna VGA
+   450 00000215 6A0D                        push    13       ; Fila VGA
+   451 00000217 FF35[00000000]              push    dword[paginas_creadas]
+   452 0000021D E8(00000000)                call    mostrar_numero32_VGA
+   453 00000222 C9                          leave
+   454                                  
+   455 00000223 EB0A                        jmp     end_handler_PF                  ; Finalizo el handler #PF
+   456                                  
+   457                                  
+   458                                  resetear_dir_phy_dinamica:
+   459 00000225 C705[00000000]0000-         mov     dword[dir_phy_dinamica], 0x0A000000
+   459 0000022D 000A               
+   460                                  end_handler_PF:
+   461                                     
+   462                                      ;xchg    bx, bx                          ; BREAK LUEGO DE PAGINAR.
    463                                  
-   464                                  ISR15_Handler_RES:
-   465 00000233 6687DB                      xchg    bx,bx
-   466 00000236 B20F                        mov dl,0x0F
-   467 00000238 F4                          hlt
+   464 0000022F 61                          popad                       ; Tomo valores de registros guardados.
+   465 00000230 58                          pop eax                     ; Porque me queda un valor para ser popeado y poder retornar con CS:DIR LINEAL al punto donde se produjo el #PF
+   466 00000231 FB                          sti                         ; Habilito interrupciones.
+   467 00000232 CF                          iret
    468                                  
-   469                                  ISR16_Handler_MF:
-   470 00000239 6687DB                      xchg    bx,bx
-   471 0000023C B210                        mov dl,0x10
-   472 0000023E F4                          hlt
+   469                                  ISR15_Handler_RES:
+   470 00000233 6687DB                      xchg    bx,bx
+   471 00000236 B20F                        mov dl,0x0F
+   472 00000238 F4                          hlt
    473                                  
-   474                                  ISR17_Handler_AC:
-   475 0000023F 6687DB                      xchg    bx,bx
-   476 00000242 B211                        mov dl,0x11
-   477 00000244 F4                          hlt
+   474                                  ISR16_Handler_MF:
+   475 00000239 6687DB                      xchg    bx,bx
+   476 0000023C B210                        mov dl,0x10
+   477 0000023E F4                          hlt
    478                                  
-   479                                  ISR18_Handler_MC:
-   480 00000245 6687DB                      xchg    bx,bx
-   481 00000248 B212                        mov dl,0x12
-   482 0000024A F4                          hlt
+   479                                  ISR17_Handler_AC:
+   480 0000023F 6687DB                      xchg    bx,bx
+   481 00000242 B211                        mov dl,0x11
+   482 00000244 F4                          hlt
    483                                  
-   484                                  ISR19_Handler_XM:
-   485 0000024B 6687DB                      xchg    bx,bx
-   486 0000024E B213                        mov dl,0x13
-   487 00000250 F4                          hlt
-   488                                  ; System Call Handler
-   489                                  ISR128_Handler_SC:
-   490                                  
-   491                                      ; -> Analizo que sys call fue requerida por la tarea de nivel usuario
-   492                                  
-   493                                      ;cmp eax, SYS_R
-   494                                      ;je sys_read
-   495                                  ;
-   496                                      ;cmp eax, SYS_P
-   497                                      ;je sys_print
-   498                                  ;
-   499                                      ;cmp eax, SYS_P_VGA
-   500                                      ;je sys_print_VGA
-   501                                  ;
-   502                                      ;cmp eax, SYS_H
-   503                                      ;je sys_hlt
+   484                                  ISR18_Handler_MC:
+   485 00000245 6687DB                      xchg    bx,bx
+   486 00000248 B212                        mov dl,0x12
+   487 0000024A F4                          hlt
+   488                                  
+   489                                  ISR19_Handler_XM:
+   490 0000024B 6687DB                      xchg    bx,bx
+   491 0000024E B213                        mov dl,0x13
+   492 00000250 F4                          hlt
+   493                                  ; System Call Handler
+   494                                  ISR128_Handler_SC:
+   495                                  
+   496                                      ; -> Analizo que sys call fue requerida por la tarea de nivel usuario
+   497 00000251 FB                          sti
+   498                                  
+   499 00000252 83F801                      cmp eax, SYS_R
+   500 00000255 740F                        je sys_read
+   501                                  
+   502 00000257 83F802                      cmp eax, SYS_P
+   503 0000025A 7432                        je sys_print
    504                                  
-   505                                  
-   506 00000251 CF                          iret            ; Vuelvo a la tarea de usuario
+   505 0000025C 83F803                      cmp eax, SYS_P_VGA
+   506 0000025F 7455                        je sys_print_VGA
+   507                                  
+   508 00000261 83F800                      cmp eax, SYS_H
+   509 00000264 7472                        je sys_hlt
+   510                                  
+   511                                  sys_read:
+   512                                  
+   513 00000266 83FB01                      cmp ebx, 1 
+   514 00000269 740F                        je read_byte
+   515                                  
+   516 0000026B 83FB02                      cmp ebx, 2 
+   517 0000026E 740E                        je read_word
+   518                                  
+   519 00000270 83FB03                      cmp ebx, 3 
+   520 00000273 740E                        je read_dword
+   521                                  
+   522 00000275 83FB04                      cmp ebx, 4 
+   523 00000278 740D                        je read_qword
+   524                                  
+   525                                  ;8bits
+   526                                  read_byte:
+   527 0000027A 8A06                        mov al, [esi]
+   528 0000027C EB5D                        jmp SYS_CALL_FIN
+   529                                  
+   530                                  ;16bits
+   531                                  read_word:
+   532 0000027E 668B06                      mov ax, [esi]
+   533 00000281 EB58                        jmp SYS_CALL_FIN
+   534                                  
+   535                                  ;32bits
+   536                                  read_dword:
+   537 00000283 8B06                        mov eax, [esi]
+   538 00000285 EB54                        jmp SYS_CALL_FIN
+   539                                  
+   540                                  ;64bits
+   541                                  read_qword:
+   542 00000287 8B06                        mov dword eax, [esi]
+   543 00000289 8B5604                      mov dword edx, [esi + 4]            ;parte alta 
+   544 0000028C EB4D                        jmp SYS_CALL_FIN
+   545                                  
+   546                                  sys_print:
+   547                                  
+   548 0000028E 83FB01                      cmp ebx, 1 
+   549 00000291 740F                        je print_byte
+   550                                  
+   551 00000293 83FB02                      cmp ebx, 2 
+   552 00000296 740E                        je print_word
+   553                                  
+   554 00000298 83FB03                      cmp ebx, 3 
+   555 0000029B 740E                        je print_dword
+   556                                  
+   557 0000029D 83FB04                      cmp ebx, 4 
+   558 000002A0 740D                        je print_qword
+   559                                  
+   560                                  ;8bits
+   561                                  print_byte:
+   562 000002A2 880F                        mov byte [edi], cl
+   563 000002A4 EB35                        jmp SYS_CALL_FIN
+   564                                  
+   565                                  ;16bits
+   566                                  print_word:
+   567 000002A6 66890F                      mov word [edi], cx
+   568 000002A9 EB30                        jmp SYS_CALL_FIN
+   569                                  
+   570                                  ;32bits
+   571                                  print_dword:
+   572 000002AB 890F                        mov dword [edi], ecx
+   573 000002AD EB2C                        jmp SYS_CALL_FIN
+   574                                  
+   575                                  ;64bits
+   576                                  print_qword:
+   577 000002AF 890F                        mov dword [edi], ecx
+   578 000002B1 895704                      mov dword [edi + 4], edx            ;parte alta 
+   579 000002B4 EB25                        jmp SYS_CALL_FIN
+   580                                  
+   581                                  sys_print_VGA:
+   582                                  
+   583 000002B6 83FB01                      cmp ebx, 1
+   584 000002B9 740F                        je print_VGA_byte
+   585                                  
+   586 000002BB 83FB02                      cmp ebx, 2
+   587 000002BE 740A                        je print_VGA_word
+   588                                  
+   589 000002C0 83FB03                      cmp ebx, 3
+   590 000002C3 7405                        je print_VGA_dword
+   591                                  
+   592 000002C5 83FB04                      cmp ebx, 4
+   593 000002C8 7400                        je print_VGA_qword
+   594                                  
+   595                                  print_VGA_byte:
+   596                                  
+   597                                  print_VGA_word:
+   598                                  
+   599                                  print_VGA_dword:
+   600                                  
+   601                                  print_VGA_qword:
+   602                                      ;xchg bx, bx
+   603                                  
+   604 000002CA 55                          push    ebp
+   605 000002CB 89E5                        mov     ebp, esp
+   606 000002CD 51                          push    ecx                    ; Columna VGA
+   607 000002CE 52                          push    edx                    ; Fila VGA
+   608 000002CF 57                          push    edi                    ; Numero de 64 bits
+   609 000002D0 E8(00000000)                call    mostrar_promedio64_VGA
+   610 000002D5 C9                          leave
+   611 000002D6 EB03                        jmp SYS_CALL_FIN
+   612                                  
+   613                                  sys_hlt:
+   614                                  
+   615 000002D8 F4                          hlt
+   616 000002D9 EBFD                        jmp sys_hlt
+   617                                  ;    add esp, 12
+   618                                  SYS_CALL_FIN:
+   619                                  
+   620 000002DB CF                          iret            ; Vuelvo a la tarea de usuario

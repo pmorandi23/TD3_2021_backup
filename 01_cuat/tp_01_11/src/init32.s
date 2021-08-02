@@ -22,12 +22,14 @@ EXTERN _gdtr_32
 EXTERN init_timer
 EXTERN init_teclado
 EXTERN set_cr3_rom
-EXTERN ejecutar_tarea_1
-EXTERN ejecutar_tarea_2
-EXTERN ejecutar_tarea_3
+EXTERN tarea_1_asm
+EXTERN tarea_2_asm
+EXTERN tarea_3_asm
+EXTERN tarea_4_asm
 EXTERN ejecutar_tarea_4
 EXTERN set_page_rom
 EXTERN init_tss
+exter
 ; Direcciones LMA
 EXTERN __KERNEL_32_LMA
 EXTERN __TECLADO_ISR_LMA
@@ -201,6 +203,7 @@ start32_launcher:
   leave
   cmp     eax, 1 ; Analizo el valor de retorno de memcopy (1 Exito , 0 Fallo)
   jne     .guard
+
   ; -> Desempaquetamiento de la ROM (copia del kernel a RAM)
   push    ebp
   mov     ebp, esp 
@@ -491,7 +494,7 @@ start32_launcher:
   leave
 
 
-;------__FUNCTIONS_PHY-----------
+;------1era pag de__FUNCTIONS_PHY-----------
   ; ->Cargo DPTE y PTE
   push    ebp
   mov     ebp, esp 
@@ -504,6 +507,22 @@ start32_launcher:
   push    __CR3_KERNEL_PHY  ; Base del DPT del Kernel 
   call    set_page_rom
   leave
+
+
+;------2da pag de__FUNCTIONS_PHY-----------
+  ; ->Cargo DPTE y PTE
+  push    ebp
+  mov     ebp, esp 
+  push    PAG_RW_R          ; Permisos R/W para el PTE
+  push    PAG_RW_W          ; Permisos R/W para el DPTE
+  push    PAG_US_SUP        ; Permisos de Supervisor/Usuario para el PTE
+  push    PAG_US_SUP        ; Permisos de Supervisor/Usuario para el DPTE
+  push    __FUNCTIONS_PHY + 0x1000
+  push    __FUNCTIONS_VMA + 0x1000 
+  push    __CR3_KERNEL_PHY  ; Base del DPT del Kernel 
+  call    set_page_rom
+  leave
+
 
 ;------__DIGITS_TABLE_PHY-----------
   ; ->Cargo DPTE y PTE
@@ -689,7 +708,7 @@ start32_launcher:
   mov     ebp, esp 
   push    PAG_RW_R            ; Permisos R/W para el PTE
   push    PAG_RW_W            ; Permisos R/W para el DPTE
-  push    PAG_US_SUP          ; Permisos de Supervisor/Usuario para el PTE
+  push    PAG_US_US          ; Permisos de Supervisor/Usuario para el PTE
   push    PAG_US_US           ; Permisos de Supervisor/Usuario para el DPTE
   push    __FUNCTIONS_PHY     
   push    __FUNCTIONS_VMA 
@@ -697,13 +716,28 @@ start32_launcher:
   call    set_page_rom
   leave
 
+    ;------2da __FUNCTIONS_PHY-----------
+  ; ->Cargo DPTE y PTE
+  push    ebp
+  mov     ebp, esp 
+  push    PAG_RW_R            ; Permisos R/W para el PTE
+  push    PAG_RW_W            ; Permisos R/W para el DPTE
+  push    PAG_US_US          ; Permisos de Supervisor/Usuario para el PTE
+  push    PAG_US_US           ; Permisos de Supervisor/Usuario para el DPTE
+  push    __FUNCTIONS_PHY + 0x1000     
+  push    __FUNCTIONS_VMA + 0x1000
+  push    __CR3_TAREA_1_PHY    ; Base del DPT de la Tarea 1 
+  call    set_page_rom
+  leave
+
+
   ;------__DATOS_SYS32_PHY-----------
   ; ->Cargo DPTE y PTE
   push    ebp
   mov     ebp, esp 
   push    PAG_RW_W            ; Permisos R/W para el PTE
   push    PAG_RW_W            ; Permisos R/W para el DPTE
-  push    PAG_US_SUP          ; Permisos de Supervisor/Usuario para el PTE
+  push    PAG_US_US          ; Permisos de Supervisor/Usuario para el PTE
   push    PAG_US_US           ; Permisos de Supervisor/Usuario para el DPTE
   push    __DATOS_SYS32_PHY     
   push    __DATOS_SYS32_VMA 
@@ -717,7 +751,7 @@ start32_launcher:
   mov     ebp, esp 
   push    PAG_RW_W            ; Permisos R/W para el PTE
   push    PAG_RW_W            ; Permisos R/W para el DPTE
-  push    PAG_US_SUP          ; Permisos de Supervisor/Usuario para el PTE
+  push    PAG_US_US           ; Permisos de Supervisor/Usuario para el PTE
   push    PAG_US_US           ; Permisos de Supervisor/Usuario para el DPTE
   push    __DIGITS_TABLE_PHY     
   push    __DIGITS_TABLE_VMA 
@@ -898,6 +932,20 @@ start32_launcher:
   push    PAG_US_US           ; Permisos de Supervisor/Usuario para el DPTE
   push    __FUNCTIONS_PHY     
   push    __FUNCTIONS_VMA 
+  push    __CR3_TAREA_2_PHY    ; Base del DPT de la Tarea 1 
+  call    set_page_rom
+  leave
+
+    ;------2da __FUNCTIONS_PHY-----------
+  ; ->Cargo DPTE y PTE
+  push    ebp
+  mov     ebp, esp 
+  push    PAG_RW_R            ; Permisos R/W para el PTE
+  push    PAG_RW_W            ; Permisos R/W para el DPTE
+  push    PAG_US_SUP          ; Permisos de Supervisor/Usuario para el PTE
+  push    PAG_US_US           ; Permisos de Supervisor/Usuario para el DPTE
+  push    __FUNCTIONS_PHY + 0x1000    
+  push    __FUNCTIONS_VMA + 0x1000
   push    __CR3_TAREA_2_PHY    ; Base del DPT de la Tarea 1 
   call    set_page_rom
   leave
@@ -1107,6 +1155,20 @@ start32_launcher:
   call    set_page_rom
   leave
 
+   ;------2da __FUNCTIONS_PHY-----------
+  ; ->Cargo DPTE y PTE
+  push    ebp
+  mov     ebp, esp 
+  push    PAG_RW_R            ; Permisos R/W para el PTE
+  push    PAG_RW_W            ; Permisos R/W para el DPTE
+  push    PAG_US_SUP          ; Permisos de Supervisor/Usuario para el PTE
+  push    PAG_US_US           ; Permisos de Supervisor/Usuario para el DPTE
+  push    __FUNCTIONS_PHY + 0x1000    
+  push    __FUNCTIONS_VMA + 0x1000
+  push    __CR3_TAREA_3_PHY    ; Base del DPT de la Tarea 3 
+  call    set_page_rom
+  leave
+
   ;------__DATOS_SYS32_PHY-----------
   ; ->Cargo DPTE y PTE
   push    ebp
@@ -1127,7 +1189,7 @@ start32_launcher:
   mov     ebp, esp 
   push    PAG_RW_W            ; Permisos R/W para el PTE
   push    PAG_RW_W            ; Permisos R/W para el DPTE
-  push    PAG_US_SUP          ; Permisos de Supervisor/Usuario para el PTE
+  push    PAG_US_US          ; Permisos de Supervisor/Usuario para el PTE
   push    PAG_US_US           ; Permisos de Supervisor/Usuario para el DPTE
   push    __DIGITS_TABLE_PHY     
   push    __DIGITS_TABLE_VMA 
@@ -1283,7 +1345,7 @@ start32_launcher:
   push    PAG_RW_R            ; Permiso ReadOnly para el PTE del código de los Handlers EXCEP. e IRQ
   push    PAG_RW_W            ; Permiso de Write para el DPTE que apunta a la TP
   push    PAG_US_SUP          ; Permisos de Supervisor para el PTE
-  push    PAG_US_US           ; Permisos de Usuario para el DPTE
+  push    PAG_US_SUP           ; Permisos de Usuario para el DPTE
   push    __TECLADO_ISR_PHY     
   push    __TECLADO_ISR_VMA 
   push    __CR3_TAREA_4_PHY   ; Base del DPT de la Tarea 4 
@@ -1296,7 +1358,7 @@ start32_launcher:
   push    PAG_RW_W            ; Permisos R/W para el PTE
   push    PAG_RW_W            ; Permisos R/W para el DPTE
   push    PAG_US_SUP          ; Permisos de Supervisor/Usuario para el PTE
-  push    PAG_US_US           ; Permisos de Supervisor/Usuario para el DPTE
+  push    PAG_US_SUP           ; Permisos de Supervisor/Usuario para el DPTE
   push    __VGA_PHY     
   push    __VGA_VMA 
   push    __CR3_TAREA_4_PHY    ; Base del DPT de la Tarea 4 
@@ -1310,9 +1372,23 @@ start32_launcher:
   push    PAG_RW_R            ; Permisos R/W para el PTE
   push    PAG_RW_W            ; Permisos R/W para el DPTE
   push    PAG_US_SUP          ; Permisos de Supervisor/Usuario para el PTE
-  push    PAG_US_US           ; Permisos de Supervisor/Usuario para el DPTE
+  push    PAG_US_SUP           ; Permisos de Supervisor/Usuario para el DPTE
   push    __FUNCTIONS_PHY     
   push    __FUNCTIONS_VMA 
+  push    __CR3_TAREA_4_PHY    ; Base del DPT de la Tarea 4 
+  call    set_page_rom
+  leave
+
+    ;------2da __FUNCTIONS_PHY-----------
+  ; ->Cargo DPTE y PTE
+  push    ebp
+  mov     ebp, esp 
+  push    PAG_RW_R            ; Permisos R/W para el PTE
+  push    PAG_RW_W            ; Permisos R/W para el DPTE
+  push    PAG_US_SUP          ; Permisos de Supervisor/Usuario para el PTE
+  push    PAG_US_SUP           ; Permisos de Supervisor/Usuario para el DPTE
+  push    __FUNCTIONS_PHY + 0x1000     
+  push    __FUNCTIONS_VMA + 0x1000
   push    __CR3_TAREA_4_PHY    ; Base del DPT de la Tarea 4 
   call    set_page_rom
   leave
@@ -1324,7 +1400,7 @@ start32_launcher:
   push    PAG_RW_W            ; Permisos R/W para el PTE
   push    PAG_RW_W            ; Permisos R/W para el DPTE
   push    PAG_US_SUP          ; Permisos de Supervisor/Usuario para el PTE
-  push    PAG_US_US           ; Permisos de Supervisor/Usuario para el DPTE
+  push    PAG_US_SUP           ; Permisos de Supervisor/Usuario para el DPTE
   push    __DATOS_SYS32_PHY     
   push    __DATOS_SYS32_VMA 
   push    __CR3_TAREA_4_PHY    ; Base del DPT de la Tarea 4 
@@ -1337,7 +1413,7 @@ start32_launcher:
   mov     ebp, esp 
   push    PAG_RW_W            ; Permisos R/W para el PTE
   push    PAG_RW_W            ; Permisos R/W para el DPTE
-  push    PAG_US_SUP          ; Permisos de Supervisor/Usuario para el PTE
+  push    PAG_US_US          ; Permisos de Supervisor/Usuario para el PTE
   push    PAG_US_US           ; Permisos de Supervisor/Usuario para el DPTE
   push    __DIGITS_TABLE_PHY     
   push    __DIGITS_TABLE_VMA 
@@ -1352,7 +1428,7 @@ start32_launcher:
   push    PAG_RW_R            ; Permisos R/W para el PTE
   push    PAG_RW_W            ; Permisos R/W para el DPTE
   push    PAG_US_SUP          ; Permisos de Supervisor/Usuario para el PTE
-  push    PAG_US_US           ; Permisos de Supervisor/Usuario para el DPTE
+  push    PAG_US_SUP           ; Permisos de Supervisor/Usuario para el DPTE
   push    __SYS_TABLES_PHY     
   push    __SYS_TABLES_VMA 
   push    __CR3_TAREA_4_PHY    ; Base del DPT de la Tarea 4 
@@ -1365,8 +1441,8 @@ start32_launcher:
   mov     ebp, esp 
   push    PAG_RW_R            ; Permisos R/W para el PTE
   push    PAG_RW_W            ; Permisos R/W para el DPTE
-  push    PAG_US_US           ; Permisos de Supervisor/Usuario para el PTE
-  push    PAG_US_US           ; Permisos de Supervisor/Usuario para el DPTE
+  push    PAG_US_SUP           ; Permisos de Supervisor/Usuario para el PTE
+  push    PAG_US_SUP           ; Permisos de Supervisor/Usuario para el DPTE
   push    __TAREA4_TEXT_PHY     
   push    __TAREA4_TEXT_VMA 
   push    __CR3_TAREA_4_PHY    ; Base del DPT de la Tarea 4 
@@ -1379,8 +1455,8 @@ start32_launcher:
   mov     ebp, esp 
   push    PAG_RW_W            ; Permisos R/W para el PTE
   push    PAG_RW_W            ; Permisos R/W para el DPTE
-  push    PAG_US_US           ; Permisos de Supervisor/Usuario para el PTE
-  push    PAG_US_US           ; Permisos de Supervisor/Usuario para el DPTE
+  push    PAG_US_SUP           ; Permisos de Supervisor/Usuario para el PTE
+  push    PAG_US_SUP           ; Permisos de Supervisor/Usuario para el DPTE
   push    __TAREA4_BSS_PHY     
   push    __TAREA4_BSS_VMA 
   push    __CR3_TAREA_4_PHY    ; Base del DPT de la Tarea 4 
@@ -1393,8 +1469,8 @@ start32_launcher:
   mov     ebp, esp 
   push    PAG_RW_W            ; Permisos R/W para el PTE
   push    PAG_RW_W            ; Permisos R/W para el DPTE
-  push    PAG_US_US           ; Permisos de Supervisor/Usuario para el PTE
-  push    PAG_US_US           ; Permisos de Supervisor/Usuario para el DPTE
+  push    PAG_US_SUP           ; Permisos de Supervisor/Usuario para el PTE
+  push    PAG_US_SUP           ; Permisos de Supervisor/Usuario para el DPTE
   push    __TAREA4_DATA_PHY     
   push    __TAREA4_DATA_VMA 
   push    __CR3_TAREA_4_PHY    ; Base del DPT de la Tarea 4 
@@ -1407,8 +1483,8 @@ start32_launcher:
   mov     ebp, esp 
   push    PAG_RW_W            ; Permisos R/W para el PTE
   push    PAG_RW_W            ; Permisos R/W para el DPTE
-  push    PAG_US_US           ; Permisos de Supervisor/Usuario para el PTE
-  push    PAG_US_US           ; Permisos de Supervisor/Usuario para el DPTE
+  push    PAG_US_SUP           ; Permisos de Supervisor/Usuario para el PTE
+  push    PAG_US_SUP           ; Permisos de Supervisor/Usuario para el DPTE
   push    __TAREA4_STACK_START_PHY     
   push    __TAREA4_STACK_START_VMA 
   push    __CR3_TAREA_4_PHY    ; Base del DPT de la Tarea 4 
@@ -1423,7 +1499,7 @@ start32_launcher:
   push    PAG_RW_W            ; Permisos R/W para el PTE
   push    PAG_RW_W            ; Permisos R/W para el DPTE
   push    PAG_US_SUP           ; Permisos de Supervisor/Usuario para el PTE
-  push    PAG_US_US           ; Permisos de Supervisor/Usuario para el DPTE
+  push    PAG_US_SUP           ; Permisos de Supervisor/Usuario para el DPTE
   push    __STACK_KERNEL_TAREA4_PHY     
   push    __STACK_KERNEL_TAREA4_VMA 
   push    __CR3_TAREA_4_PHY    ; Base del DPT de la Tarea 1 
@@ -1438,7 +1514,7 @@ start32_launcher:
   push    PAG_RW_W             ; Permisos R/W para el PTE
   push    PAG_RW_W             ; Permisos R/W para el DPTE
   push    PAG_US_SUP           ; Permisos de Supervisor/Usuario para el PTE
-  push    PAG_US_US            ; Permisos de Supervisor/Usuario para el DPTE
+  push    PAG_US_SUP            ; Permisos de Supervisor/Usuario para el DPTE
   push    __STACK_KERNEL_PHY     
   push    __STACK_KERNEL_VMA 
   push    __CR3_TAREA_4_PHY    ; Base del DPT de la Tarea 3 
@@ -1452,7 +1528,7 @@ start32_launcher:
   push    PAG_RW_W          ; Permisos R/W para el PTE
   push    PAG_RW_W          ; Permisos R/W para el DPTE
   push    PAG_US_SUP        ; Permisos de Supervisor/Usuario para el PTE
-  push    PAG_US_US         ; Permisos de Supervisor/Usuario para el DPTE
+  push    PAG_US_SUP         ; Permisos de Supervisor/Usuario para el DPTE
   push    __TSS4_VMA          ; Identitty Mapping
   push    __TSS4_VMA 
   push    __CR3_TAREA_4_PHY  ; Base del DPT de la Tarea 4 
@@ -1469,7 +1545,7 @@ start32_launcher:
   push    PAG_RW_W          ; Permisos R/W para el PTE
   push    PAG_RW_W          ; Permisos R/W para el DPTE
   push    PAG_US_SUP        ; Permisos de Supervisor/Usuario para el PTE
-  push    PAG_US_US         ; Permisos de Supervisor/Usuario para el DPTE
+  push    PAG_US_SUP         ; Permisos de Supervisor/Usuario para el DPTE
   push    __TSS_BASICA        ; Identitty Mapping
   push    __TSS_BASICA 
   push    __CR3_TAREA_4_PHY  ; Base del DPT del Kernel 
@@ -1479,8 +1555,6 @@ start32_launcher:
   ;--------------------------------------------
   ;-----------FIN PAGINACIÓN-------------------
   ;--------------------------------------------
-
-
 
   ; -> Habilito la paginación
   mov   eax, cr0 
@@ -1508,7 +1582,7 @@ start32_launcher:
   push    __CR3_TAREA_1_PHY               ; CR3 de la tarea
   push    __TAREA1_STACK_END_VMA          ; STACK de la tarea
   push    __STACK_KERNEL_TAREA1_END_VMA   ; STACK del Kernel
-  push    ejecutar_tarea_1                ; Dir. de inicio de la tarea
+  push    tarea_1_asm                ; Dir. de inicio de la tarea
   call init_tss
   leave
 
@@ -1521,8 +1595,8 @@ start32_launcher:
   push     __CR3_TAREA_2_PHY               ; CR3 de la tarea
   push     __TAREA2_STACK_END_VMA          ; STACK de la tarea
   push     __STACK_KERNEL_TAREA2_END_VMA   ; STACK del Kernel
-  push     ejecutar_tarea_2                ; Dir. de inicio de la tarea
-  call init_tss
+  push     tarea_2_asm                ; Dir. de inicio de la tarea
+  call     init_tss
   leave
 
   ; -------------TSS_3--------------
@@ -1533,8 +1607,8 @@ start32_launcher:
   push     __CR3_TAREA_3_PHY               ; CR3 de la tarea
   push     __TAREA3_STACK_END_VMA          ; STACK de la tarea
   push     __STACK_KERNEL_TAREA3_END_VMA   ; STACK del Kernel
-  push     ejecutar_tarea_3                ; Dir. de inicio de la tarea
-  call init_tss
+  push     tarea_3_asm                ; Dir. de inicio de la tarea
+  call     init_tss
   leave
 
   ; -------------TSS_4--------------
@@ -1545,11 +1619,9 @@ start32_launcher:
   push    __CR3_TAREA_4_PHY               ; CR3 de la tarea
   push    __TAREA4_STACK_END_VMA          ; STACK de la tarea
   push    __STACK_KERNEL_TAREA4_END_VMA   ; STACK del Kernel
-  push    ejecutar_tarea_4                ; Dir. de inicio de la tarea
-  call init_tss
+  push    tarea_4_asm                ; Dir. de inicio de la tarea
+  call    init_tss
   leave
-
-
 
   ; -------------TSS_BASICA para el CPU--------------
   push    ebp

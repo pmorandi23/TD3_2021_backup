@@ -1,10 +1,9 @@
 #include "../inc/functions.h"
 
-
-/* ---------------EXTERN---------------------------- */
- 
 /* ----------------DEFINES GENERALES---------------- */
 
+/* ---------------EXTERN---------------------------- */
+extern long unsigned resultado_promedio;
 
 /* -----------------TYPEDEF-------------------- */
 
@@ -17,7 +16,6 @@
 /* ----------------PROTOTIPOS DE FUNCION----------- */
 void promedio_digitos_64(tabla_t* , qword* );
 void sumatoria_digitos_64(tabla_t* );
-void mostrar_promedio64_VGA(qword promedio, byte , byte );
 void lectura_promedio64 (qword );
-void ejecutar_tarea_1 ();
+void ejecutar_tarea_1 (void);
 

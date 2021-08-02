@@ -1,0 +1,31 @@
+     1                                  ; ----------------EXTERN------------
+     2                                  EXTERN ejecutar_tarea_4
+     3                                  
+     4                                  
+     5                                  ; ----------------GLOBAL------------
+     6                                  GLOBAL tarea_4_asm
+     7                                  
+     8                                  
+     9                                  ; -------------RODATA--------------
+    10                                  SECTION .rodata_tarea4
+    11 00000000 01                      dummy_t4    db  1
+    12                                  ;-------------BSS------------------
+    13                                  SECTION .bss_tarea4
+    14                                  
+    15                                  ; ---------------DATA-------------
+    16                                  SECTION .data_tarea4
+    17                                  
+    18                                  ; --------------TEXT---------------
+    19                                  SECTION .functions_tarea_4
+    20                                  
+    21                                  tarea_4_asm:
+    22                                      ; La tarea tiene 10ms para correr y el tiempo de sobra espera al scheduler
+    23                                      ;call ejecutar_tarea_4
+    24                                  
+    25                                      ;xchg bx, bx
+    26                                  
+    27                                  loop_tarea_4_asm:
+    28                                  
+    29 00000000 F4                          hlt
+    30                                  
+    31 00000001 EBFD                        jmp loop_tarea_4_asm

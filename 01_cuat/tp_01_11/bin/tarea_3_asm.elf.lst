@@ -1,0 +1,30 @@
+     1                                  ; ----------------EXTERN------------
+     2                                  EXTERN ejecutar_tarea_3
+     3                                  
+     4                                  
+     5                                  ; ----------------GLOBAL------------
+     6                                  GLOBAL tarea_3_asm
+     7                                  
+     8                                  
+     9                                  ; -------------RODATA--------------
+    10                                  SECTION .rodata_tarea3
+    11                                  
+    12                                  ;-------------BSS------------------
+    13                                  SECTION .bss_tarea3
+    14                                  
+    15                                  ; ---------------DATA-------------
+    16                                  SECTION .data_tarea3
+    17                                  
+    18                                  ; --------------TEXT---------------
+    19                                  SECTION .functions_tarea_3
+    20                                  
+    21                                  tarea_3_asm:
+    22                                      ; La tarea tiene 10ms para correr y el tiempo de sobra espera al scheduler
+    23 00000000 E8(00000000)                call ejecutar_tarea_3
+    24                                  
+    25                                      ;xchg bx, bx
+    26                                  
+    27                                  loop_tarea_3_asm:
+    28                                  
+    29                                  
+    30 00000005 EBFE                        jmp loop_tarea_3_asm

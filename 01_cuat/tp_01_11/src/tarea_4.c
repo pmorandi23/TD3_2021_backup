@@ -16,12 +16,12 @@ byte variable_global_inicializada_tarea4 = 0; //.data dummy
 __attribute__(( section(".functions_tarea_4")))
 void ejecutar_tarea_4 ()
 {
-    asm("xchg %bx,%bx");
+    //asm("xchg %bx,%bx");
     //asm("hlt");
 
-     while (1)
+   /*   while (1)
     {
         //asm("hlt");
-    }
+    } */
 
 }

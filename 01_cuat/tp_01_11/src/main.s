@@ -27,6 +27,8 @@ GLOBAL paginas_creadas
 GLOBAL Stack_aux
 GLOBAL TSS_aux
 GLOBAL CR3_aux
+GLOBAL POINTER_VMA_DIGITS_TABLE
+;--------------CODE SIZE----------------
 kernel21_code_size EQU kernel32_end-kernel32_init
 ;---------EQU-----------------------------
 CANTIDAD_DATOS  EQU 10
@@ -55,6 +57,7 @@ kernel32_init:
 
 main:
     hlt                     ; CPU en HALT aguardando por interrupciones
+    
     jmp main 
 
 guard:
@@ -64,14 +67,14 @@ guard:
 kernel32_end:
     
 
-;-------- VARIABLES DE DATOS PARA PROPOSITO GENERAL----
+;-------- VARIABLES DE DATOS PARA PROPOSITO GENERAL--------------------------
 SECTION .data_kernel
 variables_globales:
     memoria_buffer_reservada    resb 19             ; Reservo para buffer[0-16] + head[17] + tail[18] + cantidad[19] 
 
     contador_timer              resb 1              ; Contador del timer
 
-    resultado_promedio          resq 1              ; Resultado del promedio cada 500ms de los dígitos en tabla.
+    ;resultado_promedio          resq 1              ; Resultado del promedio cada 500ms de los dígitos en tabla.
 
     dir_lineal_page_fault       resd 1              ; Dir. Lineal que produjo una Page Fault Exception.
 
@@ -93,3 +96,8 @@ mensajes_error:
     page_fault_msg_4            db "Paginacion OFF. Se puede paginar con VMA del CR2",0
     page_fault_msg_5            db "Paginacion exitosa.",0
     page_fault_msg_6            db "#PF Handler - Paginas de 4K creadas: ",0
+
+
+SECTION .table_digits_64
+
+POINTER_VMA_DIGITS_TABLE        resb 8*20    ; Guardo 20 digitos de 8 bytes (64 bits) cada uno 

@@ -17,7 +17,7 @@ LDFLAGS = -z max-page-size=0x01000 --oformat=binary -m elf_i386
 LDSCRIPT = linker.ld
 ODFLAGS = -CprsSx --prefix-addresses
 #en objs guardo todos mis objetos elf
-OBJS = $(BINPATH)init32.elf $(BINPATH)reset.elf $(BINPATH)init16.elf $(BINPATH)main.elf $(BINPATH)functions_asm.elf $(BINPATH)functions_asm_rom.elf $(BINPATH)functions_rom.elf $(BINPATH)handlers_32.elf $(BINPATH)functions.elf $(BINPATH)sys_tables.elf $(BINPATH)init_screen.elf $(BINPATH)tarea_1.elf $(BINPATH)tarea_2.elf $(BINPATH)tarea_3.elf $(BINPATH)tarea_4.elf $(BINPATH)scheduler.elf 
+OBJS = $(BINPATH)init32.elf $(BINPATH)reset.elf $(BINPATH)init16.elf $(BINPATH)main.elf $(BINPATH)functions_asm.elf $(BINPATH)functions_asm_rom.elf $(BINPATH)functions_rom.elf $(BINPATH)handlers_32.elf $(BINPATH)functions.elf $(BINPATH)sys_tables.elf $(BINPATH)init_screen.elf $(BINPATH)tarea_1.elf $(BINPATH)tarea_1_asm.elf $(BINPATH)tarea_2.elf $(BINPATH)tarea_2_asm.elf $(BINPATH)tarea_3.elf $(BINPATH)tarea_3_asm.elf $(BINPATH)tarea_4.elf $(BINPATH)tarea_4_asm.elf $(BINPATH)scheduler.elf 
 
 SRC_NAME = mibios
 
@@ -114,6 +114,27 @@ $(BINPATH)sys_tables.elf: $(SRCPATH)sys_tables.s
 	@echo Generando $@
 	mkdir -p bin
 	$(AC) $(AFLAGS) $< -o $@ -l $@.lst
+
+$(BINPATH)tarea_1_asm.elf: $(SRCPATH)tarea_1_asm.s
+	@echo Generando $@
+	mkdir -p bin
+	$(AC) $(AFLAGS) $< -o $@ -l $@.lst
+
+$(BINPATH)tarea_2_asm.elf: $(SRCPATH)tarea_2_asm.s
+	@echo Generando $@
+	mkdir -p bin
+	$(AC) $(AFLAGS) $< -o $@ -l $@.lst
+
+$(BINPATH)tarea_3_asm.elf: $(SRCPATH)tarea_3_asm.s
+	@echo Generando $@
+	mkdir -p bin
+	$(AC) $(AFLAGS) $< -o $@ -l $@.lst
+
+$(BINPATH)tarea_4_asm.elf: $(SRCPATH)tarea_4_asm.s
+	@echo Generando $@
+	mkdir -p bin
+	$(AC) $(AFLAGS) $< -o $@ -l $@.lst
+	
 
 
 bochs:

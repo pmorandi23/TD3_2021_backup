@@ -63,7 +63,7 @@ void determinar_tecla_presionada (byte teclaPresionada, buffer_t* buffer_vma)
 
         //asm("xchg %bx,%bx");
         flag_rellenar_tabla = 0;
-        escribir_tabla_digitos(buffer_vma, (tabla_t*)&__DIGITS_TABLE_VMA,flag_rellenar_tabla);
+        escribir_tabla_digitos(buffer_vma, (tabla_t*)&POINTER_VMA_DIGITS_TABLE,flag_rellenar_tabla);
 
     }
     /* Si se presiono ENTER y no hay 16 caracteres , hay que rellenar con 0 la tabla*/
@@ -72,7 +72,7 @@ void determinar_tecla_presionada (byte teclaPresionada, buffer_t* buffer_vma)
         //asm("xchg %bx,%bx");
 
         flag_rellenar_tabla = 1;
-        escribir_tabla_digitos(buffer_vma, (tabla_t*)&__DIGITS_TABLE_VMA,flag_rellenar_tabla);
+        escribir_tabla_digitos(buffer_vma, (tabla_t*)&POINTER_VMA_DIGITS_TABLE,flag_rellenar_tabla);
 
     }
 
@@ -166,7 +166,6 @@ byte leer_buffer (buffer_t*buffer_vma)
 	}
 
 }
-
 /* Función que setea el Control Register 3 */
 __attribute__(( section(".functions_c")))
 dword set_cr3 (dword init_dpt, byte _pcd, byte _pwt)
@@ -293,12 +292,14 @@ __attribute__(( section(".functions_c")))
 void escribir_caracter_VGA (char caracter, byte fila, byte columna, byte flag_ASCII)
 {
     static int pos_msg = 0;
-    buff_screen_t* VGA = (buff_screen_t*)&__VGA_VMA;    // Dirección base de la pantalla en el borde superior izquierdo.
+    buff_screen_t* VGA = &__VGA_VMA;    // Dirección base de la pantalla en el borde superior izquierdo.
     byte atributos = 0x07;              // Fondo negro y letra blanca.
 
     /* Filas = 24 (y)
        Columnas = 80 (x) */
     
+    //asm("xchg %bx,%bx");
+
     /* Si no es ASCII, lo convierto. */
     if (!flag_ASCII)
     {
@@ -307,8 +308,6 @@ void escribir_caracter_VGA (char caracter, byte fila, byte columna, byte flag_AS
 
     VGA->buffer_screen[2*fila][2*columna + 2*pos_msg ] = caracter;
     VGA->buffer_screen[2*fila][2*columna +(2*pos_msg + 1) ] = atributos;
-
-    
 
 }
 /* Función que escribe un mensaje en el borde superior izquierdo de la pantalla */
@@ -439,5 +438,37 @@ void mostrar_numero32_VGA(dword numero32, byte fila, byte columna)
 
 }
 
+/*Función que muestra el promedio de digitos de 64b en pantalla.*/
+__attribute__(( section(".functions_c")))
+void mostrar_promedio64_VGA(qword* promedio, byte fila, byte columna)
+{
+    static int pos_caracter=0;
+    byte caracter = 0;
+
+ 
+    for (pos_caracter=0;pos_caracter<16;pos_caracter++)
+    {
+        caracter = ((*promedio >> 4*pos_caracter) & MASK_PROMEDIO) ; //Voy obteniendo caracteres del prom de 64 bits.
+
+        //Tengo del 0 al 9         
+            if (caracter > -1 && caracter < 10)
+        {
+            caracter = caracter + 48; //Convierto a ASCII (el cero es 48)
+        }
+        else
+        {
+            //Si tengo A, B, C, D, E
+            if ( caracter > 9 && caracter < 16)
+            {
+                caracter = caracter + 55 ; // Convierto a ASCII (la A es 65)
+            } 
+        } 
+
+
+        escribir_caracter_VGA (caracter, fila , columna - pos_caracter, ASCII_TRUE);
+                                
+    }
+
+}
 
 

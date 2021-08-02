@@ -65,7 +65,7 @@ ENTRY (reset)
     __CR3_TAREA_1_PHY               = 0x01000000; 
     __CR3_TAREA_2_PHY               = 0x02000000;
     __CR3_TAREA_3_PHY               = 0x03000000; 
-    __CR3_TAREA_4_PHY               = 0x00050000;
+    __CR3_TAREA_4_PHY               = 0x04000000;
     __FUNCTIONS_PHY                 = 0x00060000;           /* Rutinas (Elijo)*/
     __VGA_PHY                       = 0x000B8000;           /* VGA en RAM (Elijo) */
     __TECLADO_ISR_PHY               = 0x00100000;           /* Teclado + ISR (Pide el enunciado) */
@@ -239,7 +239,7 @@ ENTRY (reset)
 
     /* VMA = LMA (se van a ejecutar en ROM) */
 
-    __INIT_16_LMA                   = 0xFFFF9000;                       
+    __INIT_16_LMA                   = 0xFFFFC000;                       
 /*  __VGA_INIT_LMA          
     __INIT_32_LMA           
     __FUNCTIONS_ROM_LMA    */ 
@@ -294,16 +294,28 @@ SECTIONS
 
     __DATOS_SYS32_LMA = LOADADDR(.handlers_ISR) + SIZEOF(.handlers_ISR);
 
-/* La sección de entrada la tengo en el archivo main.s, debajo de la sección kernel32 */
+    /* La sección de entrada la tengo en el archivo main.s, debajo de la sección kernel32 */
     .datos_sys32 __DATOS_SYS32_VMA :
         AT ( __DATOS_SYS32_LMA )
-        { *(.data_kernel);
-            *(.data)
+        { 
+            *(.data);
+            *(.data_kernel);
             *(.rodata);
             *(.bss); } > ram
     __data_size = SIZEOF(.datos_sys32);
 
-    __KERNEL_32_LMA = LOADADDR(.datos_sys32) + SIZEOF(.datos_sys32);
+    __DIGITS_TABLE_LMA = LOADADDR(.datos_sys32) + SIZEOF(.datos_sys32);
+
+
+    .table_digits __DIGITS_TABLE_VMA :
+        AT ( __DIGITS_TABLE_LMA )
+        { 
+            *(.table_digits_64)} > ram
+
+    __table_digits_size = SIZEOF(.table_digits);
+
+    __KERNEL_32_LMA = LOADADDR(.table_digits) + SIZEOF(.table_digits);
+
 
     .codigo_kernel32 __KERNEL_32_VMA :                  /* Ubicación en VMA (RAM) a la que deberá copiarse el código en tiempo de ejecución  */
         AT ( __KERNEL_32_LMA )                          /* Ubicación inicial del código en LMA (ROM) */
@@ -326,21 +338,21 @@ SECTIONS
 /* Variables no inicializadas de la tarea 1 */
     .tarea_1_bss __TAREA1_BSS_VMA :
         AT (__TAREA1_BSS_LMA)
-        {./bin/tarea_1.elf(.bss_tarea1);} > ram
+        {*(.bss_tarea1);} > ram
     __tarea_1_bss_size = SIZEOF(.tarea_1_bss); 
 
     __TAREA1_DATA_LMA = LOADADDR(.tarea_1_bss) + SIZEOF(.tarea_1_bss);
 /* Variables inicializadas */
     .tarea_1_data __TAREA1_DATA_VMA :
         AT (__TAREA1_DATA_LMA)
-        {./bin/tarea_1.elf(.data_tarea1);} > ram
+        {*(.data_tarea1);} > ram
     __tarea_1_data_size = SIZEOF(.tarea_1_data); 
 
     __TAREA1_RODATA_LMA = LOADADDR(.tarea_1_data) + SIZEOF(.tarea_1_data);  
 /* Variables de solo lectura. */
     .tarea_1_rodata __TAREA1_RODATA_VMA :
         AT (__TAREA1_RODATA_LMA)
-        {./bin/tarea_1.elf(.rodata_tarea1);} > ram
+        {*(.rodata_tarea1);} > ram
     __tarea_1_rodata_size = SIZEOF(.tarea_1_rodata); 
 
 /* --------------TAREA 2------------ */
@@ -356,21 +368,21 @@ SECTIONS
 /* Variables no inicializadas de la tarea 2 */
     .tarea_2_bss __TAREA2_BSS_VMA :
         AT (__TAREA2_BSS_LMA)
-        {./bin/tarea_2.elf(.bss_tarea2);} > ram
+        {*(.bss_tarea2);} > ram
     __tarea_2_bss_size = SIZEOF(.tarea_2_bss); 
 
     __TAREA2_DATA_LMA = LOADADDR(.tarea_2_bss) + SIZEOF(.tarea_2_bss);
 /* Variables inicializadas de la tarea 2*/
     .tarea_2_data __TAREA2_DATA_VMA :
         AT (__TAREA2_DATA_LMA)
-        {./bin/tarea_2.elf(.data_tarea2);} > ram
+        {*(.data_tarea2);} > ram
     __tarea_2_data_size = SIZEOF(.tarea_2_data); 
 
     __TAREA2_RODATA_LMA = LOADADDR(.tarea_2_data) + SIZEOF(.tarea_2_data);  
 /* Variables de solo lectura de la tarea 2 */
     .tarea_2_rodata __TAREA2_RODATA_VMA :
         AT (__TAREA2_RODATA_LMA)
-        {./bin/tarea_2.elf(.rodata_tarea2);} > ram
+        {*(.rodata_tarea2);} > ram
     __tarea_2_rodata_size = SIZEOF(.tarea_2_rodata); 
 
 /* --------------TAREA 3------------ */
@@ -386,21 +398,21 @@ SECTIONS
 /* Variables no inicializadas de la tarea 3 */
     .tarea_3_bss __TAREA3_BSS_VMA :
         AT (__TAREA3_BSS_LMA)
-        {./bin/tarea_3.elf(.bss_tarea3);} > ram
+        {*(.bss_tarea3);} > ram
     __tarea_3_bss_size = SIZEOF(.tarea_3_bss); 
 
     __TAREA3_DATA_LMA = LOADADDR(.tarea_3_bss) + SIZEOF(.tarea_3_bss);
 /* Variables inicializadas de la tarea 3*/
     .tarea_3_data __TAREA3_DATA_VMA :
         AT (__TAREA3_DATA_LMA)
-        {./bin/tarea_3.elf(.data_tarea3);} > ram
+        {*(.data_tarea3);} > ram
     __tarea_3_data_size = SIZEOF(.tarea_3_data); 
 
     __TAREA3_RODATA_LMA = LOADADDR(.tarea_3_data) + SIZEOF(.tarea_3_data);  
 /* Variables de solo lectura de la tarea 3 */
     .tarea_3_rodata __TAREA3_RODATA_VMA :
         AT (__TAREA3_RODATA_LMA)
-        {./bin/tarea_3.elf(.rodata_tarea3);} > ram
+        {*(.rodata_tarea3);} > ram
     __tarea_3_rodata_size = SIZEOF(.tarea_3_rodata); 
 
 /* --------------TAREA 4------------ */
@@ -416,21 +428,21 @@ SECTIONS
 /* Variables no inicializadas de la tarea 4 */
     .tarea_4_bss __TAREA4_BSS_VMA :
         AT (__TAREA4_BSS_LMA)
-        {./bin/tarea_4.elf(.bss_tarea4);} > ram
+        {*(.bss_tarea4);} > ram
     __tarea_4_bss_size = SIZEOF(.tarea_4_bss); 
 
     __TAREA4_DATA_LMA = LOADADDR(.tarea_4_bss) + SIZEOF(.tarea_4_bss);
 /* Variables inicializadas de la tarea 4*/
     .tarea_4_data __TAREA4_DATA_VMA :
         AT (__TAREA4_DATA_LMA)
-        {./bin/tarea_4.elf(.data_tarea4);} > ram
+        {*(.data_tarea4);} > ram
     __tarea_4_data_size = SIZEOF(.tarea_4_data); 
 
     __TAREA4_RODATA_LMA = LOADADDR(.tarea_4_data) + SIZEOF(.tarea_4_data);  
 /* Variables de solo lectura de la tarea 4 */
     .tarea_4_rodata __TAREA4_RODATA_VMA :
         AT (__TAREA4_RODATA_LMA)
-        {./bin/tarea_4.elf(.rodata_tarea4);} > ram
+        {*(.rodata_tarea4);} > ram
     __tarea_4_rodata_size = SIZEOF(.tarea_4_rodata); 
 
 /* ********************************* */

@@ -1,0 +1,45 @@
+     1                                  ; ----------------EXTERN------------
+     2                                  EXTERN ejecutar_tarea_1
+     3                                  EXTERN __DIGITS_TABLE_VMA
+     4                                  ; -----------EXTERN VARIABLES-------
+     5                                  
+     6                                  ;-----------------EXTERN EQU--------
+     7                                  EXTERN SYS_P_VGA
+     8                                  ; ----------------GLOBAL------------
+     9                                  GLOBAL tarea_1_asm
+    10                                  GLOBAL resultado_promedio
+    11                                  
+    12                                  ; -------------RODATA--------------
+    13                                  SECTION .rodata_tarea1
+    14                                  
+    15                                  ;---------------BSS----------------
+    16                                  SECTION .bss_tarea1
+    17                                  
+    18                                  ; ---------------DATA--------------
+    19                                  SECTION .data_tarea1
+    20                                  
+    21 00000000 <res 00000008>          resultado_promedio resq 1   ; Resultado del promedio de dig. de 64 bits
+    21          ******************       warning: uninitialized space declared in non-BSS section `.data_tarea1': zeroing
+    22                                  
+    23                                  
+    24                                  ; --------------TEXT---------------
+    25                                  SECTION .functions_tarea_1
+    26                                  
+    27                                  tarea_1_asm:
+    28                                      ; La tarea tiene 10ms para correr y el tiempo de sobra espera al scheduler
+    29                                      ;xchg bx, bx
+    30                                  
+    31 00000000 E8(00000000)                call ejecutar_tarea_1
+    32                                  
+    33                                      ;xchg bx, bx
+    34                                  
+    35 00000005 BF[00000000]                mov edi, resultado_promedio         ; Numero de 64 bits 
+    36 0000000A BA01000000                  mov edx, 1                          ; Fila VGA
+    37 0000000F B94F000000                  mov ecx, 79                         ; Columna VGA
+    38 00000014 B8[00000000]                mov eax, SYS_P_VGA                  ; Syscall de escritura VGA
+    39 00000019 BB04000000                  mov ebx, 4                          ; tamaño del dato    1 = byte, 2 = word, 3 = dword, 4 = qword
+    40 0000001E CD80                        int 0x80
+    41                                  
+    42                                  loop_tarea_1_asm:
+    43                                  
+    44 00000020 EBFE                        jmp loop_tarea_1_asm

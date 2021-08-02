@@ -51,7 +51,7 @@
 #define TECLA_Z     0x2C
 #define TECLA_ENTER 0x1C
 /* ---------------EXTERN---------------------------- */
-extern long unsigned __DIGITS_TABLE_VMA;
+extern long unsigned POINTER_VMA_DIGITS_TABLE ;
 extern long unsigned __VGA_VMA;
 extern long unsigned __PAGE_TABLES_PHY;
 extern long unsigned __PAG_DINAMICA_INIT_VMA;
@@ -139,5 +139,6 @@ void limpiar_VGA (buff_screen_t* );
 dword get_entry_DTP(dword ) ;
 dword get_entry_TP(dword );  
 void set_page (dword , dword , dword ,byte , byte , byte , byte );
+void mostrar_promedio64_VGA(qword* promedio, byte , byte );
 
 

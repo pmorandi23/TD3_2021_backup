@@ -234,7 +234,6 @@ guardar_contexto_asm:
 no_guardo_stack_user:
 
     ;xchg bx, bx
-
     mov eax, [esp]
     mov [TSS_aux + 32],   eax      ; Guardo EIP
     mov eax, [ esp + 4 ]
