@@ -1,0 +1,17 @@
+./bin/*
+./inc/*.o
+./inc/*.bin
+./inc/*.elf
+./lib/*.o
+./lib/*.bin
+./lib/*.elf
+./lib/*.o
+./lib/*.bin
+./lib/*.elf
+./src/*.o
+./src/*.bin
+./src/*.elf
+./doc/*.o
+./doc/*.bin
+./doc/*.elf
+./doc/*.html
