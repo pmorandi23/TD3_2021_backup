@@ -16,4 +16,8 @@ Repositorio de backup de los trabajos prácticos realizados en la cursada de Té
 - TP01_07: Funcionando
 - TP01_09: Funcionando
 - TP01_10: Funcionando
-- TP01_11: En proceso
+- TP01_11: Funcionando
+- TP01_12: Funcionando
+- TP01_13: Funcionando
+
+
