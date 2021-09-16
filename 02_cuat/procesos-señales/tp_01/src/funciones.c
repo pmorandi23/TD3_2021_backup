@@ -1,0 +1,2 @@
+#include "../inc/funciones.h"
+
