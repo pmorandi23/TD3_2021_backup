@@ -6,7 +6,7 @@ Repositorio de backup de los trabajos prácticos realizados en la cursada de Té
 - Programador : Pablo Jonathan Morandi
 
 ### Estado de TPs
-
+## 1º Cuatrimestre
 - TP01_01: Funcionando
 - TP01_02: Funcionando
 - TP01_03: Funcionando
@@ -19,5 +19,15 @@ Repositorio de backup de los trabajos prácticos realizados en la cursada de Té
 - TP01_11: Funcionando
 - TP01_12: Funcionando
 - TP01_13: Funcionando
+
+### Estado de TPs
+## 2º Cuatrimestre
+
+- Archivos - File Stream
+- Procesos
+- Señales
+- IPCS (Messages Queues, Semaphores, Shared Memory)
+- Sockets
+
 
 
