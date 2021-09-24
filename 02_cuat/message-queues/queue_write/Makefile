@@ -5,7 +5,7 @@ CC = gcc
 OFLAGS = -lm -o
 CFLAGS = -c -g -Wall
 OUTPUT = ejecutable
-OBJETO = main.o funciones.o
+OBJETO = main.o
 arg    = 5
 
 
@@ -15,11 +15,8 @@ all: $(OBJETO)
 main.o: $(SCRPATH)/main.c
 	$(CC) $< $(CFLAGS)
 
-funciones.o: $(SCRPATH)/funciones.c
-	$(CC) $< $(CFLAGS)
-
 run:
-	./$(OUTPUT) $(arg)
+	./$(OUTPUT) 
 
 clean:
-	rm *.o *.exe
+	rm *.o ejecutable

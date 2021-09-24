@@ -19,7 +19,7 @@ funciones.o: $(SCRPATH)/funciones.c
 	$(CC) $< $(CFLAGS)
 
 run:
-	./$(OUTPUT) $(arg)
+	./$(OUTPUT) 
 
 clean:
 	rm *.o *.exe
