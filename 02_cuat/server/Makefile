@@ -1,22 +1,28 @@
-SCRPATH = ./src
-OBJPATH = ./obj
+SRCPATH = ./src/
+OBJPATH = ./obj/
+COMPATH = ./comons/
 
 CC = gcc
-OFLAGS = -lm -o
-CFLAGS = -c -g -Wall
-OUTPUT = ejecutable
-OBJETO = serverTCP.o 
-arg    = 5
-
+OFLAGS = -lm -o   
+CFLAGS = -c -Wall
+OUTPUT = serverTCP
+OBJETO = $(OBJPATH)serverTCP.o $(OBJPATH)handlers.o 
 
 all: $(OBJETO) 
-	$(CC) $(OBJETO) $(OFLAGS) $(OUTPUT)
+	$(CC) $(OBJETO) $(OFLAGS) $(OUTPUT)	
 
-serverTCP.o: $(SCRPATH)/serverTCP.c
-	$(CC) $< $(CFLAGS)
+$(OBJPATH)serverTCP.o: $(SRCPATH)serverTCP.c
+	$(CC) $< $(CFLAGS) -o $@
 
-run:
-	./$(OUTPUT) 
+$(OBJPATH)handlers.o: $(SRCPATH)handlers.c
+	$(CC) $< $(CFLAGS) -o $@
+	
+run:	
+	./$(OUTPUT) $(arg)
 
 clean:
-	rm *.o ejecutable
+
+	rm ./obj/*.o serverTCP
+
+
+
