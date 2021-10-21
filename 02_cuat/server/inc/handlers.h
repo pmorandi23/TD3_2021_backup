@@ -2,10 +2,13 @@
 // Defines
 #define RUNNING         1
 #define CLOSING         0
+#define TRUE        1
+#define FALSE       0
 
 // Externs
-
 extern int serverRunning;
+extern int updateServerConfig;
+extern volatile int childsKilled;
 // Prototipos de función
 void sigusr2_handler(int);
 

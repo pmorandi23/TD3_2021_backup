@@ -10,39 +10,39 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/sem.h>
-#include <sys/wait.h>
 #include <signal.h>
+#include <sys/wait.h>
 #include "../inc/handlers.h"
 
-
-void sigusr1_handler(int sig)
-{
-    
-}
 // Señal para leer archivo de configuración
 void sigusr2_handler(int sig)
 {
-    printf("\n======================================\n");
-    printf("PID %d: Señal SIGUSR2 recibida!\n",getpid());
-    printf("\n======================================\n");
-    //serverRunning = CLOSING;
-
+    printf("==========================================================\n");
+    printf("PID %d: Señal SIGUSR2 recibida! Abriendo archivo de cfg...\n", getpid());
+    printf("==========================================================\n");
+    updateServerConfig = TRUE;
 }
 // Señal para apagar el servidor correctamente.
 void sigint_handler(int sig)
 {
-    printf("\n==============================\n");
-    printf("PID %d: Señal SIGINT recibida.\n",getpid());
-    printf("\n==============================\n");
     serverRunning = CLOSING;
 }
-
+// Señal a la que entran childs que hacen exit().
 void sigchld_handler(int sig)
 {
-    waitpid(-1,NULL,WNOHANG); // Tengo el PID del hijo que muere
-    //printf("SIGCHLD! Muere hijo con PID = %d\n",childClosed);
-    printf("\n=============================\n");
-	write(0, "SIGCHLD: Termina proceso hijo\n", sizeof("SIGCHLD: Termina proceso hijo \n"));
-    printf("=============================\n");
-
+    pid_t childDead;
+    // Que el padre espere a los hijos si o solo si se envio SIGINT para apagar el server.
+    if (!serverRunning)
+    {
+        while ((childDead = waitpid(-1, NULL, WNOHANG)) != -1)
+        {
+            if (childDead > 0)
+            {
+                childsKilled++;
+                printf("-----------------------------------------\n");
+                printf("SIGCHLD: Termina proceso hijo PID %d\n", childDead);
+                printf("-----------------------------------------\n");
+            }
+        }
+    }
 }
