@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
         printf("\n\n->Enviando: %s, a: %s en el puerto: %s \n", argv[3], argv[1], argv[2]);
         // Recibe la respuesta
         recv(s, resp, sizeof(resp), 0);
-        printf("<-Recibido: %s\n", resp);
+        printf("<-Recibido: %s\n\n", resp);
         close(s);
         sleep(1);
       }
