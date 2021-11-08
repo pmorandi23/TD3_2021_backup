@@ -1,18 +1,3 @@
-/* #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <errno.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <sys/sem.h>
-#include <signal.h>
-#include <sys/wait.h>
-#include <stdbool.h>*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -37,16 +22,6 @@
 #include "../inc/serverTCP.h"
 #include "../inc/handlers.h"
 #include "../inc/configFile.h"
-
-/* ------ Shared Memory Segments --------
-key        shmid      owner      perms      bytes      nattch     status      
-0x000011d7 0          root       644        4096       3                       
-0x00001cd8 32769      root       644        4096       3                       
-
------- Semaphore Arrays --------
-key        semid      owner      perms      nsems     
-0x000004d2 0          root       666        1         
-0x000010e1 32769      root       666        1   */
 
 // Variables globales
 // Semaphores
@@ -90,10 +65,11 @@ int main(int argc, char *argv[])
         return 0;
     }
     ppid = getpid();
-    printf("---------------------------------------------------\n");
+    printf("------------------TD3 2021 - R5054-----------------\n\n");
+    printf("---------------Pablo Jonathan Morandi--------------\n");
     printf("---------------------------------------------------\n");
     printf("********Bienvenido al servidor concurrente!********\n");
-    printf("---------------------------------------------------\n");
+    printf("---------------------------------------------------\n\n");
     printf("---------------------------------------\n");
     printf("PPID %d: Configurando IPCS y Sockets...\n", ppid);
     printf("---------------------------------------\n");
@@ -114,10 +90,10 @@ int main(int argc, char *argv[])
     {
         return 0;
     }
-    printf("---------------------------------------------\n");
+    printf("------------------------------------------------\n");
     printf("PPID %d: Semáforo ID %d creado correctamente.\n", ppid, clientsSemaphoreID);
     printf("PPID %d: Semáforo ID %d creado correctamente.\n", ppid, configFileSemafhoreID);
-    printf("---------------------------------------------\n");
+    printf("------------------------------------------------\n");
     // Creo memoria compartida de 4K
     if ((sharedMemDataSensorPointer = crear_shared_memory(SHM_1_KEY, &sharedMemDataSensorId)) == (void *)-1)
     {
@@ -143,15 +119,14 @@ int main(int argc, char *argv[])
     // Creo proceso hijo para leer datos del sensor y escribirlos en la shared_memory
     if (!fork())
     {
-        printf("----------------------------------------------------------------------------\n");
+        printf("---------------------------------------------------------------\n");
         printf("PID %d obteniendo data del sensor y almacenando en la shm...\n", getpid());
-        printf("----------------------------------------------------------------------------\n");
-        srand(getpid()); // Inicializo el rand() para simular el sensor.
+        printf("---------------------------------------------------------------\n");
         // Código del hijo
         while (serverRunning)
         {
             leer_data_sensor();
-            sleep(1); // Cada un ms consulto el sensor a través del driver. REVISAR SI AJUSTAR ESTE TIEMPO SEGUN SENSOR.
+            sleep(1); // Cada un seg consulto el sensor a través del driver.
         }
         printf("----------------------------------------------\n");
         printf("PID %d : proceso lector del sensor muriendo...\n", getpid());
@@ -178,9 +153,7 @@ int main(int argc, char *argv[])
                     updateServerConfig = FALSE;
                 }
                 sleep(1); // Cada 100ms consulta si debe leer del archivo de config.
-                //printf("---------------------------------------------------------\n");
-                //printf("PID %d : Esperando update del CFG...\n", getpid());
-                //printf("---------------------------------------------------------\n");
+
             }
             printf("---------------------------------------------------------\n");
             printf("PID %d : proceso que lee archivo de config. muriendo...\n", getpid());
@@ -195,10 +168,9 @@ int main(int argc, char *argv[])
             semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
             serverConfig->connections = 0;
             semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
-
-            printf("---------------------------------------------------------\n");
-            printf("PPID %d: SERVER esperando conexiones...\n", ppid);
-            printf("---------------------------------------------------------\n");
+            printf("------------------------------------------\n");
+            printf("PPID %d: SERVER: esperando conexiones...\n", ppid);
+            printf("------------------------------------------\n");
             while (serverRunning)
             {
                 // Si se superan las conexiones máximas, se espera hasta que se liberen.
@@ -224,10 +196,6 @@ int main(int argc, char *argv[])
                 // Espera al establecimiento de alguna conexion. Cada un segundo bloquea el ppid en select() para no acerlo en accept()
                 // El primer parametro es el maximo de los fds especificados en
                 // las macros FD_SET + 1.
-                //printf("---------------------------------------------------------\n");
-                //printf("PPID %d: Esperando conexión. nbr_fds = %d\n", ppid, nbr_fds);
-                //printf("---------------------------------------------------------\n");
-
                 //nbr_fds = select(socketServer + 1, &readfds, NULL, NULL, &timeout);
                 nbr_fds = select(8, &readfds, NULL, NULL, &timeout); // Pongo 8 en NFDS a ver si funciona el select()
 
@@ -237,11 +205,8 @@ int main(int argc, char *argv[])
                 }
                 /* if (!FD_ISSET(socketServer, &readfds))
                 {
-                    printf("---------------------------------------------\n");
-                    printf("\n\n\nPPID %d:----------FD_ISSET----\n\n\n", ppid);
-                    printf("---------------------------------------------------------\n");
                     continue;
-                } */
+                }  */
                 // Si tengo conexion entrante y no se alcanzaron las máximas permitidas, nbr_fds > 0 y da paso al accept()
                 if (nbr_fds > 0 && !maxConnectionsReached)
                 {
@@ -269,14 +234,16 @@ int main(int argc, char *argv[])
                         semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
                         serverConfig->connections++;
                         semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
-                        printf("---------------------------------------------------------\n");
+                        printf("----------------------------------------------------\n");
                         printf("PID %d: Conexiones actuales  = %d\n", getpid(), serverConfig->connections);
-                        printf("---------------------------------------------------------\n");
+                        printf("----------------------------------------------------\n");
 
                         // Atiendo al cliente TCP.
                         if (atender_cliente_TCP(clientAddress, socketAux) == -1)
                         {
-                            return 0;
+                            printf("---------------------------------------------------------------\n");
+                            printf("PID %d: Error en conexión TCP con cliente. Cerrando child...\n", getpid());
+                            printf("---------------------------------------------------------------\n");
                         }
                         // Resto conexión activa.
                         semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
@@ -291,6 +258,7 @@ int main(int argc, char *argv[])
                         printf("-------------------\n");
                         printf("PID %d: muriendo...\n", getpid());
                         printf("-------------------\n");
+                        childsCounter--;
                         // Cierro el pid del hijo que atendió conexión entrante.
                         exit(1);
                     }
@@ -311,6 +279,9 @@ int main(int argc, char *argv[])
     // Parent esperando que mueran los hijos para luego morirse.
     while (1)
     {
+        printf("----------------------------------------------------\n");
+        printf("PPID %d: SERVER : Esperando que mueran childs...\n", ppid);
+        printf("----------------------------------------------------\n");
         if (childsKilled > childsCounter - 1)
         {
             if ((close(socketServer)) == -1)
@@ -324,17 +295,17 @@ int main(int argc, char *argv[])
                 return 0;
             }
             printf("----------------------------------------------\n");
-            printf("PPID %d: IPCs cerrados correctamente.\n", ppid);
+            printf("PPID %d: SERVER : IPCs cerrados correctamente.\n", ppid);
             printf("----------------------------------------------\n"); // Cierro todos los IPCS
             printf("----------------------------------------------\n");
-            printf("PPID %d: Servidor apagado correctamente.\n", ppid);
+            printf("PPID %d: SERVER : Servidor apagado correctamente.\n", ppid);
             printf("----------------------------------------------\n");
             printf("----------------------------------------------\n");
-            printf("PPID %d: muriendo...\n", ppid);
+            printf("PPID %d: SERVER : muriendo...\n", ppid);
             printf("----------------------------------------------\n");
             return 0;
         }
-        sleep(0.1);
+        sleep(1);
     }
 }
 
@@ -351,10 +322,20 @@ int crear_socket_server(char *port, struct serverConfig *_serverConfig)
     int socket_server;
     struct sockaddr_in address;
     pid_t ppid;
+    struct timeval tv;
+    tv.tv_sec = 10; //  10 segundos de timeout a las operaciones de RECV
+    tv.tv_usec = 0;
     ppid = getpid();
     // Creamos el socket
     if ((socket_server = socket(AF_INET, SOCK_STREAM, 0)) != -1)
     {
+        // Configuro un timeout para los RECV de clientes
+        if (setsockopt(socket_server, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof tv) == -1)
+        {
+            perror("setsockopt");
+            return -1;
+        }
+
         // Asigna el puerto indicado y una IP de la maquina
         address.sin_family = AF_INET;
         address.sin_port = htons(atoi(port));
@@ -519,6 +500,10 @@ int atender_cliente_TCP(struct sockaddr_in clientAddress, int socketAux)
     // Espera recibir mensaje del cliente...
     if (recv(socketAux, bufferRxClient, sizeof(bufferRxClient), 0) == -1)
     {
+        printf(" ------- TIMEOUT EN RECV---------\n");
+        printf(" PID %d                          \n", getpid());
+        printf(" Client IP : %s                  \n", ipClientAddress);
+        printf(" Client port : %d                \n", clientPort);
         perror("Error en recv");
         return -1;
     }
@@ -565,42 +550,43 @@ int atender_cliente_TCP(struct sockaddr_in clientAddress, int socketAux)
         return 0;
     }
     // Me quedo en un while hasta que el cliente me envie END. Siempre y cuando el server no se este apagando.
-    if (serverRunning)
+    printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+    printf("PID %d :SEND to %s:%d: dataSensor\n", getpid(), ipClientAddress, clientPort);
+    printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+    do
     {
-        do
+        // Leo la SHM Mem. y armo la trama
+        semop(clientsSemaphoreID, &p, 1); //Tomo el semaforo
+        sprintf(bufferTxServer, "%.2f\n%.2f\n%.2f\n%.2f\n%.2f\n%.2f\n%.2f\n", dataSensor->accel_xout,
+                dataSensor->accel_yout,
+                dataSensor->accel_zout,
+                dataSensor->gyro_xout,
+                dataSensor->gyro_yout,
+                dataSensor->gyro_zout,
+                (float)dataSensor->temp_out_float);
+        semop(clientsSemaphoreID, &v, 1); //Libero el semaforo
+        // Le respondo al cliente con los datos.
+        if (send(socketAux, bufferTxServer, strlen(bufferTxServer), 0) == -1)
         {
-            // Leo la SHM Mem. y armo la trama
-            semop(clientsSemaphoreID, &p, 1); //Tomo el semaforo
-            sprintf(bufferTxServer, "%.2f\n%.2f\n%.2f\n%.2f\n%.2f\n%.2f\n%.2f\n", dataSensor->accel_xout,
-                    dataSensor->accel_yout,
-                    dataSensor->accel_zout,
-                    dataSensor->gyro_xout,
-                    dataSensor->gyro_yout,
-                    dataSensor->gyro_zout,
-                    (float)dataSensor->temp_out_float);
-            semop(clientsSemaphoreID, &v, 1); //Libero el semaforo
+            perror("Error en send");
+            return -1;
+        }
+        // Espera recibir mensaje del cliente...
+        if (recv(socketAux, bufferRxClient, sizeof(bufferRxClient), 0) == -1)
+        {
+            perror("Error en recv");
+            return -1;
+        }
+        // Analizo rta del cliente
+        if (!memcmp(bufferRxClient, "END", 3))
+        {
             printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-            printf("PID %d :SEND to %s:%d: dataSensor\n", getpid(), ipClientAddress, clientPort);
+            printf("PID %d :RECV %s:%d: END\n", getpid(), ipClientAddress, clientPort);
             printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-            // Le respondo al cliente con los datos.
-            if (send(socketAux, bufferTxServer, strlen(bufferTxServer), 0) == -1)
-            {
-                perror("Error en send");
-                return -1;
-            }
-            // Espera recibir mensaje del cliente...
-            if (recv(socketAux, bufferRxClient, sizeof(bufferRxClient), 0) == -1)
-            {
-                perror("Error en recv");
-                return -1;
-            }
-            //Demora para leer la SHMMEM
-            sleep(1.5);
-        } while (memcmp(bufferRxClient, "END", 3));
-        printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-        printf("PID %d :RECV %s:%d: END\n", getpid(), ipClientAddress, clientPort);
-        printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-    }
+        }
+        //Demora para leer la SHMMEM
+        sleep(1.5);
+    } while (memcmp(bufferRxClient, "END", 3) && serverRunning);
 
     return 0;
 }
@@ -720,9 +706,9 @@ int leer_data_sensor()
     dataSensorAvg.gyro_yout = dataSensorAvg.gyro_yout / MPU6050fifoPacketsForMeanFilter;
     dataSensorAvg.gyro_zout = dataSensorAvg.gyro_zout / MPU6050fifoPacketsForMeanFilter;
 
-    printf ("------------------------------------------\n\n\n");
-    printf ("############PROMEDIO DE DATASENSOR############\n");
-    printf ("Cantidad de muestras de a 14 bytes = %d\n",MPU6050fifoPacketsForMeanFilter);
+    /* printf("------------------------------------------\n\n\n");
+    printf("############PROMEDIO DE DATASENSOR############\n");
+    printf("Cantidad de muestras de a 14 bytes = %d\n", MPU6050fifoPacketsForMeanFilter);
     printf(
         "ACCEL X OUT: %.2f g\nACCEL Y OUT: %.2f g\nACCEL Z OUT: %.2f g\nTEMP. OUT: %.2f °C\nGYRO X OUT: %.2f °/s\nGYRO Y OUT: %.2f °/s\nGYRO Z OUT: %.2f °/s\n",
         dataSensorAvg.accel_xout,
@@ -731,33 +717,9 @@ int leer_data_sensor()
         dataSensorAvg.temp_out_float,
         dataSensorAvg.gyro_xout,
         dataSensorAvg.gyro_yout,
-        dataSensorAvg.gyro_zout); 
-    printf ("------------------------------------------\n\n\n");
-
-
-
-    /* // La temperatura debo convertirla primero de esta forma, uint16_t. Luego casteo a float
-    // Armo los pares de bytes H y L Y convierto a los valores correspondientes
-    // ACCEL
-    aux16Bits = (int16_t)(dataMPU6050_fifo[0] << 8 | dataMPU6050_fifo[1]);
-    dataSensorAvg.accel_xout = (float)aux16Bits * 2 / 32768;
-    aux16Bits = (int16_t)(dataMPU6050_fifo[2] << 8 | dataMPU6050_fifo[3]);
-    dataSensorAvg.accel_yout = (float)aux16Bits * 2 / 32768;
-    aux16Bits = (int16_t)(dataMPU6050_fifo[4] << 8 | dataMPU6050_fifo[5]);
-    dataSensorAvg.accel_zout = (float)aux16Bits * 2 / 32768;
-    //TEMPERATURE
-    aux16Bits = (uint16_t)(dataMPU6050_fifo[6] << 8 | dataMPU6050_fifo[7]);
-    dataSensorAvg.temp_out_float = (float)aux16Bits / 340 + 36.53;
-    // GYRO
-    aux16Bits = (int16_t)(dataMPU6050_fifo[8] << 8 | dataMPU6050_fifo[9]);
-    dataSensorAvg.gyro_xout = (float)aux16Bits * 250 / 32768;
-    aux16Bits = (int16_t)(dataMPU6050_fifo[10] << 8 | dataMPU6050_fifo[11]);
-    dataSensorAvg.gyro_yout = (float)aux16Bits * 250 / 32768;
-    aux16Bits = (int16_t)(dataMPU6050_fifo[12] << 8 | dataMPU6050_fifo[13]);
-    dataSensorAvg.gyro_zout = (float)aux16Bits * 250 / 32768; */
-
-
-
+        dataSensorAvg.gyro_zout);
+    printf("------------------------------------------\n\n\n"); */
+    // Escribo en la SHM MEM
     semop(clientsSemaphoreID, &p, 1); //Tomo el semaforo
     dataSensor->accel_xout = dataSensorAvg.accel_xout;
     dataSensor->accel_yout = dataSensorAvg.accel_yout;
@@ -767,11 +729,9 @@ int leer_data_sensor()
     dataSensor->gyro_yout = dataSensorAvg.gyro_yout;
     dataSensor->gyro_zout = dataSensorAvg.gyro_zout;
     semop(clientsSemaphoreID, &v, 1); //Libero el semaforo
-
-    free(dataMPU6050_fifo); // Libero memoria
-
-    // NO OLVIDARSE DE PROMEDIAR LA DATA CON EL VALOR DE LA VENTANA DE FILTRO DE MEDIA DEL ARCHIVO CFG!!!!!!!!!!!!!!!!!!!!
-
+    // Libero memoria
+    free(dataMPU6050_fifo);
+    // Cierro el driver
     close(fd);
 
     return 0;

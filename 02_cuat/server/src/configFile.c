@@ -61,14 +61,13 @@ void leer_config_server(struct serverConfig *serverConf)
 
     //serverConf->connections = 0;
 
-    printf("************************************************************\n");
-    printf("PID % d: Update desde archivo de config. del server*********\n",getpid());
-    printf("************************************************************\n");
+    printf("*******************************************************\n");
+    printf("PID % d: Update desde archivo de config. del server\n",getpid());
+    printf("*******************************************************\n");
     printf("Cantidad maxima de conexiones      = %d                \n", serverConf->maxConnections);
     printf("Backlog                            = %d                \n", serverConf->backlog);
     printf("Muestreo del filtro                = %d                \n", serverConf->meanSamples);
     printf("Cantidad de conexiones actuales    = %d                \n", serverConf->connections);
-    printf("********************************************************\n");
-    printf("********************************************************\n");
-    printf("********************************************************\n");
+    printf("*******************************************************\n");
+    printf("*******************************************************\n");
 }

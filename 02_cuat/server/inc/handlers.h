@@ -6,8 +6,8 @@
 #define FALSE       0
 
 // Externs
-extern int serverRunning;
-extern int updateServerConfig;
+extern volatile  int serverRunning;
+extern volatile int updateServerConfig;
 extern volatile int childsKilled;
 // Prototipos de función
 void sigusr2_handler(int);
