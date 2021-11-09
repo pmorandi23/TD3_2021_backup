@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     }
     ppid = getpid();
     printf("------------------TD3 2021 - R5054-----------------\n\n");
-    printf("---------------Pablo Jonathan Morandi--------------\n");
+    printf("Autor: Pablo Jonathan Morandi\n");
     printf("---------------------------------------------------\n");
     printf("********Bienvenido al servidor concurrente!********\n");
     printf("---------------------------------------------------\n\n");
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
         while (serverRunning)
         {
             leer_data_sensor();
-            sleep(1); // Cada un seg consulto el sensor a través del driver.
+            sleep(0.5); // Cada un seg consulto el sensor a través del driver.
         }
         printf("----------------------------------------------\n");
         printf("PID %d : proceso lector del sensor muriendo...\n", getpid());
@@ -153,7 +153,6 @@ int main(int argc, char *argv[])
                     updateServerConfig = FALSE;
                 }
                 sleep(1); // Cada 100ms consulta si debe leer del archivo de config.
-
             }
             printf("---------------------------------------------------------\n");
             printf("PID %d : proceso que lee archivo de config. muriendo...\n", getpid());
@@ -258,7 +257,7 @@ int main(int argc, char *argv[])
                         printf("-------------------\n");
                         printf("PID %d: muriendo...\n", getpid());
                         printf("-------------------\n");
-                        childsCounter--;
+                        //childsCounter--;
                         // Cierro el pid del hijo que atendió conexión entrante.
                         exit(1);
                     }
@@ -563,7 +562,7 @@ int atender_cliente_TCP(struct sockaddr_in clientAddress, int socketAux)
                 dataSensor->gyro_xout,
                 dataSensor->gyro_yout,
                 dataSensor->gyro_zout,
-                (float)dataSensor->temp_out_float);
+                dataSensor->temp_out_float);
         semop(clientsSemaphoreID, &v, 1); //Libero el semaforo
         // Le respondo al cliente con los datos.
         if (send(socketAux, bufferTxServer, strlen(bufferTxServer), 0) == -1)
@@ -585,7 +584,7 @@ int atender_cliente_TCP(struct sockaddr_in clientAddress, int socketAux)
             printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
         }
         //Demora para leer la SHMMEM
-        sleep(1.5);
+        sleep(1);
     } while (memcmp(bufferRxClient, "END", 3) && serverRunning);
 
     return 0;
@@ -657,6 +656,8 @@ int leer_data_sensor()
     dataMPU6050_fifo = (uint8_t *)malloc(bytesToReadFromMPU6050FIFO * sizeof(uint8_t));
     //printf("PID %d : leer_data_sensor\n", getpid());
     // File operation: OPEN
+
+
     if ((fd = open("/dev/P.Morandi,i2c_td3_driver", O_RDWR)) < 0)
     {
         printf("PID %d : No es posible abrir el driver del I2C\n\n", getpid());
@@ -672,29 +673,29 @@ int leer_data_sensor()
     while (i < bytesToReadFromMPU6050FIFO)
     {
         aux16Bits = (int16_t)(dataMPU6050_fifo[i] << 8 | dataMPU6050_fifo[i + 1]);
-        dataSensorAvg.accel_xout += (float)aux16Bits * 2 / 32768;
+        dataSensorAvg.accel_xout += (float)aux16Bits * 2 / 32768 - 0.020;
         //auxFloat += (float)aux16Bits * 2 / 32768;
         //dataSensorAvg.accel_xout = auxFloat / MPU6050fifoPacketsForMeanFilter;
 
         aux16Bits = (int16_t)(dataMPU6050_fifo[i + 2] << 8 | dataMPU6050_fifo[i + 3]);
-        dataSensorAvg.accel_yout += (float)aux16Bits * 2 / 32768;
+        dataSensorAvg.accel_yout += (float)aux16Bits * 2 / 32768 + 0.060;
 
         aux16Bits = (int16_t)(dataMPU6050_fifo[i + 4] << 8 | dataMPU6050_fifo[i + 5]);
-        dataSensorAvg.accel_zout += (float)aux16Bits * 2 / 32768;
+        dataSensorAvg.accel_zout += (float)aux16Bits * 2 / 32768 - 0.05;
 
         //TEMPERATURE
-        aux16Bits = (uint16_t)(dataMPU6050_fifo[i + 6] << 8 | dataMPU6050_fifo[i + 7]);
+        aux16Bits = (int16_t)(dataMPU6050_fifo[i + 6] << 8 | dataMPU6050_fifo[i + 7]);
         dataSensorAvg.temp_out_float += (float)aux16Bits / 340 + 36.53;
 
         // GYRO
         aux16Bits = (int16_t)(dataMPU6050_fifo[i + 8] << 8 | dataMPU6050_fifo[i + 9]);
-        dataSensorAvg.gyro_xout += (float)aux16Bits * 250 / 32768;
+        dataSensorAvg.gyro_xout += (float)aux16Bits * 250 / 32768 - 4.75;
 
         aux16Bits = (int16_t)(dataMPU6050_fifo[i + 10] << 8 | dataMPU6050_fifo[i + 11]);
-        dataSensorAvg.gyro_yout += (float)aux16Bits * 250 / 32768;
+        dataSensorAvg.gyro_yout += (float)aux16Bits * 250 / 32768 - 2.5;
 
         aux16Bits = (int16_t)(dataMPU6050_fifo[i + 12] << 8 | dataMPU6050_fifo[i + 13]);
-        dataSensorAvg.gyro_zout += (float)aux16Bits * 250 / 32768;
+        dataSensorAvg.gyro_zout += (float)aux16Bits * 250 / 32768 - 0.6;
         i += 14;
     }
     // Calculo promedios

@@ -115,7 +115,7 @@ void i2c_write_buffer(uint8_t regMPU6050, uint8_t regMPU6050_value, int operatio
 	{
 		wakeupCondition = 0;
 		printk(KERN_ERR "i2c_write_buffer ERROR :  read (%s %d)\n", __FUNCTION__, __LINE__);
-		return;
+		return statusEvent;
 	}
 	wakeupCondition = 0;
 	// Genero condición de STOP
@@ -170,12 +170,13 @@ uint8_t i2c_read_buffer(void)
 	auxRegister |= I2C_CON_START;
 	iowrite32(auxRegister, i2c2_baseAddr + I2C_CON);
 	// Espero a que la recepción finalice poniendo en espera el proceso. Puede ser INTERRUPTABLE.
+	//wait_event(queueTASK_UNINTERRUPTIBLE, wakeupCondition > 0);
 	if ((statusEvent = wait_event_interruptible(queue, wakeupCondition > 0)) < 0)
 	{
 		wakeupCondition = 0;
 		printk(KERN_ERR "|writebyte| [ERROR] td3_i2c : read (%s %d)\n", __FUNCTION__, __LINE__);
 		return statusEvent;
-	}
+	} 
 	wakeupCondition = 0;
 	// Genero condición de STOP
 	auxRegister = ioread32(i2c2_baseAddr + I2C_CON);
@@ -189,12 +190,11 @@ uint8_t i2c_read_buffer(void)
 	return byteRx;
 }
 
-void i2c_read_burst(int bytesToRead)
+int i2c_read_burst(int bytesToRead)
 {
 	uint32_t i = 0;
 	uint32_t auxRegister = 0;
 	uint32_t statusEvent = 0;
-	uint8_t byteRx;
 
 	pr_info("i2c_read_burst \n");
 
@@ -228,19 +228,20 @@ void i2c_read_burst(int bytesToRead)
 	iowrite32(auxRegister, i2c2_baseAddr + I2C_CON);
 	pr_info("i2c_read_burst: Esperando fin de RX... \n");
 	// Espero a que la recepción finalice poniendo en espera el proceso. Puede ser INTERRUPTABLE.
+	//wait_event(queueTASK_UNINTERRUPTIBLE, wakeupCondition > 0);
 	if ((statusEvent = wait_event_interruptible(queue, wakeupCondition > 0)) < 0)
 	{
 		wakeupCondition = 0;
 		printk(KERN_ERR "|writebyte| [ERROR] td3_i2c : read (%s %d)\n", __FUNCTION__, __LINE__);
 		return statusEvent;
-	}
+	} 
 	wakeupCondition = 0;
 	// Genero condición de STOP
 	auxRegister = ioread32(i2c2_baseAddr + I2C_CON);
 	auxRegister &= 0xFFFFFFFE;
 	auxRegister |= I2C_CON_STOP;
 	iowrite32(auxRegister, i2c2_baseAddr + I2C_CON);
-	return;
+	return 0;
 }
 
 // Handler de IRQ del I2C2

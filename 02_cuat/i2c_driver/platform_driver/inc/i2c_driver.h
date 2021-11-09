@@ -56,7 +56,7 @@ irqreturn_t i2c_irq_handler(int irq, void *dev_id, struct pt_regs *regs);
 static int change_permission_cdev(struct device *dev, struct kobj_uevent_env *env);
 void i2c_write_buffer(uint8_t regMPU6050, uint8_t regMPU6050_value, int operation);
 uint8_t i2c_read_buffer(void);
-void i2c_read_burst(int bytesToRead);
+int i2c_read_burst(int bytesToRead);
 void MPU6050_init(void);
 void I2C_init(void);
 uint16_t MPU6050_read_fifo_count(void);
@@ -95,7 +95,7 @@ static struct {
 
 } i2cStruct;
 // Data sensor MPU6050
-static struct MPU6050_REGS
+/* static struct MPU6050_REGS
 {
     int16_t accel_xout;
     int16_t accel_yout;
@@ -104,7 +104,7 @@ static struct MPU6050_REGS
     int16_t gyro_xout;
     int16_t gyro_yout;
     int16_t gyro_zout;
-}MPU6050_data;
+}MPU6050_data; */
 
 
 // File operations
