@@ -207,7 +207,8 @@ static int i2c_remove(struct platform_device *i2c_pd)
 static int fop_open(struct inode *inode, struct file *file)
 {
 	uint8_t rx;
-	pr_info("%s: File Operation OPEN\n", ID);
+	pr_info("---------------------------------------\n", ID);
+	pr_info("%s: File Operation OPEN --> Entrando...\n", ID);
 	rx = 0;
 	i2c_write_buffer(WHO_AM_I, 0x00, READ_REGISTER);
 	rx = i2c_read_buffer();
@@ -219,13 +220,14 @@ static int fop_open(struct inode *inode, struct file *file)
 	}
 	pr_info("%s: Respuesta del MPU6050 -> WHO_AM_I: 0x%x\n", ID, rx);
 
-	pr_info("%s: Saliendo de OPEN\n", ID);
+	pr_info("%s: File Operation OPEN --> Cerrando..\n", ID);
 	return 0;
 }
 // Entra luego de un error de un close desde el user
 static int fop_release(struct inode *inode, struct file *file)
 {
 	pr_alert("%s: REALEASE file operation --> Cerrando...\n", ID);
+	pr_info("--------------------------------------------\n", ID);
 	return 0;
 }
 
@@ -234,7 +236,7 @@ static ssize_t fop_read(struct file *device_descriptor, char __user *user_buffer
 	int result = 0;
 	uint16_t fifoCount;
 
-	pr_info("%s: File Operations: READ\n", ID);
+	pr_info("\n\n\n%s: File Operations: READ --> Abriendo\n", ID);
 
 	// Verificación de punteros.
 	if (access_ok(VERIFY_WRITE, user_buffer, read_len) == 0)
@@ -263,6 +265,7 @@ static ssize_t fop_read(struct file *device_descriptor, char __user *user_buffer
 	i2c_write_buffer(USER_CTRL, 0x44, WRITE_REGISTER); // Enable FIFO and reset it
 	do
 	{
+		msleep(5);
 		// Leo la cantidad de bytes en la FIFO
 		fifoCount = MPU6050_read_fifo_count();
 		//pr_info("FIFO_COUNT DENTRO del while= %d \n\n",fifoCount);
@@ -273,10 +276,11 @@ static ssize_t fop_read(struct file *device_descriptor, char __user *user_buffer
 		return -1;
 	}
 	// Asigno memoria dinámicamente (tiene sentido ya que una vez terminada la file operation, devuelvo memoria)
-	i2cStruct.MPU6050_dataBuffer = (uint8_t *)kmalloc(read_len * sizeof(uint8_t), GFP_ATOMIC); // GFP_KERNEL: Get Free Page from Kernel. El otro argumento, el tamaño.
+	i2cStruct.MPU6050_dataBuffer = (uint8_t *)kmalloc(read_len * sizeof(uint8_t), GFP_KERNEL); // GFP_KERNEL: Get Free Page from Kernel. El otro argumento, el tamaño.
 	// Leo primeros 100 bytes de la FIFO
 	i2c_write_buffer(FIFO_R_W, 0x00, READ_REGISTER); // Direcciono registro de FIFO
 	i2c_read_burst(read_len);						 //Leo 280 bytes sin STOP
+	pr_info("%s: File Operations: READ --> %d bytes leidos correctamente. Copiando a usuario...\n", ID, read_len);
 	// Le respondo al usuario con data del sensor.
 	if ((result = copy_to_user(user_buffer, i2cStruct.MPU6050_dataBuffer, read_len)) > 0)
 	{ //en copia correcta devuelve 0
@@ -285,6 +289,8 @@ static ssize_t fop_read(struct file *device_descriptor, char __user *user_buffer
 	}
 	// Libero memoria
 	kfree(i2cStruct.MPU6050_dataBuffer);
+	pr_info("%s: File Operations: READ --> Cerrando ...\n\n\n", ID, read_len);
+
 }
 
 static long fop_ioctl(struct file *file, unsigned int cmd, unsigned long arg)

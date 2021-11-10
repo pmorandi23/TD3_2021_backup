@@ -22,6 +22,8 @@
 #include "../inc/serverTCP.h"
 #include "../inc/handlers.h"
 #include "../inc/configFile.h"
+#include "../inc/meanFilterMPU6050.h"
+
 
 // Variables globales
 // Semaphores
@@ -38,6 +40,7 @@ volatile int updateServerConfig = FALSE;
 // Structs
 struct MPU6050_REGS *dataSensor;
 struct serverConfig *serverConfig;
+
 // Ints
 volatile int childsKilled = 0, childsCounter = 0;
 
@@ -126,7 +129,7 @@ int main(int argc, char *argv[])
         while (serverRunning)
         {
             leer_data_sensor();
-            sleep(0.5); // Cada un seg consulto el sensor a través del driver.
+            sleep(0.25); // Cada un seg consulto el sensor a través del driver.
         }
         printf("----------------------------------------------\n");
         printf("PID %d : proceso lector del sensor muriendo...\n", getpid());
@@ -584,7 +587,7 @@ int atender_cliente_TCP(struct sockaddr_in clientAddress, int socketAux)
             printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
         }
         //Demora para leer la SHMMEM
-        sleep(1);
+        sleep(0.5);
     } while (memcmp(bufferRxClient, "END", 3) && serverRunning);
 
     return 0;
@@ -641,10 +644,10 @@ int config_signals()
  **/
 int leer_data_sensor()
 {
-    int fd, i = 0, MPU6050fifoPacketsForMeanFilter, bytesToReadFromMPU6050FIFO;
-    struct MPU6050_REGS dataSensorAvg;
+    int fd, MPU6050fifoPacketsForMeanFilter, bytesToReadFromMPU6050FIFO;
     uint8_t *dataMPU6050_fifo;
-    int16_t aux16Bits;
+    struct MPU6050_REGS dataSensorAvg;
+
 
     // Cantidad de paquetes de datos a traer de la FIFO del MPU6050
     semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
@@ -669,44 +672,10 @@ int leer_data_sensor()
         printf("PID %d : No es posible leer el driver del I2C\n\n", getpid());
         return -1;
     }
-    // FILTRO DE MEDIA : segun el valor de la ventana, sumar las N mediciones y dividir por N.
-    while (i < bytesToReadFromMPU6050FIFO)
-    {
-        aux16Bits = (int16_t)(dataMPU6050_fifo[i] << 8 | dataMPU6050_fifo[i + 1]);
-        dataSensorAvg.accel_xout += (float)aux16Bits * 2 / 32768 - 0.020;
-        //auxFloat += (float)aux16Bits * 2 / 32768;
-        //dataSensorAvg.accel_xout = auxFloat / MPU6050fifoPacketsForMeanFilter;
-
-        aux16Bits = (int16_t)(dataMPU6050_fifo[i + 2] << 8 | dataMPU6050_fifo[i + 3]);
-        dataSensorAvg.accel_yout += (float)aux16Bits * 2 / 32768 + 0.060;
-
-        aux16Bits = (int16_t)(dataMPU6050_fifo[i + 4] << 8 | dataMPU6050_fifo[i + 5]);
-        dataSensorAvg.accel_zout += (float)aux16Bits * 2 / 32768 - 0.05;
-
-        //TEMPERATURE
-        aux16Bits = (int16_t)(dataMPU6050_fifo[i + 6] << 8 | dataMPU6050_fifo[i + 7]);
-        dataSensorAvg.temp_out_float += (float)aux16Bits / 340 + 36.53;
-
-        // GYRO
-        aux16Bits = (int16_t)(dataMPU6050_fifo[i + 8] << 8 | dataMPU6050_fifo[i + 9]);
-        dataSensorAvg.gyro_xout += (float)aux16Bits * 250 / 32768 - 4.75;
-
-        aux16Bits = (int16_t)(dataMPU6050_fifo[i + 10] << 8 | dataMPU6050_fifo[i + 11]);
-        dataSensorAvg.gyro_yout += (float)aux16Bits * 250 / 32768 - 2.5;
-
-        aux16Bits = (int16_t)(dataMPU6050_fifo[i + 12] << 8 | dataMPU6050_fifo[i + 13]);
-        dataSensorAvg.gyro_zout += (float)aux16Bits * 250 / 32768 - 0.6;
-        i += 14;
-    }
-    // Calculo promedios
-    dataSensorAvg.accel_xout = dataSensorAvg.accel_xout / MPU6050fifoPacketsForMeanFilter;
-    dataSensorAvg.accel_yout = dataSensorAvg.accel_yout / MPU6050fifoPacketsForMeanFilter;
-    dataSensorAvg.accel_zout = dataSensorAvg.accel_zout / MPU6050fifoPacketsForMeanFilter;
-    dataSensorAvg.temp_out_float = dataSensorAvg.temp_out_float / MPU6050fifoPacketsForMeanFilter;
-    dataSensorAvg.gyro_xout = dataSensorAvg.gyro_xout / MPU6050fifoPacketsForMeanFilter;
-    dataSensorAvg.gyro_yout = dataSensorAvg.gyro_yout / MPU6050fifoPacketsForMeanFilter;
-    dataSensorAvg.gyro_zout = dataSensorAvg.gyro_zout / MPU6050fifoPacketsForMeanFilter;
-
+    // File operation : RELEASE
+    close(fd);
+    // Promedio con el buffer 
+    dataSensorAvg = filtro_MPU6050(dataMPU6050_fifo, MPU6050fifoPacketsForMeanFilter, bytesToReadFromMPU6050FIFO);
     /* printf("------------------------------------------\n\n\n");
     printf("############PROMEDIO DE DATASENSOR############\n");
     printf("Cantidad de muestras de a 14 bytes = %d\n", MPU6050fifoPacketsForMeanFilter);
@@ -731,9 +700,7 @@ int leer_data_sensor()
     dataSensor->gyro_zout = dataSensorAvg.gyro_zout;
     semop(clientsSemaphoreID, &v, 1); //Libero el semaforo
     // Libero memoria
-    free(dataMPU6050_fifo);
-    // Cierro el driver
-    close(fd);
+    free(dataMPU6050_fifo); 
 
     return 0;
 }
