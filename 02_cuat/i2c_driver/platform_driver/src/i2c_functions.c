@@ -1,4 +1,10 @@
-void I2C_init()
+/**
+ * \fn void I2C_init(void)
+ * \param void No recibe nada
+ * \brief Función que configura el módulo I2C y lo habilita.
+ * \return No devuelve nada.
+ **/
+void I2C_init(void)
 {
 	// ----------------------------------------------
 	// Configuración de registros del I2C - pag. 4559
@@ -52,8 +58,6 @@ void I2C_init()
 	iowrite32(0x8000, i2c2_baseAddr + I2C_CON);
 
 }
-
-
 /**
  * \fn int leer_data_sensor(void)
  * \param regMPU6050 Dirección del registro a leer / escribir
@@ -62,7 +66,7 @@ void I2C_init()
  * \brief Función que escribe el buffer del I2C en modo "Master transmitter" por IRQ
  * \return Devuelve 0 si fue un éxito, -1 si hubo un error.
  **/
-void i2c_write_buffer(uint8_t regMPU6050, uint8_t regMPU6050_value, int operation)
+int i2c_write_buffer(uint8_t regMPU6050, uint8_t regMPU6050_value, int operation)
 {
 	uint32_t i = 0;
 	uint32_t auxRegister = 0;
@@ -79,7 +83,7 @@ void i2c_write_buffer(uint8_t regMPU6050, uint8_t regMPU6050_value, int operatio
 		if (i == 4)
 		{
 			printk(KERN_ERR "|writebyte| [ERROR] td3_i2c : busy (%s %d)\n", __FUNCTION__, __LINE__);
-			return;
+			return -1;
 		}
 	}
 	// Cargo el registro a TX en variable aux. para cuando entre a I2C_IRQSTATUS_XRDY
@@ -126,8 +130,14 @@ void i2c_write_buffer(uint8_t regMPU6050, uint8_t regMPU6050_value, int operatio
 	// Tiempo para que baje la línea (STOP).
 	msleep(1);
 	pr_info("i2c_write_buffer: Byte TX OK. \n");
+	return 0;
 }
-
+/**
+ * \fn uint8_t i2c_read_buffer(void)
+ * \param void No recibe nada.
+ * \brief Función que lee el buffer del I2C en modo "Master receiver" por IRQ
+ * \return Devuelve el byte recibido si fue un éxito, -1 si hubo un error.
+ **/
 uint8_t i2c_read_buffer(void)
 {
 	uint32_t i = 0;
@@ -189,7 +199,12 @@ uint8_t i2c_read_buffer(void)
 	//pr_info("%s: i2c_read_buffer : Byte recibido: 0x%x \n", ID, byteRx);
 	return byteRx;
 }
-
+/**
+ * \fn int i2c_read_burst(int bytesToRead)
+ * \param bytesToRead Cantidad de bytes a leer en modo "burst"
+ * \brief Función que lee el buffer del I2C en modo "Master receiver" en modo BURST por IRQ
+ * \return Devuelve 0 si fue un éxito, -1 si hubo un error.
+ **/
 int i2c_read_burst(int bytesToRead)
 {
 	uint32_t i = 0;
@@ -244,18 +259,11 @@ int i2c_read_burst(int bytesToRead)
 	return 0;
 }
 
-// Handler de IRQ del I2C2
-/* 
-• Receive interrupt/status (RRDY) is generated when there is received data ready to be read by the CPU
-from the I2C_DATA register (see the FIFO Management subsection for a complete description of
-required conditions for interrupt generation). The CPU can alternatively poll this bit to read the received
-data from the I2C_DATA register.
-
-• Transmit interrupt/status (XRDY) is generated when the CPU needs to put more data in the I2C_DATA
-register after the transmitted data has been shifted out on the SDA pin (see the FIFO Management
-subsection for a complete description of required conditions for interrupt generation). The CPU can
-alternatively poll this bit to write the next transmitted data into the I2C_DATA register.
-*/
+/**
+ * \fn irqreturn_t i2c_irq_handler(int irq, void *devid, struct pt_regs *regs)
+ * \brief Handler para la IRQ del I2C
+ * \return Devuelve IRQ_HANDLED
+ **/
 irqreturn_t i2c_irq_handler(int irq, void *devid, struct pt_regs *regs)
 {
 	uint32_t irq_status;
@@ -325,7 +333,7 @@ irqreturn_t i2c_irq_handler(int irq, void *devid, struct pt_regs *regs)
 			}
 			else
 			{
-				pr_info(" + IRQ I2C: Direccionando registro 0x%x (MPU6050) a escribir.\n", i2cStruct.txData[0]);
+				pr_info(" + IRQ I2C: Direccionando registro 0x%x (MPU6050) a escribir...\n", i2cStruct.txData[0]);
 				iowrite8(i2cStruct.txData[0], i2c2_baseAddr + I2C_DATA);
 				i2cStruct.dataCount++;
 			}

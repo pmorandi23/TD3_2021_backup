@@ -183,11 +183,13 @@ static int i2c_probe(struct platform_device *i2c_pd)
 	}
 	pr_info("%s: Numero de IRQ asignado %d\n", ID, virq);
 	// Inicialización del módulo I2C
+	pr_info("%s: Configurando e inicializando driver I2C...\n", ID);
 	I2C_init();
+	pr_info("%s: Driver I2C inicializado correctamente.\n", ID);
 	// Inicialización de parámetros del sensor MPU6050
+	pr_info("%s: Configurando e inicializando MPU6050...\n", ID);
 	MPU6050_init();
 	pr_info("%s: MPU6050 inicializado correctamente.\n", ID);
-	pr_info("%s: Driver I2C configurado correctamente.\n", ID);
 	pr_info("%s: Cerrando la función probe()...\n", ID);
 	return result;
 }
@@ -207,27 +209,27 @@ static int i2c_remove(struct platform_device *i2c_pd)
 static int fop_open(struct inode *inode, struct file *file)
 {
 	uint8_t rx;
-	pr_info("---------------------------------------\n", ID);
-	pr_info("%s: File Operation OPEN --> Entrando...\n", ID);
+	pr_info("--------------------------------\n");
+	pr_info("%s: op OPEN --> Entrando...\n", ID);
 	rx = 0;
 	i2c_write_buffer(WHO_AM_I, 0x00, READ_REGISTER);
 	rx = i2c_read_buffer();
 	rx = rx & 0x7E;
 	if (rx != 0x68)
 	{
-		pr_alert("Error en el sensor! No responde correctamente\n");
+		pr_alert("%s: op OPEN --> Error en el sensor! No responde correctamente\n", ID);
 		return -1;
 	}
-	pr_info("%s: Respuesta del MPU6050 -> WHO_AM_I: 0x%x\n", ID, rx);
+	pr_info("%s: op OPEN --> MPU6050 -> WHO_AM_I: 0x%x\n", ID, rx);
 
-	pr_info("%s: File Operation OPEN --> Cerrando..\n", ID);
+	pr_info("%s: op OPEN --> Cerrando..\n", ID);
 	return 0;
 }
 // Entra luego de un error de un close desde el user
 static int fop_release(struct inode *inode, struct file *file)
 {
-	pr_alert("%s: REALEASE file operation --> Cerrando...\n", ID);
-	pr_info("--------------------------------------------\n", ID);
+	pr_info("%s: op REALEASE --> Cerrando...\n", ID);
+	pr_info("--------------------------------\n");
 	return 0;
 }
 
@@ -236,27 +238,27 @@ static ssize_t fop_read(struct file *device_descriptor, char __user *user_buffer
 	int result = 0;
 	uint16_t fifoCount;
 
-	pr_info("\n\n\n%s: File Operations: READ --> Abriendo\n", ID);
+	pr_info("%s: op: READ --> Abriendo\n", ID);
 
 	// Verificación de punteros.
 	if (access_ok(VERIFY_WRITE, user_buffer, read_len) == 0)
 	{
-		pr_alert("%s: File Operations: READ --> Error en el buffer del usuario.\n", ID);
-		return -1;
-	}
-	// Chequeo si los bytes solicitados son multiplo de 14 (1 paquete de datos del MPU6050)
-	if (read_len % 14 != 0)
-	{
-		pr_alert("%s: File Operations: READ --> Bytes solicitados (%d) no son múltiplos de 14!\n", ID, read_len);
+		pr_alert("%s: op: READ --> Error en el buffer del usuario.\n", ID);
 		return -1;
 	}
 	// Verificación de que el tamaño del buffer sea menor a la cantidad máxima de bytes validos dentro de la FIFO
 	if (read_len > MAX_BYTES_TO_READ)
 	{
-		pr_alert("%s: File Operations: READ --> Tamaño del buffer de usuario mayor a lo que puede entregar el sensor.\nSe limita a 1022 bytes (73 paquetes)\n", ID);
+		pr_alert("%s: op: READ --> Tamaño del buffer de usuario mayor a lo que puede entregar el sensor.\nSe limita a 1022 bytes (73 paquetes)\n", ID);
 		read_len = MAX_BYTES_TO_READ;
 	}
-	pr_info("%s: File Operations: READ --> User requiere leer %d bytes\n", ID, read_len);
+	// Chequeo si los bytes solicitados son multiplo de 14 (1 paquete de datos del MPU6050)
+	if (read_len % 14 != 0)
+	{
+		pr_alert("%s: op: READ --> Bytes solicitados (%d) no son múltiplos de 14!\n", ID, read_len);
+		return -1;
+	}
+	pr_info("%s: op: READ --> User requiere leer %d bytes. Esperando FIFO llena...\n", ID, read_len);
 	/* ----------------------------------------------------------------- */
 	/* -------------Lectura de la FIFO del MPU6050---------------------- */
 	/* ----------------------------------------------------------------- */
@@ -265,32 +267,31 @@ static ssize_t fop_read(struct file *device_descriptor, char __user *user_buffer
 	i2c_write_buffer(USER_CTRL, 0x44, WRITE_REGISTER); // Enable FIFO and reset it
 	do
 	{
-		msleep(5);
 		// Leo la cantidad de bytes en la FIFO
 		fifoCount = MPU6050_read_fifo_count();
 		//pr_info("FIFO_COUNT DENTRO del while= %d \n\n",fifoCount);
 	} while (fifoCount < read_len);
 	if (fifoCount > 1022)
 	{
-		pr_alert("File Operations: READ --> FIFO_COUNT overflow= %d \n\n", fifoCount);
+		pr_alert("%s: op: READ --> |ERROR| FIFO_COUNT overflow= %d \n\n", ID, fifoCount);
 		return -1;
 	}
-	// Asigno memoria dinámicamente (tiene sentido ya que una vez terminada la file operation, devuelvo memoria)
-	i2cStruct.MPU6050_dataBuffer = (uint8_t *)kmalloc(read_len * sizeof(uint8_t), GFP_KERNEL); // GFP_KERNEL: Get Free Page from Kernel. El otro argumento, el tamaño.
+	// Asigno memoria dinámicamente (tiene sentido ya que una vez terminada la op, devuelvo memoria)
+	i2cStruct.MPU6050_dataBuffer = (uint8_t *)kmalloc(read_len * sizeof(uint8_t), GFP_ATOMIC); // GFP_KERNEL: Get Free Page from Kernel. El otro argumento, el tamaño.
 	// Leo primeros 100 bytes de la FIFO
 	i2c_write_buffer(FIFO_R_W, 0x00, READ_REGISTER); // Direcciono registro de FIFO
 	i2c_read_burst(read_len);						 //Leo 280 bytes sin STOP
-	pr_info("%s: File Operations: READ --> %d bytes leidos correctamente. Copiando a usuario...\n", ID, read_len);
+	pr_info("%s: op: READ --> %d bytes leidos correctamente. Copiando a usuario...\n", ID, read_len);
 	// Le respondo al usuario con data del sensor.
 	if ((result = copy_to_user(user_buffer, i2cStruct.MPU6050_dataBuffer, read_len)) > 0)
 	{ //en copia correcta devuelve 0
-		pr_info("%s: File Operations: READ --> Falla en copia de buffer de kernel a buffer de usuario\n", ID);
+		pr_info("%s: op: READ --> Falla en copia de buffer de kernel a buffer de usuario\n", ID);
 		return -1;
 	}
 	// Libero memoria
 	kfree(i2cStruct.MPU6050_dataBuffer);
-	pr_info("%s: File Operations: READ --> Cerrando ...\n\n\n", ID, read_len);
-
+	pr_info("%s: op: READ --> Cerrando ...\n", ID);
+	return 0;
 }
 
 static long fop_ioctl(struct file *file, unsigned int cmd, unsigned long arg)

@@ -25,7 +25,7 @@
 //-------------------------------------------------------------------
 #define MENOR          0
 #define CANT_DISP      1
-#define ID    		   "msgTail"
+#define ID    		   "i2c_driver"
 #define CLASS_NAME     "i2c_td3_driver_class"
 #define COMPATIBLE	   "P.Morandi,i2c_td3_driver"
 #define NAME		   "P.Morandi,i2c_td3_driver"
@@ -54,7 +54,7 @@ static ssize_t fop_write (struct file * device_descriptor, const char __user * u
 static long fop_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
 irqreturn_t i2c_irq_handler(int irq, void *dev_id, struct pt_regs *regs);
 static int change_permission_cdev(struct device *dev, struct kobj_uevent_env *env);
-void i2c_write_buffer(uint8_t regMPU6050, uint8_t regMPU6050_value, int operation);
+int i2c_write_buffer(uint8_t regMPU6050, uint8_t regMPU6050_value, int operation);
 uint8_t i2c_read_buffer(void);
 int i2c_read_burst(int bytesToRead);
 void MPU6050_init(void);

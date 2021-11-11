@@ -5,7 +5,7 @@ COMPATH = ./comons/
 CC = gcc
 OFLAGS = -lm -o
 NEONFLAGS = -S   
-CFLAGS = -c -Wall -Ofast -pthread -lrt
+CFLAGS = -c -Wall 
 OUTPUT = serverTCP
 OBJETO = $(OBJPATH)serverTCP.o $(OBJPATH)handlers.o $(OBJPATH)configFile.o $(OBJPATH)meanFilterMPU6050.o $(OBJPATH)config.o $(OBJPATH)string.o $(OBJPATH)dictionary.o 
 
@@ -22,7 +22,7 @@ $(OBJPATH)configFile.o: $(SRCPATH)configFile.c
 	$(CC) $< $(CFLAGS) -o $@
 
 $(OBJPATH)meanFilterMPU6050.o: $(SRCPATH)meanFilterMPU6050.c
-	$(CC) $< $(CFLAGS) -o $@
+	$(CC) $< -c -Wall -Ofast -pthread -lrt -o $@
 
 $(OBJPATH)config.o: $(COMPATH)config.c 
 	$(CC) $< $(CFLAGS) -o $@

@@ -1,3 +1,9 @@
+/**
+ * \fn void MPU6050_init(void)
+ * \param void No recibe nada
+ * \brief Función que inicializa y configura el sensor MPU6050 
+ * \return No devuelve nada
+ **/
 void MPU6050_init(void)
 {
     uint8_t rx = 0;
@@ -24,7 +30,7 @@ void MPU6050_init(void)
     // DLPF_CFG = bits 2:0 = 010; this sets the sample rate at 1 kHz for both
     i2c_write_buffer(CONFIG, 0x03, WRITE_REGISTER);
     // Set sample rate = gyroscope output rate/(1 + SMPLRT_DIV)
-    i2c_write_buffer(SMPLRT_DIV, 0x04, WRITE_REGISTER); // Use a 200 Hz sample rate (5ms)
+    i2c_write_buffer(SMPLRT_DIV, 0x03, WRITE_REGISTER); // Use a 200 Hz sample rate (5ms)
     // Set gyroscope full scale range
     // Range selects FS_SEL and AFS_SEL are 0 - 3, so 2-bit values are left-shifted into positions 4:3
     i2c_write_buffer(GYRO_CONFIG, 0x00, READ_REGISTER); // Clear self-test bits [7:5]
@@ -48,7 +54,12 @@ void MPU6050_init(void)
     i2c_write_buffer(FIFO_EN, 0xF8, WRITE_REGISTER);   // Enable gyro, accelerometer and temperature sensors for FIFO  (max size 1024 bytes in MPU-6050)
     msleep(100);                                       // Wait for some samples
 }
-
+/**
+ * \fn uint16_t MPU6050_read_fifo_count(void)
+ * \param void No recibe nada
+ * \brief Función que lee la cantidad de datos (bytes) válidos en la FIFO del MPU6050
+ * \return Devuelve la cantidad de bytes en la FIFO.
+ **/
 uint16_t MPU6050_read_fifo_count(void)
 {
     uint16_t fifoCount;

@@ -24,7 +24,6 @@
 #include "../inc/configFile.h"
 #include "../inc/meanFilterMPU6050.h"
 
-
 // Variables globales
 // Semaphores
 struct sembuf p = {0, -1, SEM_UNDO}; // Estructura para tomar el semáforo
@@ -226,9 +225,9 @@ int main(int argc, char *argv[])
                         perror("Error en accept");
                         return 0;
                     }
-                    printf("---------------------------------------------------------------\n");
-                    printf("PPID %d: SERVER : Conexión aceptada. Atendiendo cliente.... nbr_fds = %d\n", ppid, nbr_fds);
-                    printf("---------------------------------------------------------------\n");
+                    printf("---------------------------------------------------------------------------\n");
+                    printf("PPID %d: SERVER : Conexión aceptada. Atendiendo cliente.... nbr_fds = %d   \n", ppid, nbr_fds);
+                    printf("---------------------------------------------------------------------------\n");
                     // Creo un pid para cada conexión entrante
                     if (!fork())
                     {
@@ -236,9 +235,9 @@ int main(int argc, char *argv[])
                         semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
                         serverConfig->connections++;
                         semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
-                        printf("----------------------------------------------------\n");
+                        printf("--------------------------------------------\n");
                         printf("PID %d: Conexiones actuales  = %d\n", getpid(), serverConfig->connections);
-                        printf("----------------------------------------------------\n");
+                        printf("--------------------------------------------\n");
 
                         // Atiendo al cliente TCP.
                         if (atender_cliente_TCP(clientAddress, socketAux) == -1)
@@ -270,9 +269,9 @@ int main(int argc, char *argv[])
                 if (serverConfig->connections >= serverConfig->maxConnections)
                 {
                     maxConnectionsReached = true;
-                    printf("--------------------------------------------------------------------------------\n");
+                    printf("----------------------------------------------------------------------------\n");
                     printf("PPID %d: SERVER : Conexiones máximas alcanzadas. Esperando que se liberen...\n", ppid);
-                    printf("--------------------------------------------------------------------------------\n");
+                    printf("----------------------------------------------------------------------------\n");
                 }
                 semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
             }
@@ -559,7 +558,7 @@ int atender_cliente_TCP(struct sockaddr_in clientAddress, int socketAux)
     {
         // Leo la SHM Mem. y armo la trama
         semop(clientsSemaphoreID, &p, 1); //Tomo el semaforo
-        sprintf(bufferTxServer, "%.2f\n%.2f\n%.2f\n%.2f\n%.2f\n%.2f\n%.2f\n", dataSensor->accel_xout,
+        sprintf(bufferTxServer, "%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.2f\n", dataSensor->accel_xout,
                 dataSensor->accel_yout,
                 dataSensor->accel_zout,
                 dataSensor->gyro_xout,
@@ -648,19 +647,24 @@ int leer_data_sensor()
     uint8_t *dataMPU6050_fifo;
     struct MPU6050_REGS dataSensorAvg;
 
-
     // Cantidad de paquetes de datos a traer de la FIFO del MPU6050
     semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
     MPU6050fifoPacketsForMeanFilter = serverConfig->meanSamples;
     semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
     // Cantidad de bytes totales a leer de la FIFO del MPU6050
-    bytesToReadFromMPU6050FIFO = MPU6050fifoPacketsForMeanFilter * MPU6050_PACKET_LENGTH;
+    if (MPU6050fifoPacketsForMeanFilter > 73)
+    {
+        printf("PID %d : Paquetes para filtro exceden capacidad de FIFO. Se limitan a 72.\n\n", getpid());
+        bytesToReadFromMPU6050FIFO = 72 * MPU6050_PACKET_LENGTH;
+    }
+    else
+    {
+        bytesToReadFromMPU6050FIFO = MPU6050fifoPacketsForMeanFilter * MPU6050_PACKET_LENGTH;
+    }
     // Le pido al driver que traiga "meanSamples" muestras sin procesar para realizar el filtro de media móvil
     dataMPU6050_fifo = (uint8_t *)malloc(bytesToReadFromMPU6050FIFO * sizeof(uint8_t));
     //printf("PID %d : leer_data_sensor\n", getpid());
     // File operation: OPEN
-
-
     if ((fd = open("/dev/P.Morandi,i2c_td3_driver", O_RDWR)) < 0)
     {
         printf("PID %d : No es posible abrir el driver del I2C\n\n", getpid());
@@ -674,7 +678,7 @@ int leer_data_sensor()
     }
     // File operation : RELEASE
     close(fd);
-    // Promedio con el buffer 
+    // Promedio con el buffer
     dataSensorAvg = filtro_MPU6050(dataMPU6050_fifo, MPU6050fifoPacketsForMeanFilter, bytesToReadFromMPU6050FIFO);
     /* printf("------------------------------------------\n\n\n");
     printf("############PROMEDIO DE DATASENSOR############\n");
@@ -700,7 +704,7 @@ int leer_data_sensor()
     dataSensor->gyro_zout = dataSensorAvg.gyro_zout;
     semop(clientsSemaphoreID, &v, 1); //Libero el semaforo
     // Libero memoria
-    free(dataMPU6050_fifo); 
+    free(dataMPU6050_fifo);
 
     return 0;
 }
