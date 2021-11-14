@@ -34,15 +34,13 @@ int sharedMemDataSensorId = 0, sharedMemConfigServerId = 0;
 void *sharedMemDataSensorPointer = (void *)0;
 void *sharedMemConfigServerPointer = (void *)0;
 // Flags
-volatile int serverRunning = RUNNING;
-volatile int updateServerConfig = FALSE;
+int serverRunning = RUNNING;
 // Structs
 struct MPU6050_REGS *dataSensor;
 struct serverConfig *serverConfig;
-
 // Ints
 volatile int childsKilled = 0, childsCounter = 0;
-
+int pipeChildSensorReader[2], pipeServer[2], childSensorReader = 0;
 /**
  * \fn int main(int argc, char *argv[])
  * \brief Servidor concurrente TCP.  Escucha peticiones HTTP o de determinado Objeto y responde con mediciones de un sensor.
@@ -118,9 +116,17 @@ int main(int argc, char *argv[])
     {
         return 0;
     }
+    pipe(pipeChildSensorReader);
+    pipe(pipeServer);
     // Creo proceso hijo para leer datos del sensor y escribirlos en la shared_memory
     if (!fork())
     {
+        close(pipeServer[0]);            // Cierro pipe de lectura del server
+        close(pipeServer[1]);            // Cierro pipe de escritura del server
+        close(pipeChildSensorReader[0]); // Cierro pipe de lectura del hijo
+        childSensorReader = getpid();
+        // Le eswcribo el PID a la pipe
+        write(pipeChildSensorReader[1], &childSensorReader, sizeof(childSensorReader));
         printf("---------------------------------------------------------------\n");
         printf("PID %d obteniendo data del sensor y almacenando en la shm...\n", getpid());
         printf("---------------------------------------------------------------\n");
@@ -137,144 +143,123 @@ int main(int argc, char *argv[])
     }
     else
     {
+        // Leo el PID del proceso lector desde el padre.
+        read(pipeChildSensorReader[0], &childSensorReader, sizeof(childSensorReader));
         childsCounter++;
-        // Creo proceso hijo para consultar por si debe actualizar la configuración del server.
-        if (!fork())
-        {
-            printf("---------------------------------------------------------\n");
-            printf("PID %d : proceso que lee archivo de config.\n", getpid());
-            printf("---------------------------------------------------------\n");
-            // Código de hijo
-            while (serverRunning)
-            {
-                if (updateServerConfig)
-                {
-                    semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
-                    leer_config_server(serverConfig);
-                    semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
-                    updateServerConfig = FALSE;
-                }
-                sleep(1); // Cada 100ms consulta si debe leer del archivo de config.
-            }
-            printf("---------------------------------------------------------\n");
-            printf("PID %d : proceso que lee archivo de config. muriendo...\n", getpid());
-            printf("---------------------------------------------------------\n");
-            exit(1);
-        }
-        else
-        {
-            childsCounter++;
-            // Código del padre. Se queda esperando conexiones entrantes con select() y accept()
-            // Permite atender a multiples usuarios
-            semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
-            serverConfig->connections = 0;
-            semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
-            printf("------------------------------------------\n");
-            printf("PPID %d: SERVER: esperando conexiones...\n", ppid);
-            printf("------------------------------------------\n");
-            while (serverRunning)
-            {
-                // Si se superan las conexiones máximas, se espera hasta que se liberen.
-                while (maxConnectionsReached)
-                {
-                    semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
-                    if (serverConfig->connections < serverConfig->maxConnections)
-                    {
-                        maxConnectionsReached = false;
-                        printf("--------------------------------------------------------------------------------\n");
-                        printf("PPID %d: SERVER : Conexiones liberadas. Vuelven a admitirse.\n", ppid);
-                        printf("--------------------------------------------------------------------------------\n");
-                    }
-                    semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
-                    sleep(1);
-                }
-                // Crear la lista de "file descriptors" que vamos a escuchar
-                FD_ZERO(&readfds);
-                // Especificamos el socket, podria haber mas.
-                FD_SET(socketServer, &readfds);
-                timeout.tv_sec = 1;
-                timeout.tv_usec = 0;
-                // Espera al establecimiento de alguna conexion. Cada un segundo bloquea el ppid en select() para no acerlo en accept()
-                // El primer parametro es el maximo de los fds especificados en
-                // las macros FD_SET + 1.
-                //nbr_fds = select(socketServer + 1, &readfds, NULL, NULL, &timeout);
-                nbr_fds = select(8, &readfds, NULL, NULL, &timeout); // Pongo 8 en NFDS a ver si funciona el select()
+        // Código del padre. Se queda esperando conexiones entrantes con select() y accept()
+        // Permite atender a multiples usuarios
+        semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
+        serverConfig->connections = 0;
+        semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
+        printf("------------------------------------------\n");
+        printf("PPID %d: SERVER: esperando conexiones...\n", ppid);
+        printf("------------------------------------------\n");
 
-                if ((nbr_fds < 0) && (errno != EINTR))
+        // Escribo el flag del serverRunning para hijos que atienden clientes
+
+        while (serverRunning)
+        {
+            // Si se superan las conexiones máximas, se espera hasta que se liberen.
+            while (maxConnectionsReached)
+            {
+                semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
+                if (serverConfig->connections < serverConfig->maxConnections)
                 {
-                    perror("select");
+                    maxConnectionsReached = false;
+                    printf("--------------------------------------------------------------------------------\n");
+                    printf("PPID %d: SERVER : Conexiones liberadas. Vuelven a admitirse.\n", ppid);
+                    printf("--------------------------------------------------------------------------------\n");
                 }
-                /* if (!FD_ISSET(socketServer, &readfds))
+                semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
+                sleep(1);
+            }
+            // Crear la lista de "file descriptors" que vamos a escuchar
+            FD_ZERO(&readfds);
+            // Especificamos el socket, podria haber mas.
+            FD_SET(socketServer, &readfds);
+            timeout.tv_sec = 1;
+            timeout.tv_usec = 0;
+            // Espera al establecimiento de alguna conexion. Cada un segundo bloquea el ppid en select() para no acerlo en accept()
+            // El primer parametro es el maximo de los fds especificados en
+            // las macros FD_SET + 1.
+            //nbr_fds = select(socketServer + 1, &readfds, NULL, NULL, &timeout);
+            nbr_fds = select(8, &readfds, NULL, NULL, &timeout); // Pongo 8 en NFDS a ver si funciona el select()
+
+            if ((nbr_fds < 0) && (errno != EINTR))
+            {
+                perror("select");
+            }
+            /* if (!FD_ISSET(socketServer, &readfds))
                 {
                     continue;
                 }  */
-                // Si tengo conexion entrante y no se alcanzaron las máximas permitidas, nbr_fds > 0 y da paso al accept()
-                if (nbr_fds > 0 && !maxConnectionsReached)
+            // Si tengo conexion entrante y no se alcanzaron las máximas permitidas, nbr_fds > 0 y da paso al accept()
+            if (nbr_fds > 0 && !maxConnectionsReached)
+            {
+                printf("--------------------------------------------\n");
+                printf("PPID %d: Solicitud de conexión. nbr_fds = %d\n", ppid, nbr_fds);
+                printf("--------------------------------------------\n");
+                // La funcion accept rellena la estructura address con informacion
+                // del cliente y pone en addrlen la longitud de la estructura.
+                // Aca se podria agregar codigo para rechazar clientes invalidos
+                // cerrando s_aux. En este caso el cliente fallaria con un error
+                // de "broken pipe" cuando quiera leer o escribir al socket.
+                clientAddresslen = sizeof(clientAddress);
+                if ((socketAux = accept(socketServer, (struct sockaddr *)&clientAddress, &clientAddresslen)) < 0)
                 {
-                    printf("--------------------------------------------\n");
-                    printf("PPID %d: Solicitud de conexión. nbr_fds = %d\n", ppid, nbr_fds);
-                    printf("--------------------------------------------\n");
-                    // La funcion accept rellena la estructura address con informacion
-                    // del cliente y pone en addrlen la longitud de la estructura.
-                    // Aca se podria agregar codigo para rechazar clientes invalidos
-                    // cerrando s_aux. En este caso el cliente fallaria con un error
-                    // de "broken pipe" cuando quiera leer o escribir al socket.
-                    clientAddresslen = sizeof(clientAddress);
-                    if ((socketAux = accept(socketServer, (struct sockaddr *)&clientAddress, &clientAddresslen)) < 0)
-                    {
-                        perror("Error en accept");
-                        return 0;
-                    }
-                    printf("---------------------------------------------------------------------------\n");
-                    printf("PPID %d: SERVER : Conexión aceptada. Atendiendo cliente.... nbr_fds = %d   \n", ppid, nbr_fds);
-                    printf("---------------------------------------------------------------------------\n");
-                    // Creo un pid para cada conexión entrante
-                    if (!fork())
-                    {
-                        // Sumo una conexión activa.
-                        semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
-                        serverConfig->connections++;
-                        semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
-                        printf("--------------------------------------------\n");
-                        printf("PID %d: Conexiones actuales  = %d\n", getpid(), serverConfig->connections);
-                        printf("--------------------------------------------\n");
+                    perror("Error en accept");
+                    return 0;
+                }
+                printf("---------------------------------------------------------------------------\n");
+                printf("PPID %d: SERVER : Conexión aceptada. Atendiendo cliente.... nbr_fds = %d   \n", ppid, nbr_fds);
+                printf("---------------------------------------------------------------------------\n");
+                // Creo un pid para cada conexión entrante
+                if (!fork())
+                {
 
-                        // Atiendo al cliente TCP.
-                        if (atender_cliente_TCP(clientAddress, socketAux) == -1)
-                        {
-                            printf("---------------------------------------------------------------\n");
-                            printf("PID %d: Error en conexión TCP con cliente. Cerrando child...\n", getpid());
-                            printf("---------------------------------------------------------------\n");
-                        }
-                        // Resto conexión activa.
-                        semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
-                        if (serverConfig->connections > 0)
-                        {
-                            serverConfig->connections--;
-                        }
-                        printf("---------------------------------------------------------\n");
-                        printf("PID %d: Conexiones actuales  = %d\n", getpid(), serverConfig->connections);
-                        printf("---------------------------------------------------------\n");
-                        semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
-                        printf("-------------------\n");
-                        printf("PID %d: muriendo...\n", getpid());
-                        printf("-------------------\n");
-                        //childsCounter--;
-                        // Cierro el pid del hijo que atendió conexión entrante.
-                        exit(1);
+                    // Sumo una conexión activa.
+                    semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
+                    serverConfig->connections++;
+                    semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
+                    printf("--------------------------------------------\n");
+                    printf("PID %d: Conexiones actuales  = %d\n", getpid(), serverConfig->connections);
+                    printf("--------------------------------------------\n");
+
+                    // Atiendo al cliente TCP.
+                    if (atender_cliente_TCP(clientAddress, socketAux) == -1)
+                    {
+                        printf("---------------------------------------------------------------\n");
+                        printf("PID %d: Error en conexión TCP con cliente. Cerrando child...\n", getpid());
+                        printf("---------------------------------------------------------------\n");
                     }
-                    childsCounter++;
+                    // Resto conexión activa.
+                    semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
+                    if (serverConfig->connections > 0)
+                    {
+                        serverConfig->connections--;
+                    }
+                    printf("---------------------------------------------------------\n");
+                    printf("PID %d: Conexiones actuales  = %d\n", getpid(), serverConfig->connections);
+                    printf("---------------------------------------------------------\n");
+                    semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
+                    printf("-------------------\n");
+                    printf("PID %d: muriendo...\n", getpid());
+                    printf("-------------------\n");
+                    //childsCounter--;
+                    // Cierro el pid del hijo que atendió conexión entrante.
+                    exit(1);
                 }
-                semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
-                if (serverConfig->connections >= serverConfig->maxConnections)
-                {
-                    maxConnectionsReached = true;
-                    printf("----------------------------------------------------------------------------\n");
-                    printf("PPID %d: SERVER : Conexiones máximas alcanzadas. Esperando que se liberen...\n", ppid);
-                    printf("----------------------------------------------------------------------------\n");
-                }
-                semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
+                childsCounter++;
             }
+            semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
+            if (serverConfig->connections >= serverConfig->maxConnections)
+            {
+                maxConnectionsReached = true;
+                printf("----------------------------------------------------------------------------\n");
+                printf("PPID %d: SERVER : Conexiones máximas alcanzadas. Esperando que se liberen...\n", ppid);
+                printf("----------------------------------------------------------------------------\n");
+            }
+            semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
         }
     }
     // Parent esperando que mueran los hijos para luego morirse.
@@ -533,6 +518,10 @@ int atender_cliente_TCP(struct sockaddr_in clientAddress, int socketAux)
     // Espera recibir mensaje del cliente...
     if (recv(socketAux, bufferRxClient, sizeof(bufferRxClient), 0) == -1)
     {
+        printf(" ------- TIMEOUT EN RECV---------\n");
+        printf(" PID %d                          \n", getpid());
+        printf(" Client IP : %s                  \n", ipClientAddress);
+        printf(" Client port : %d                \n", clientPort);
         perror("Error en recv");
         return -1;
     }
@@ -556,6 +545,9 @@ int atender_cliente_TCP(struct sockaddr_in clientAddress, int socketAux)
     printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
     do
     {
+        // Escrivo FIFO con estado del servidor
+        write(pipeServer[1], &serverRunning, sizeof(serverRunning));
+
         // Leo la SHM Mem. y armo la trama
         semop(clientsSemaphoreID, &p, 1); //Tomo el semaforo
         sprintf(bufferTxServer, "%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.2f\n", dataSensor->accel_xout,
@@ -575,6 +567,10 @@ int atender_cliente_TCP(struct sockaddr_in clientAddress, int socketAux)
         // Espera recibir mensaje del cliente...
         if (recv(socketAux, bufferRxClient, sizeof(bufferRxClient), 0) == -1)
         {
+            printf(" ------- TIMEOUT EN RECV---------\n");
+            printf(" PID %d                          \n", getpid());
+            printf(" Client IP : %s                  \n", ipClientAddress);
+            printf(" Client port : %d                \n", clientPort);
             perror("Error en recv");
             return -1;
         }
@@ -587,6 +583,10 @@ int atender_cliente_TCP(struct sockaddr_in clientAddress, int socketAux)
         }
         //Demora para leer la SHMMEM
         sleep(0.5);
+
+        // Leo pipe que fue escrita en el SIGCLD para actualizar serverRunning
+        read(pipeServer[0], &serverRunning, sizeof(serverRunning));
+
     } while (memcmp(bufferRxClient, "END", 3) && serverRunning);
 
     return 0;

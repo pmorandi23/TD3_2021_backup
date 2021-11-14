@@ -6,9 +6,16 @@
 #define FALSE       0
 
 // Externs
-extern volatile  int serverRunning;
-extern volatile int updateServerConfig;
+extern int serverRunning;
 extern volatile int childsKilled;
+extern volatile int childsCounter;
+extern int configFileSemafhoreID;
+extern struct sembuf p;
+extern struct sembuf v;
+extern struct serverConfig *serverConfig;
+extern int childSensorReader;
+extern int pipeServer[2];
+
 // Prototipos de función
 void sigusr2_handler(int);
 
