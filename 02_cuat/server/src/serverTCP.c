@@ -40,7 +40,7 @@ struct MPU6050_REGS *dataSensor;
 struct serverConfig *serverConfig;
 // Ints
 volatile int childsKilled = 0, childsCounter = 0;
-int pipeChildSensorReader[2], pipeServer[2], childSensorReader = 0;
+int pipeChildSensorReader[2], childSensorReader = 0;
 /**
  * \fn int main(int argc, char *argv[])
  * \brief Servidor concurrente TCP.  Escucha peticiones HTTP o de determinado Objeto y responde con mediciones de un sensor.
@@ -67,8 +67,8 @@ int main(int argc, char *argv[])
     ppid = getpid();
     printf("------------------TD3 2021 - R5054-----------------\n\n");
     printf("Autor: Pablo Jonathan Morandi\n");
-    printf("---------------------------------------------------\n");
-    printf("********Bienvenido al servidor concurrente!********\n");
+    printf("---------------------------------------------------\n\n");
+    printf("********Bienvenido al servidor concurrente!********\n\n");
     printf("---------------------------------------------------\n\n");
     printf("---------------------------------------\n");
     printf("PPID %d: Configurando IPCS y Sockets...\n", ppid);
@@ -107,8 +107,10 @@ int main(int argc, char *argv[])
     // Apunto la struct del sensor y la config del server a las memorias compartidas.
     dataSensor = (struct MPU6050_REGS *)sharedMemDataSensorPointer;
     serverConfig = (struct serverConfig *)sharedMemConfigServerPointer;
+
     // Cargar config de archivo
     semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
+    serverConfig->serverRunning = RUNNING;
     leer_config_server(serverConfig);
     semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
     // Creo el socket. Le paso el puerto obtenido por línea de comandos.
@@ -117,12 +119,9 @@ int main(int argc, char *argv[])
         return 0;
     }
     pipe(pipeChildSensorReader);
-    pipe(pipeServer);
     // Creo proceso hijo para leer datos del sensor y escribirlos en la shared_memory
     if (!fork())
     {
-        close(pipeServer[0]);            // Cierro pipe de lectura del server
-        close(pipeServer[1]);            // Cierro pipe de escritura del server
         close(pipeChildSensorReader[0]); // Cierro pipe de lectura del hijo
         childSensorReader = getpid();
         // Le eswcribo el PID a la pipe
@@ -160,7 +159,7 @@ int main(int argc, char *argv[])
         while (serverRunning)
         {
             // Si se superan las conexiones máximas, se espera hasta que se liberen.
-            while (maxConnectionsReached)
+            while (maxConnectionsReached && serverRunning)
             {
                 semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
                 if (serverConfig->connections < serverConfig->maxConnections)
@@ -194,10 +193,10 @@ int main(int argc, char *argv[])
                     continue;
                 }  */
             // Si tengo conexion entrante y no se alcanzaron las máximas permitidas, nbr_fds > 0 y da paso al accept()
-            if (nbr_fds > 0 && !maxConnectionsReached)
+            if (nbr_fds > 0 && !maxConnectionsReached && serverRunning)
             {
                 printf("--------------------------------------------\n");
-                printf("PPID %d: Solicitud de conexión. nbr_fds = %d\n", ppid, nbr_fds);
+                printf("PPID %d: SERVER : Solicitud de conexión.\n", ppid);
                 printf("--------------------------------------------\n");
                 // La funcion accept rellena la estructura address con informacion
                 // del cliente y pone en addrlen la longitud de la estructura.
@@ -210,9 +209,9 @@ int main(int argc, char *argv[])
                     perror("Error en accept");
                     return 0;
                 }
-                printf("---------------------------------------------------------------------------\n");
-                printf("PPID %d: SERVER : Conexión aceptada. Atendiendo cliente.... nbr_fds = %d   \n", ppid, nbr_fds);
-                printf("---------------------------------------------------------------------------\n");
+                printf("--------------------------------------\n");
+                printf("PPID %d: SERVER : Conexión aceptada.\n           Atendiendo cliente...\n", ppid);
+                printf("--------------------------------------\n");
                 // Creo un pid para cada conexión entrante
                 if (!fork())
                 {
@@ -228,9 +227,9 @@ int main(int argc, char *argv[])
                     // Atiendo al cliente TCP.
                     if (atender_cliente_TCP(clientAddress, socketAux) == -1)
                     {
-                        printf("---------------------------------------------------------------\n");
-                        printf("PID %d: Error en conexión TCP con cliente. Cerrando child...\n", getpid());
-                        printf("---------------------------------------------------------------\n");
+                        printf("---------------------------------------------\n");
+                        printf("PID %d: Error en conexión TCP con cliente.\n        Cerrando child...\n", getpid());
+                        printf("---------------------------------------------\n");
                     }
                     // Resto conexión activa.
                     semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
@@ -238,9 +237,9 @@ int main(int argc, char *argv[])
                     {
                         serverConfig->connections--;
                     }
-                    printf("---------------------------------------------------------\n");
+                    printf("-------------------------------------\n");
                     printf("PID %d: Conexiones actuales  = %d\n", getpid(), serverConfig->connections);
-                    printf("---------------------------------------------------------\n");
+                    printf("-------------------------------------\n");
                     semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
                     printf("-------------------\n");
                     printf("PID %d: muriendo...\n", getpid());
@@ -255,8 +254,9 @@ int main(int argc, char *argv[])
             if (serverConfig->connections >= serverConfig->maxConnections)
             {
                 maxConnectionsReached = true;
-                printf("----------------------------------------------------------------------------\n");
-                printf("PPID %d: SERVER : Conexiones máximas alcanzadas. Esperando que se liberen...\n", ppid);
+                printf("----------------------------------------------------------------------------\n\n\n");
+                printf("PPID %d: SERVER : |WARNING| Conexiones máximas alcanzadas.\n", ppid);
+                printf("                  Esperando que se liberen...\n\n\n");
                 printf("----------------------------------------------------------------------------\n");
             }
             semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
@@ -477,6 +477,9 @@ int atender_cliente_TCP(struct sockaddr_in clientAddress, int socketAux)
 
     // Armo el msg.
     sprintf(bufferTxServer, "OK");
+    printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+    printf("PID %d : SEND to %s:%d > OK\n", getpid(), ipClientAddress, clientPort);
+    printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
     // Le respondo "OK" al connect() que realizo el cliente.
     if (send(socketAux, bufferTxServer, strlen(bufferTxServer), 0) == -1)
     {
@@ -487,28 +490,32 @@ int atender_cliente_TCP(struct sockaddr_in clientAddress, int socketAux)
     if (recv(socketAux, bufferRxClient, sizeof(bufferRxClient), 0) == -1)
     {
         printf(" ------- TIMEOUT EN RECV---------\n");
-        printf(" PID %d                          \n", getpid());
-        printf(" Client IP : %s                  \n", ipClientAddress);
-        printf(" Client port : %d                \n", clientPort);
-        perror("Error en recv");
+        printf("- PID %d                          \n", getpid());
+        printf("- Client IP : %s                  \n", ipClientAddress);
+        printf("- Client port : %d                \n", clientPort);
+        perror("- Error en recv");
         return -1;
     }
     // Verifico que el cliente haya respondido AKN
     if (!memcmp(bufferRxClient, "AKN", 3))
     {
-        printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-        printf("PID %d : RECV from %s:%d: AKN\n", getpid(), ipClientAddress, clientPort);
-        printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+        printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+        printf("PID %d : RECV from %s:%d > AKN\n", getpid(), ipClientAddress, clientPort);
+        printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
     }
     else
     {
-        printf("******************************************************************\n");
-        printf("PID %d : Rta del cliente incorrecta. Cerrando conexión...\n", getpid());
-        printf("******************************************************************\n");
+        printf("******************************************\n");
+        printf("PID %d : Rta del cliente incorrecta.\n", getpid());
+        printf("         Cerrando conexión...\n");
+        printf("******************************************\n");
         return 0;
     }
     // Armo el msg.
     sprintf(bufferTxServer, "OK");
+    printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+    printf("PID %d : SEND to %s:%d > OK\n", getpid(), ipClientAddress, clientPort);
+    printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
     // Le respondo "OK" al connect() que realizo el cliente.
     if (send(socketAux, bufferTxServer, strlen(bufferTxServer), 0) == -1)
     {
@@ -528,26 +535,25 @@ int atender_cliente_TCP(struct sockaddr_in clientAddress, int socketAux)
     // Verifico que el cliente haya respondido KA
     if (!memcmp(bufferRxClient, "KA", 2))
     {
-        printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-        printf("PID %d :RECV from %s:%d: KA\n", getpid(), ipClientAddress, clientPort);
-        printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+        printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+        printf("PID %d : RECV from %s:%d > KA\n", getpid(), ipClientAddress, clientPort);
+        printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
     }
     else
     {
-        printf("******************************************************************\n");
-        printf("PID %d : Rta del cliente incorrecta. Cerrando conexión...\n", getpid());
-        printf("******************************************************************\n");
-        return 0;
+        printf("******************************************\n");
+        printf("PID %d : Rta del cliente incorrecta.\n", getpid());
+        printf("         Cerrando conexión...\n");
+        printf("******************************************\n");
+        return -1;
     }
     // Me quedo en un while hasta que el cliente me envie END. Siempre y cuando el server no se este apagando.
-    printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-    printf("PID %d :SEND to %s:%d: dataSensor\n", getpid(), ipClientAddress, clientPort);
-    printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+    printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+    printf("PID %d : Entrando el loop.\n", getpid());
+    printf("PID %d : SEND to %s:%d > dataSensor\n", getpid(), ipClientAddress, clientPort);
+    printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
     do
     {
-        // Escrivo FIFO con estado del servidor
-        write(pipeServer[1], &serverRunning, sizeof(serverRunning));
-
         // Leo la SHM Mem. y armo la trama
         semop(clientsSemaphoreID, &p, 1); //Tomo el semaforo
         sprintf(bufferTxServer, "%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.2f\n", dataSensor->accel_xout,
@@ -574,18 +580,19 @@ int atender_cliente_TCP(struct sockaddr_in clientAddress, int socketAux)
             perror("Error en recv");
             return -1;
         }
-        // Analizo rta del cliente
+        // Analizo rta del cliente. Siempre deberia mandar "KA". Si manda "END", termina la conexión
         if (!memcmp(bufferRxClient, "END", 3))
         {
             printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-            printf("PID %d :RECV %s:%d: END\n", getpid(), ipClientAddress, clientPort);
+            printf("PID %d :RECV %s:%d > END\n", getpid(), ipClientAddress, clientPort);
             printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
         }
         //Demora para leer la SHMMEM
         sleep(0.5);
-
-        // Leo pipe que fue escrita en el SIGCLD para actualizar serverRunning
-        read(pipeServer[0], &serverRunning, sizeof(serverRunning));
+        // Analizo si murio el proceso lector... de ser asi debo cortar todos los childs con conexiones TCP activas
+        semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
+        serverRunning = serverConfig->serverRunning;
+        semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
 
     } while (memcmp(bufferRxClient, "END", 3) && serverRunning);
 
@@ -692,7 +699,7 @@ int leer_data_sensor()
         dataSensorAvg.gyro_xout,
         dataSensorAvg.gyro_yout,
         dataSensorAvg.gyro_zout);
-    printf("------------------------------------------\n\n\n"); */
+    printf("------------------------------------------\n\n\n");  */
     // Escribo en la SHM MEM
     semop(clientsSemaphoreID, &p, 1); //Tomo el semaforo
     dataSensor->accel_xout = dataSensorAvg.accel_xout;

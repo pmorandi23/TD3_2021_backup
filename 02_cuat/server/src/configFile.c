@@ -17,6 +17,12 @@
 #include "../inc/serverTCP.h"
 #include "../inc/configFile.h"
 
+/**
+ * \fn void leer_config_server(struct serverConfig *serverConf)
+ * \param serverConf Struct con parámetros del servidor
+ * \brief Lee de la SHM los parámetros del server.
+ * \return No devuelve nada.
+ **/
 void leer_config_server(struct serverConfig *serverConf)
 {
     t_config *config;
@@ -70,4 +76,15 @@ void leer_config_server(struct serverConfig *serverConf)
     printf("Cantidad de conexiones actuales    = %d                \n", serverConf->connections);
     printf("*******************************************************\n");
     printf("*******************************************************\n");
+}
+
+/**
+ * \fn void apagar_server(struct serverConfig * _serverConfig)
+ * \param _serverConfig Struct con parámetros del servidor
+ * \brief Escribe en la SHM de los parámetros del server un 0 en el flag "serverRunning"
+ * \return No devuelve nada.
+ **/
+void apagar_server(struct serverConfig * _serverConfig)
+{
+    _serverConfig->serverRunning = CLOSING;
 }

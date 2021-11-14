@@ -29,6 +29,7 @@ struct serverConfig
     int backlog;
     int meanSamples;
     int connections;
+    int serverRunning;
 };
 
 // Prototipos
