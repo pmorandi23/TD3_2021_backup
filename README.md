@@ -5,7 +5,6 @@ Repositorio de backup de los trabajos prácticos realizados en la cursada de Té
 
 - Programador : Pablo Jonathan Morandi
 
-### Estado de TPs
 ## 1º Cuatrimestre
 - TP01_01: Funcionando
 - TP01_02: Funcionando
@@ -20,7 +19,6 @@ Repositorio de backup de los trabajos prácticos realizados en la cursada de Té
 - TP01_12: Funcionando
 - TP01_13: Funcionando
 
-### Estado de TPs
 ## 2º Cuatrimestre
 
 - Archivos - File Stream
@@ -28,6 +26,11 @@ Repositorio de backup de los trabajos prácticos realizados en la cursada de Té
 - Señales
 - IPCS (Messages Queues, Semaphores, Shared Memory)
 - Sockets
+
+### TP2:
+- Servidor concurrente. Conexiones TCP con clientes.
+- Driver del módulo I2C 
+- Sensor MPU6050 (acelerómetro, giroscópio y temperatura)
 
 
 
