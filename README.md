@@ -1,11 +1,11 @@
 # TD3_2021_backup
-### x86 Intel  Bare Metal projects
 
 Repositorio de backup de los trabajos prácticos realizados en la cursada de Técnicas Digitales 3 en el año 2021.
 
 - Programador : Pablo Jonathan Morandi
 
 ## 1º Cuatrimestre
+### x86 Intel  Bare Metal projects
 - TP01_01: Funcionando
 - TP01_02: Funcionando
 - TP01_03: Funcionando
@@ -20,7 +20,7 @@ Repositorio de backup de los trabajos prácticos realizados en la cursada de Té
 - TP01_13: Funcionando
 
 ## 2º Cuatrimestre
-
+### Drivers, file system, TCP server
 - Archivos - File Stream
 - Procesos
 - Señales
