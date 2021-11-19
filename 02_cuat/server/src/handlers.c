@@ -21,9 +21,9 @@ void sigusr2_handler(int sig)
     printf("==========================================================\n");
     printf("PID %d: Señal SIGUSR2 recibida! Abriendo archivo de cfg...\n", getpid());
     printf("==========================================================\n");
-    semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
+    //semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
     leer_config_server(serverConfig);
-    semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
+    //semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
 }
 // Señal para apagar el servidor correctamente.
 void sigint_handler(int sig)
@@ -35,35 +35,34 @@ void sigchld_handler(int sig)
 {
     pid_t childDead;
     // Que el padre espere a los hijos si o solo si se envio SIGINT para apagar el server.
-    childDead = waitpid(-1, NULL, WNOHANG);
-
-    if (childDead > 0)
+    while ((childDead = waitpid(-1, NULL, WNOHANG)) > 0)
     {
-        if (childDead == childSensorReader)
+        if (childDead > 0)
         {
-            // Si muere el proceso lector del sensor a traves del driver, apago el servidor.
-            printf("-------------------------------------------------------------\n");
-            printf("SIGCHLD: Murio PID %d (lector del sensor a traves del driver)\n         Apagando servidor... \n", childDead);
-            printf("-------------------------------------------------------------\n");
-            if (serverRunning)
+            if (childDead == childSensorReader)
             {
-                // Saco al ppid del while principal
-                serverRunning = CLOSING;
-                // Apago flag "serverRunning" en la mem compartida para los childs que atienden conexiones TCP
-                semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
-                apagar_server(serverConfig);
-                semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
+                // Si muere el proceso lector del sensor a traves del driver, apago el servidor.
+                printf("-------------------------------------------------------------\n");
+                printf("SIGCHLD: Murio PID %d (lector del sensor a traves del driver)\n         Apagando servidor... \n", childDead);
+                printf("-------------------------------------------------------------\n");
+                if (serverRunning)
+                {
+                    // Saco al ppid del while principal
+                    serverRunning = CLOSING;
+                    // Apago flag "serverRunning" en la mem compartida para los childs que atienden conexiones TCP
+                    semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
+                    apagar_server(serverConfig);
+                    semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
+                }
             }
+            else
+            {
+                printf("-----------------------------------------\n");
+                printf("SIGCHLD: Termina proceso hijo PID %d\n", childDead);
+                printf("-----------------------------------------\n");
+            }
+            childsKilled++;
         }
-        else
-        {
-            printf("-----------------------------------------\n");
-            printf("SIGCHLD: Termina proceso hijo PID %d\n", childDead);
-            printf("-----------------------------------------\n");
-        }
-        childsKilled++;
-        //printf("SIGCHLD: childsKilled = %d\n", childsKilled);
-        //printf("SIGCHLD: childsCounter = %d\n", childsCounter);
+
     }
 }
-

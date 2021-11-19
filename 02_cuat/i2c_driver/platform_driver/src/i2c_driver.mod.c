@@ -70,4 +70,4 @@ __attribute__((section(".modinfo"))) =
 MODULE_ALIAS("of:N*T*CP.Morandi,i2c_td3_driver");
 MODULE_ALIAS("of:N*T*CP.Morandi,i2c_td3_driverC*");
 
-MODULE_INFO(srcversion, "61DC37AA9AA0E9618B4C931");
+MODULE_INFO(srcversion, "03D847CA1D13AE4FCD0C2A9");

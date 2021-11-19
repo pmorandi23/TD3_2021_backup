@@ -28,6 +28,13 @@
 // Semaphores
 struct sembuf p = {0, -1, SEM_UNDO}; // Estructura para tomar el semáforo
 struct sembuf v = {0, +1, SEM_UNDO}; // Estructura para liberar el semáforo
+union semun //Beej Guide to UNIX IPC P32
+{
+    int val;
+    struct semid_ds *buf;
+    unsigned short *array;
+};
+union semun sem_attr;
 int clientsSemaphoreID, configFileSemafhoreID;
 // Shared Mem
 int sharedMemDataSensorId = 0, sharedMemConfigServerId = 0;
@@ -40,7 +47,7 @@ struct MPU6050_REGS *dataSensor;
 struct serverConfig *serverConfig;
 // Ints
 volatile int childsKilled = 0, childsCounter = 0;
-int pipeChildSensorReader[2], childSensorReader = 0;
+int childSensorReader = 0;
 /**
  * \fn int main(int argc, char *argv[])
  * \brief Servidor concurrente TCP.  Escucha peticiones HTTP o de determinado Objeto y responde con mediciones de un sensor.
@@ -109,23 +116,17 @@ int main(int argc, char *argv[])
     serverConfig = (struct serverConfig *)sharedMemConfigServerPointer;
 
     // Cargar config de archivo
-    semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
     serverConfig->serverRunning = RUNNING;
     leer_config_server(serverConfig);
-    semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
     // Creo el socket. Le paso el puerto obtenido por línea de comandos.
     if ((socketServer = crear_socket_server(argv[1], serverConfig)) < 0)
     {
         return 0;
     }
-    pipe(pipeChildSensorReader);
+    childSensorReader = fork();
     // Creo proceso hijo para leer datos del sensor y escribirlos en la shared_memory
-    if (!fork())
+    if (!childSensorReader)
     {
-        close(pipeChildSensorReader[0]); // Cierro pipe de lectura del hijo
-        childSensorReader = getpid();
-        // Le eswcribo el PID a la pipe
-        write(pipeChildSensorReader[1], &childSensorReader, sizeof(childSensorReader));
         printf("---------------------------------------------------------------\n");
         printf("PID %d obteniendo data del sensor y almacenando en la shm...\n", getpid());
         printf("---------------------------------------------------------------\n");
@@ -142,20 +143,14 @@ int main(int argc, char *argv[])
     }
     else
     {
-        // Leo el PID del proceso lector desde el padre.
-        read(pipeChildSensorReader[0], &childSensorReader, sizeof(childSensorReader));
         childsCounter++;
         // Código del padre. Se queda esperando conexiones entrantes con select() y accept()
-        // Permite atender a multiples usuarios
         semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
         serverConfig->connections = 0;
         semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
         printf("------------------------------------------\n");
         printf("PPID %d: SERVER: esperando conexiones...\n", ppid);
         printf("------------------------------------------\n");
-
-        // Escribo el flag del serverRunning para hijos que atienden clientes
-
         while (serverRunning)
         {
             // Si se superan las conexiones máximas, se espera hasta que se liberen.
@@ -263,11 +258,11 @@ int main(int argc, char *argv[])
         }
     }
     // Parent esperando que mueran los hijos para luego morirse.
+    printf("----------------------------------------------------\n");
+    printf("PPID %d: SERVER : Esperando que mueran childs...\n", ppid);
+    printf("----------------------------------------------------\n");
     while (1)
     {
-        printf("----------------------------------------------------\n");
-        printf("PPID %d: SERVER : Esperando que mueran childs...\n", ppid);
-        printf("----------------------------------------------------\n");
         if (childsKilled > childsCounter - 1)
         {
             if ((close(socketServer)) == -1)
@@ -426,7 +421,7 @@ int crear_semaforo(int *semafhoreID, key_t key)
 }
 /**
  * \fn int cerrar_IPCS(void)
- * \param semaphoreID ID del semáforo a cerrar.
+ * \param void No recibe nada.
  * \brief Cierra los IPCs existentes. 
  * \return Devuelve 0 si fue un éxito.
  * 
@@ -655,9 +650,7 @@ int leer_data_sensor()
     struct MPU6050_REGS dataSensorAvg;
 
     // Cantidad de paquetes de datos a traer de la FIFO del MPU6050
-    semop(configFileSemafhoreID, &p, 1); //Tomo el semaforo
     MPU6050fifoPacketsForMeanFilter = serverConfig->meanSamples;
-    semop(configFileSemafhoreID, &v, 1); //Libero el semaforo
     // Cantidad de bytes totales a leer de la FIFO del MPU6050
     if (MPU6050fifoPacketsForMeanFilter > 73)
     {
@@ -687,21 +680,10 @@ int leer_data_sensor()
     close(fd);
     // Promedio con el buffer
     dataSensorAvg = filtro_MPU6050(dataMPU6050_fifo, MPU6050fifoPacketsForMeanFilter, bytesToReadFromMPU6050FIFO);
-    /* printf("------------------------------------------\n\n\n");
-    printf("############PROMEDIO DE DATASENSOR############\n");
-    printf("Cantidad de muestras de a 14 bytes = %d\n", MPU6050fifoPacketsForMeanFilter);
-    printf(
-        "ACCEL X OUT: %.2f g\nACCEL Y OUT: %.2f g\nACCEL Z OUT: %.2f g\nTEMP. OUT: %.2f °C\nGYRO X OUT: %.2f °/s\nGYRO Y OUT: %.2f °/s\nGYRO Z OUT: %.2f °/s\n",
-        dataSensorAvg.accel_xout,
-        dataSensorAvg.accel_yout,
-        dataSensorAvg.accel_zout,
-        dataSensorAvg.temp_out_float,
-        dataSensorAvg.gyro_xout,
-        dataSensorAvg.gyro_yout,
-        dataSensorAvg.gyro_zout);
-    printf("------------------------------------------\n\n\n");  */
     // Escribo en la SHM MEM
-    semop(clientsSemaphoreID, &p, 1); //Tomo el semaforo
+    sem_attr.val = 0;    
+    semctl(clientsSemaphoreID, 0, SETVAL, sem_attr); // Tomo el semáforo
+
     dataSensor->accel_xout = dataSensorAvg.accel_xout;
     dataSensor->accel_yout = dataSensorAvg.accel_yout;
     dataSensor->accel_zout = dataSensorAvg.accel_zout;
@@ -709,9 +691,12 @@ int leer_data_sensor()
     dataSensor->gyro_xout = dataSensorAvg.gyro_xout;
     dataSensor->gyro_yout = dataSensorAvg.gyro_yout;
     dataSensor->gyro_zout = dataSensorAvg.gyro_zout;
-    semop(clientsSemaphoreID, &v, 1); //Libero el semaforo
+
+    sem_attr.val = 1;    
+    semctl(clientsSemaphoreID, 0, SETVAL, sem_attr); // Libero el semáforo
     // Libero memoria
     free(dataMPU6050_fifo);
 
     return 0;
 }
+

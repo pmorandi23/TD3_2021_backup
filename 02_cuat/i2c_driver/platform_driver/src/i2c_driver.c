@@ -28,6 +28,7 @@ static int __init i2c_init(void)
 	if (!device.i2c_MPU6050_cdev)
 	{
 		pr_alert("%s: No se puede asignar memoria al CharDevice.\n", ID);
+		return EFAULT;
 	}
 	pr_alert("%s: Memoria asignada correctamente al CharDevice.\n", ID);
 	// alloc_chrdev_region
@@ -286,6 +287,7 @@ static ssize_t fop_read(struct file *device_descriptor, char __user *user_buffer
 	if ((result = copy_to_user(user_buffer, i2cStruct.MPU6050_dataBuffer, read_len)) > 0)
 	{ //en copia correcta devuelve 0
 		pr_info("%s: op: READ --> Falla en copia de buffer de kernel a buffer de usuario\n", ID);
+		kfree(i2cStruct.MPU6050_dataBuffer);
 		return -1;
 	}
 	// Libero memoria
