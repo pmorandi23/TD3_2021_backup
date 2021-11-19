@@ -1,12 +1,11 @@
 # TD3_2021_backup
-### x86 Intel  Bare Metal projects
 
 Repositorio de backup de los trabajos prácticos realizados en la cursada de Técnicas Digitales 3 en el año 2021.
 
 - Programador : Pablo Jonathan Morandi
 
-### Estado de TPs
 ## 1º Cuatrimestre
+### x86 Intel  Bare Metal projects
 - TP01_01: Funcionando
 - TP01_02: Funcionando
 - TP01_03: Funcionando
@@ -20,14 +19,18 @@ Repositorio de backup de los trabajos prácticos realizados en la cursada de Té
 - TP01_12: Funcionando
 - TP01_13: Funcionando
 
-### Estado de TPs
 ## 2º Cuatrimestre
-
+### Drivers, file system, TCP server
 - Archivos - File Stream
 - Procesos
 - Señales
 - IPCS (Messages Queues, Semaphores, Shared Memory)
 - Sockets
+
+### TP2:
+- Servidor concurrente. Conexiones TCP con clientes.
+- Driver del módulo I2C 
+- Sensor MPU6050 (acelerómetro, giroscópio y temperatura)
 
 
 
