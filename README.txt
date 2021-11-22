@@ -31,6 +31,6 @@ TP01.13: Funciona -> SI         Comentarios: con "make all" compila y corre el b
 ********************************************
 *              TP Integrador               *
 ********************************************
-Servidor:    Funciona -> SI/NO       Comentarios:
-Cliente:     Funciona -> SI/NO       Comentarios:
-Driver:      Funciona -> SI/NO       Comentarios:
+Servidor:    Funciona -> SI       Comentarios: con "make all" compila y se ejecuta con "./serverTCP PORT_SERVER" donde PORT_SERVER es el puerto para el servidor > 1024
+Cliente:     Funciona -> SI       Comentarios: Cliente python otorgado por la cátedra. Inicia conexión TCP con el servidor, quien le responderá con datos del sensor
+Driver:      Funciona -> SI       Comentarios: ver Makefile. Con "make all" compila e instala el driver. 

@@ -28,9 +28,10 @@ Repositorio de backup de los trabajos prácticos realizados en la cursada de Té
 - Sockets
 
 ### TP2:
-- Servidor concurrente. Conexiones TCP con clientes.
-- Driver del módulo I2C 
-- Sensor MPU6050 (acelerómetro, giroscópio y temperatura)
+####Proyecto realizado sobre una placa BeagleBone Black con un Debian montado en una micro SD
+- Servidor concurrente. Conexiones TCP con clientes Python (ver programa en cliente_py)
+- Driver del módulo I2C del CPU de la BeagleBone.
+- Sensor MPU6050. Comunicación por I2C (acelerómetro, giroscópio y temperatura)
 
 
 
